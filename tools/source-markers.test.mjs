@@ -174,3 +174,39 @@ test("colliding balls lunge toward each other and end back on their cells", asyn
   assert.equal(meshA.position.x, 0, "ball A back on its cell");
   assert.equal(meshB.position.x, 1, "ball B back on its cell");
 });
+
+test("a ball at a dead end rolls up to the missing track and returns", async () => {
+  const view = viewFixture();
+  view._createBall(20);
+  const mesh = view.ballMeshes.get(20);
+  mesh.userData = { arrow: { rotation: { y: 0 }, position: {}, scale: { setScalar() {} } } };
+
+  const match = rules.createMatch();
+  match.balls = [{ id: 20, row: 0, col: 0, exit: rules.LEFT }];
+  const before = { balls: [{ id: 20, row: 0, col: 0, exit: rules.RIGHT }] };
+  const event = {
+    spawned: [], rotations: [], delivered: [],
+    moves: [{ id: 20, kind: "bounce", reason: "dead-end", at: { row: 0, col: 0 } }],
+  };
+
+  const xs = [];
+  view._animate = async (duration, step) => {
+    for (const t of [0, 0.25, 0.5, 0.75, 1]) {
+      step(t);
+      xs.push(mesh.position.x);
+    }
+  };
+
+  mesh.position.set(0, 0.16, 0);
+  await view.playTick(event, before, match, 1200);
+
+  // It heads RIGHT (+x), reaches furthest at the midpoint, then comes back.
+  assert.ok(xs[2] > xs[1], `must still be advancing at the midpoint: ${xs}`);
+  assert.ok(xs[3] < xs[2], `must be returning after the midpoint: ${xs}`);
+  // Far edge touches the cell boundary (0.5) without crossing it.
+  const BALL_R = 0.17;
+  assert.ok(xs[2] + BALL_R <= 0.5 + 1e-9, `ball crossed into the next cell: ${xs[2]}`);
+  assert.ok(xs[2] > 0.3, `dead-end nose-in too timid to read: ${xs[2]}`);
+  // And it ends exactly where it started — a bounce changes no cell.
+  assert.equal(mesh.position.x, 0, "ball back on its own cell");
+});

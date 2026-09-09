@@ -17,18 +17,24 @@ import {
   RIGHT,
   DOWN,
   LEFT,
-} from "./rules.js?v=20260909-nopulse1";
+} from "./rules.js?v=20260909-deadend1";
 
 const CELL = 1;
 const GAP = 0.18; // visible gap between platforms, so groups read as units
 const TRACK_R = 0.13;
 const BALL_R = 0.17;
-// How far a ball lunges into a blocked cell before recoiling, as a fraction of
-// portOffset (half a cell). Two balls meeting head-on each cover this much, so
-// the 1-cell gap between their centres closes by 2 * 0.5 * LUNGE_REACH. At 0.5
-// they stop about 0.5 apart — clear of touching (2 * BALL_R = 0.34) while the
-// impact still reads.
+// How far a ball noses into a blocked cell before recoiling, as a fraction of
+// portOffset (half a cell).
+//
+// Collision: two balls meeting head-on each cover this much, so the 1-cell gap
+// between their centres closes by 2 * 0.5 * LUNGE_REACH. At 0.5 they stop about
+// 0.5 apart — clear of touching (2 * BALL_R = 0.34) while the impact reads.
 const LUNGE_REACH = 0.5;
+// Dead end: nothing occupies the cell ahead, so the ball rolls right up to
+// where the track stops. It travels 0.5 * DEAD_END_REACH of a cell; at 0.66
+// its centre reaches 0.33 and its far edge (+ BALL_R = 0.17) just touches the
+// cell boundary at 0.5 without crossing into the neighbour.
+const DEAD_END_REACH = 0.66;
 
 const COLOR = {
   bg: 0x0b1020,
@@ -695,27 +701,31 @@ export class BoardView {
   }
 
   /**
-   * Work out which bounced balls actually ran into another ball, and how far
-   * each may lunge before recoiling.
+   * Work out which bounced balls should nose forward before recoiling, and how
+   * far each may travel. Without this a bounce only spins the arrow, and the
+   * reversal looks arbitrary.
    *
-   * The rules mark every blocked ball `reason: "collision"`, including one held
-   * up by a ball that merely stayed put. Both are impacts worth showing, but a
-   * ball must never lunge into a cell that stays occupied by a stationary ball,
-   * or the two meshes would overlap. So the lunge is a fraction of a cell: two
-   * balls that met head-on each come a third of the way and stop nose to nose;
-   * a ball that ran into a parked one stops short of it.
+   * How far depends on why the ball turned back:
+   *
+   * - "collision": something occupies the cell ahead, so the ball must stop
+   *   short of it or the two meshes would overlap. Two balls that met head-on
+   *   each come a quarter cell and halt nose to nose.
+   * - "dead-end": the cell ahead has no matching port, so nothing is in the
+   *   way. The ball rolls to the very edge of its own cell, bumps the missing
+   *   track, and returns — which is what makes the dead end legible.
    *
    * `at` is the ball's post-rotation cell, which is where its mesh already sits
    * by the time this animation runs.
    */
-  _collisionLunges(event, matchBefore) {
+  _bounceLunges(event, matchBefore) {
     const lunges = [];
     if (!matchBefore) return lunges;
 
     const headings = new Map(matchBefore.balls.map((b) => [b.id, b]));
 
     for (const move of event.moves) {
-      if (move.kind !== "bounce" || move.reason !== "collision") continue;
+      if (move.kind !== "bounce") continue;
+      const reach = move.reason === "dead-end" ? DEAD_END_REACH : LUNGE_REACH;
       const mesh = this.ballMeshes.get(move.id);
       const before = headings.get(move.id);
       if (!mesh || !before || !move.at) continue;
@@ -724,7 +734,7 @@ export class BoardView {
       // portOffset points half a cell that way, in world space.
       const toward = portOffset(before.exit);
 
-      lunges.push({ mesh, toward, base: mesh.position.clone() });
+      lunges.push({ mesh, toward, reach, base: mesh.position.clone() });
     }
     return lunges;
   }
@@ -972,9 +982,9 @@ export class BoardView {
       bounceTurns.push({ arrow, startAngle, targetAngle });
     }
 
-    // A ball that bounced off another ball lunges toward the cell it wanted and
-    // recoils, so the collision reads as an impact rather than a silent flip.
-    const lunges = this._collisionLunges(event, matchBefore);
+    // A bounced ball rolls toward the cell it wanted and comes back, so the
+    // reversal reads as hitting something rather than a silent flip.
+    const lunges = this._bounceLunges(event, matchBefore);
 
     if (moving.length || delivered.length || bounceTurns.length || lunges.length) {
       const startPositions = new Map();
@@ -1002,12 +1012,16 @@ export class BoardView {
           }
         }
         for (const { arrow, startAngle, targetAngle } of bounceTurns) {
-          arrow.rotation.y = startAngle + (targetAngle - startAngle) * k;
+          // Turn during the second half only: the ball still points the way it
+          // is travelling on the way out, and swings round as it comes back.
+          const turn = ease(Math.max(0, t - 0.5) * 2);
+          arrow.rotation.y = startAngle + (targetAngle - startAngle) * turn;
         }
-        // Out and back within the same window: peaks at the midpoint, so two
-        // balls closing on each other meet, then retreat the way they came.
-        const nudge = Math.sin(t * Math.PI) * LUNGE_REACH;
-        for (const { mesh, toward, base } of lunges) {
+        // Out and back within the same window: peaks at the midpoint, so the
+        // ball reaches what stopped it, then retreats the way it came.
+        const swing = Math.sin(t * Math.PI);
+        for (const { mesh, toward, reach, base } of lunges) {
+          const nudge = swing * reach;
           mesh.position.set(
             base.x + toward.x * nudge,
             base.y,
