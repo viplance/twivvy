@@ -122,9 +122,9 @@ function hideNamePrompt() {
 function openNamePrompt(mode, code = null) {
   nameAction = { mode, code };
   const copy = {
-    create: ["Создать игру", "Создать комнату"],
+    create: ["Играть с другом", "Создать комнату"],
     join: ["Войти в игру", "Войти"],
-    online: ["Играть онлайн", "Подключиться"],
+    online: ["Случайный соперник", "Подключиться"],
   }[mode];
   ui.nameTitle.textContent = copy[0];
   ui.nameSubmit.textContent = copy[1];
