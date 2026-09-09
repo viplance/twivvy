@@ -1,0 +1,11 @@
+.DS_Store
+node_modules/
+
+# Private product research — business strategy, not code. Kept local.
+ios-pvp-market-perekrut.md
+
+# Never commit credentials or environment files.
+.env
+.env.*
+*.pem
+*.key

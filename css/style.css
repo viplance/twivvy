@@ -1,0 +1,336 @@
+/* Twivvy — portrait-first prototype UI.
+   The style follows the spec: a small mechanical table, thick tracks, turquoise
+   for your own receiver and coral for the opponent's, with labels so the game
+   never relies on colour alone. */
+
+:root {
+  --bg: #0b1020;
+  --panel: rgba(18, 24, 45, 0.94);
+  --line: rgba(255, 255, 255, 0.12);
+  --text: #e8ecf8;
+  --muted: #93a0c0;
+  --own: #2fd6c3;
+  --foe: #ff7a66;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+  font: 15px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Helvetica, Arial, sans-serif;
+  overscroll-behavior: none;
+  touch-action: manipulation;
+}
+
+#scene {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* ---------- HUD ---------- */
+
+#hud {
+  position: fixed;
+  top: calc(var(--safe-top) + 10px);
+  left: 0;
+  right: 0;
+  pointer-events: none;
+}
+
+/* Score counters were removed: delivered balls stay in the receivers on the
+   board, so the trays themselves show who has won how many. */
+
+.timer-row {
+  width: 100%;
+}
+
+.timer-bar {
+  height: 5px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+#timer-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--own), #7ea8ff);
+  transform-origin: left center;
+  transform: scaleX(1);
+  will-change: transform;
+}
+
+.round-title {
+  position: fixed;
+  z-index: 30;
+  left: 50%;
+  top: 50%;
+  padding: 12px 20px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 16px;
+  background: rgba(11, 16, 32, 0.78);
+  color: var(--text);
+  box-shadow: 0 14px 42px rgba(0, 0, 0, 0.42);
+  backdrop-filter: blur(10px);
+  font-size: clamp(24px, 4vw, 38px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  white-space: nowrap;
+  pointer-events: none;
+  will-change: opacity, transform, filter;
+}
+
+.round-title.playing {
+  animation: round-title-cycle 3s both;
+}
+
+@keyframes round-title-cycle {
+  0% {
+    opacity: 0;
+    filter: blur(8px);
+    transform: translate(-50%, -50%) scale(0.82);
+    animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  33.333% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate(-50%, -50%) scale(1);
+  }
+  66.666% {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate(-50%, -50%) scale(1);
+    animation-timing-function: ease-in;
+  }
+  100% {
+    opacity: 0;
+    filter: blur(5px);
+    transform: translate(-50%, -50%) scale(1.08);
+  }
+}
+
+/* ---------- Panels ---------- */
+
+#pause-status {
+  width: fit-content;
+  max-width: 90%;
+  margin: 14px auto 0;
+  padding: 10px 16px;
+  border-radius: 12px;
+  background: var(--panel);
+  color: var(--text);
+  text-align: center;
+}
+
+.panel {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(92vw, 380px);
+  padding: 26px 24px;
+  border-radius: 22px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(16px);
+  text-align: center;
+}
+
+.panel h1 {
+  margin: 0 0 6px;
+  font-size: 38px;
+  letter-spacing: -0.02em;
+  background: linear-gradient(120deg, var(--own), #7ea8ff 60%, var(--foe));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+#menu {
+  max-height: calc(100dvh - var(--safe-top) - var(--safe-bottom) - 28px);
+  overflow-y: auto;
+}
+
+.panel h2 {
+  margin: 0 0 12px;
+  font-size: 24px;
+}
+
+.tagline {
+  margin: 0 0 22px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.panel button {
+  width: 100%;
+  height: 50px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  font-size: 16px;
+  font-weight: 600;
+  margin-top: 10px;
+  transition: transform 0.1s ease, opacity 0.15s ease;
+}
+
+.panel button:active {
+  transform: scale(0.98);
+}
+
+.panel button:disabled {
+  opacity: 0.5;
+}
+
+.panel button.primary {
+  background: linear-gradient(120deg, var(--own), #34b3e0);
+  border-color: transparent;
+  color: #04201d;
+}
+
+.panel button.ghost {
+  background: transparent;
+  color: var(--muted);
+  height: 42px;
+  font-weight: 500;
+}
+
+.divider {
+  position: relative;
+  margin: 18px 0 14px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: calc(50% - 22px);
+  height: 1px;
+  background: var(--line);
+}
+
+.divider::before {
+  left: 0;
+}
+.divider::after {
+  right: 0;
+}
+
+.join-row {
+  display: flex;
+  gap: 8px;
+}
+
+.join-row input {
+  flex: 1;
+  height: 50px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: rgba(0, 0, 0, 0.28);
+  color: var(--text);
+  padding: 0 14px;
+  font-size: 19px;
+  letter-spacing: 0.22em;
+  text-align: center;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.join-row input::placeholder {
+  letter-spacing: 0.16em;
+  color: rgba(147, 160, 192, 0.55);
+}
+
+.join-row button {
+  width: 96px;
+  margin-top: 0;
+}
+
+.code {
+  font-size: 34px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  margin: 6px 0 10px;
+  color: var(--own);
+  font-variant-numeric: tabular-nums;
+}
+
+.hint {
+  color: var(--muted);
+  font-size: 13px;
+  margin: 0 0 14px;
+  word-break: break-all;
+}
+
+.rules {
+  margin-top: 18px;
+  text-align: left;
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+}
+
+.rules summary {
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 13px;
+  text-align: center;
+}
+
+.rules ul {
+  margin: 12px 0 0;
+  padding-left: 20px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.rules li {
+  margin-bottom: 6px;
+}
+
+/* ---------- Toast ---------- */
+
+#toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--safe-bottom) + 24px);
+  transform: translateX(-50%);
+  padding: 10px 18px;
+  border-radius: 12px;
+  background: rgba(10, 15, 30, 0.94);
+  border: 1px solid var(--line);
+  color: var(--text);
+  font-size: 13px;
+  white-space: nowrap;
+  backdrop-filter: blur(10px);
+  z-index: 40;
+}
+
+@media (max-width: 380px) {
+  .code {
+    font-size: 28px;
+  }
+}

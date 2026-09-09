@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1"
+    />
+    <title>Twivvy — Перекрут</title>
+    <meta
+      name="description"
+      content="Twivvy «Перекрут» — короткая дуэль на общем поле: поверни лабиринт и забери шарик, который соперник уже считал своим."
+    />
+    <meta name="theme-color" content="#0b1020" />
+    <!-- Root-absolute so assets resolve the same from / and from /CODE. -->
+    <link rel="stylesheet" href="/css/style.css?v=20260909-collide1" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='26' font-size='26'>🌀</text></svg>"
+    />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <canvas id="scene"></canvas>
+
+    <!-- HUD -->
+    <div id="hud" class="hidden">
+      <!-- No score counters: delivered balls stay in the receivers, so the
+           trays on the board show who has won how many. -->
+      <div class="timer-row">
+        <div class="timer-bar"><div id="timer-fill"></div></div>
+      </div>
+      <p id="pause-status" class="hidden" role="status" aria-live="polite">Соперник отсоединился</p>
+    </div>
+
+    <div id="round-title" class="round-title hidden" role="status" aria-live="polite"></div>
+
+    <!-- Menu -->
+    <div id="menu" class="panel">
+      <h1>Twivvy</h1>
+      <p class="tagline">
+        Поверни лабиринт и забери шарик,<br />который соперник уже считал своим.
+      </p>
+
+      <button id="create" class="primary">Создать игру</button>
+
+      <div class="divider"><span>или</span></div>
+
+      <div class="join-row">
+        <input
+          id="join-code"
+          maxlength="8"
+          placeholder="КОД"
+          autocomplete="off"
+          autocapitalize="characters"
+          spellcheck="false"
+        />
+        <button id="join">Войти</button>
+      </div>
+
+      <details class="rules">
+        <summary>Как играть</summary>
+        <ul>
+          <li>Поле из девяти поворотных платформ (3x3).</li>
+          <li>Цель игры — собрать в свой приёмник как можно больше шариков.</li>
+          <li>Игрок может повернуть одну платформу за ход.</li>
+          <li>Новые шарики появляются из двух отмеченных клеток в центре поля.</li>
+          <li>После ожидания открывается ход соперника - повороты складываются.</li>
+          <li>Шарик остаётся на поле, пока не попадёт в приёмник.</li>
+          <li>Повёрнутая платформа недоступна один следующий такт.</li>
+        </ul>
+      </details>
+    </div>
+
+    <!-- Lobby -->
+    <div id="lobby" class="panel hidden">
+      <h2>Комната создана</h2>
+      <div id="invite-code" class="code">—</div>
+      <p id="lobby-hint" class="hint">Ждём соперника…</p>
+      <button id="copy-link" class="primary">Скопировать ссылку</button>
+      <button id="cancel" class="ghost">Отмена</button>
+    </div>
+
+    <!-- Result -->
+    <div id="over" class="panel hidden">
+      <h2 id="over-title">Победа</h2>
+      <div id="over-score" class="code">0 : 0</div>
+      <button id="again" class="primary">Реванш</button>
+      <button id="to-menu" class="ghost">Новая игра</button>
+    </div>
+
+    <div id="toast" class="hidden"></div>
+
+    <script type="module" src="/js/main.js?v=20260909-collide1"></script>
+  </body>
+</html>

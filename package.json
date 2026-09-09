@@ -1,0 +1,13 @@
+{
+  "name": "twivvy",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Twivvy («Перекрут») — browser PvP prototype",
+  "type": "module",
+  "scripts": {
+    "start": "python3 -m http.server 8080",
+    "test": "node --test tools/*.test.mjs",
+    "validate-maps": "node tools/validate-maps.mjs",
+    "deploy": "gsutil -m rsync -r -x '^index\\.html$|(^|.*/)\\.git/.*|(^|.*/)\\.DS_Store$|(^|.*/)\\.claude/.*|\\.gitignore$|package\\.json$|(^|.*/)node_modules/.*|(^|.*/)tools/.*|.*\\.md$|cloudflare-worker\\.js$' . gs://twivvy.e-notix.com/ && gsutil -h 'Cache-Control:no-cache' cp index.html gs://twivvy.e-notix.com/index.html"
+  }
+}
