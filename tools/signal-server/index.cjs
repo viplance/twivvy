@@ -7,6 +7,8 @@ const DATABASE_ID = process.env.FIRESTORE_DATABASE_ID || "enotix";
 const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || "*").split(",");
 const ROOM_TTL_SECONDS = Number(process.env.ROOM_TTL_SECONDS || 1800);
 const ROOMS = "twivvy_rooms";
+const MATCHMAKING = "twivvy_matchmaking";
+const MATCHMAKING_STATE = "state";
 
 const MAX_SDP_LENGTH = 20_000;
 const MAX_CANDIDATE_LENGTH = 1_000;
@@ -14,6 +16,11 @@ const MAX_CANDIDATES = 60;
 const MAX_REQUESTS_PER_MINUTE = 120;
 const CODE_ALPHABET = "ACDEFGHJKLMNPQRTUVWXY3479";
 const CODE_LENGTH = 5;
+const PLAYER_NAME_LENGTH = 24;
+const MATCHMAKING_PRESENCE_MS = 15_000;
+const MATCHMAKING_ASSIGNMENT_MS = 120_000;
+const MAX_MATCHMAKING_PLAYERS = 500;
+const MAP_COUNT = 3;
 
 let firestore = null;
 
@@ -71,6 +78,200 @@ function normalizeCode(raw) {
     .toUpperCase();
   if (!/^[A-Z0-9]{4,8}$/.test(code)) return null;
   return code;
+}
+
+function normalizePlayerName(raw) {
+  const name = String(raw || "").replace(/\s+/g, " ").trim();
+  return name ? name.slice(0, PLAYER_NAME_LENGTH) : null;
+}
+
+function validMatchmakingCredential(raw) {
+  return typeof raw === "string" && /^[A-Za-z0-9_-]{20,80}$/.test(raw);
+}
+
+function newRoomFields({ code, seed, map, hostToken, guestToken = null,
+  hostName, guestName = null }) {
+  return {
+    code,
+    seed,
+    map,
+    hostToken,
+    guestToken,
+    hostName: normalizePlayerName(hostName) || "Игрок",
+    guestName: normalizePlayerName(guestName),
+    protocol: 2,
+    epoch: 0,
+    hostSeen: Date.now(),
+    guestSeen: guestToken ? Date.now() : null,
+    offer: null,
+    answer: null,
+    hostCandidates: [],
+    guestCandidates: [],
+    createdAt: FieldValue.serverTimestamp(),
+  };
+}
+
+function cleanMatchmakingState(raw, now = Date.now()) {
+  const present = item => item && Number.isFinite(item.seenAt) &&
+    now - item.seenAt < MATCHMAKING_PRESENCE_MS;
+  const recoverable = item => item && Number.isFinite(item.seenAt) &&
+    now - item.seenAt < MATCHMAKING_ASSIGNMENT_MS;
+  return {
+    waiting: Array.isArray(raw?.waiting) ? raw.waiting.filter(present) : [],
+    assignments: Array.isArray(raw?.assignments) ? raw.assignments.filter(recoverable) : [],
+    updatedAt: now,
+  };
+}
+
+function matchmakingCount(state, now = Date.now()) {
+  const activeAssignments = state.assignments.filter(item =>
+    now - item.seenAt < MATCHMAKING_PRESENCE_MS).length;
+  return state.waiting.length + activeAssignments;
+}
+
+function publicAssignment(assignment) {
+  if (!assignment) return null;
+  const { code, roomToken: token, role, seed, map, epoch, hostName, guestName } = assignment;
+  return { code, token, role, seed, map, epoch, hostName, guestName };
+}
+
+/** Pair the longest-waiting players. Room creation and both assignments are
+ * committed in the same transaction, so no player can be seated twice. */
+async function pairWaiting(tx, state) {
+  state.waiting.sort((a, b) => a.joinedAt - b.joinedAt || a.ticket.localeCompare(b.ticket));
+  while (state.waiting.length >= 2) {
+    const host = state.waiting.shift();
+    const guest = state.waiting.shift();
+    const code = makeCode();
+    const seed = require("crypto").randomBytes(2).readUInt16BE(0);
+    const map = require("crypto").randomBytes(1)[0] % MAP_COUNT;
+    const hostToken = makeToken();
+    const guestToken = makeToken();
+    const fields = newRoomFields({
+      code, seed, map, hostToken, guestToken,
+      hostName: host.name, guestName: guest.name,
+    });
+    await tx.create(db().collection(ROOMS).doc(code), fields);
+    for (const [player, role, roomToken] of [
+      [host, "host", hostToken],
+      [guest, "guest", guestToken],
+    ]) {
+      state.assignments.push({
+        ticket: player.ticket,
+        queueToken: player.queueToken,
+        seenAt: Date.now(),
+        code,
+        roomToken,
+        role,
+        seed,
+        map,
+        epoch: 0,
+        hostName: fields.hostName,
+        guestName: fields.guestName,
+      });
+    }
+  }
+}
+
+async function matchmakingOverview(req, res) {
+  const ref = db().collection(MATCHMAKING).doc(MATCHMAKING_STATE);
+  const state = await db().runTransaction(async tx => {
+    const snap = await tx.get(ref);
+    const next = cleanMatchmakingState(snap.exists ? snap.data() : null);
+    tx.set(ref, next);
+    return next;
+  });
+  return res.status(200).json({ online: matchmakingCount(state) });
+}
+
+async function enterMatchmaking(req, res) {
+  const name = normalizePlayerName(req.body?.name);
+  const ticket = req.body?.ticket;
+  const queueToken = req.body?.token;
+  if (!name || !validMatchmakingCredential(ticket) || !validMatchmakingCredential(queueToken)) {
+    return res.status(400).json({ error: "Invalid matchmaking request." });
+  }
+
+  const ref = db().collection(MATCHMAKING).doc(MATCHMAKING_STATE);
+  const result = await db().runTransaction(async tx => {
+    const snap = await tx.get(ref);
+    const state = cleanMatchmakingState(snap.exists ? snap.data() : null);
+    let assignment = state.assignments.find(item => item.ticket === ticket);
+    let waiter = state.waiting.find(item => item.ticket === ticket);
+    if ((assignment && assignment.queueToken !== queueToken) ||
+        (waiter && waiter.queueToken !== queueToken)) {
+      return { status: 403, body: { error: "Invalid matchmaking token." } };
+    }
+    if (assignment) {
+      assignment.seenAt = Date.now();
+    } else if (waiter) {
+      waiter.name = name;
+      waiter.seenAt = Date.now();
+    } else {
+      if (state.waiting.length + state.assignments.length >= MAX_MATCHMAKING_PLAYERS) {
+        return { status: 503, body: { error: "Matchmaking is full." } };
+      }
+      state.waiting.push({ ticket, queueToken, name, joinedAt: Date.now(), seenAt: Date.now() });
+    }
+    await pairWaiting(tx, state);
+    assignment = state.assignments.find(item => item.ticket === ticket);
+    tx.set(ref, state);
+    return { status: 200, body: {
+      ticket,
+      token: queueToken,
+      online: matchmakingCount(state),
+      match: publicAssignment(assignment),
+    } };
+  });
+  return res.status(result.status).json(result.body);
+}
+
+async function pollMatchmaking(req, res, ticket) {
+  const queueToken = String(req.query?.token || "");
+  if (!validMatchmakingCredential(ticket) || !validMatchmakingCredential(queueToken)) {
+    return res.status(400).json({ error: "Invalid matchmaking request." });
+  }
+  const ref = db().collection(MATCHMAKING).doc(MATCHMAKING_STATE);
+  const result = await db().runTransaction(async tx => {
+    const snap = await tx.get(ref);
+    const state = cleanMatchmakingState(snap.exists ? snap.data() : null);
+    let assignment = state.assignments.find(item => item.ticket === ticket);
+    const waiter = state.waiting.find(item => item.ticket === ticket);
+    const player = assignment || waiter;
+    if (!player) {
+      tx.set(ref, state);
+      return { status: 404, body: { error: "Matchmaking ticket expired." } };
+    }
+    if ((assignment?.queueToken || waiter?.queueToken) !== queueToken) {
+      return { status: 403, body: { error: "Invalid matchmaking token." } };
+    }
+    player.seenAt = Date.now();
+    await pairWaiting(tx, state);
+    assignment = state.assignments.find(item => item.ticket === ticket);
+    tx.set(ref, state);
+    return { status: 200, body: {
+      online: matchmakingCount(state),
+      match: publicAssignment(assignment),
+    } };
+  });
+  return res.status(result.status).json(result.body);
+}
+
+async function leaveMatchmaking(req, res, ticket) {
+  const queueToken = String(req.query?.token || req.body?.token || "");
+  const ref = db().collection(MATCHMAKING).doc(MATCHMAKING_STATE);
+  const result = await db().runTransaction(async tx => {
+    const snap = await tx.get(ref);
+    const state = cleanMatchmakingState(snap.exists ? snap.data() : null);
+    const all = [...state.waiting, ...state.assignments];
+    const player = all.find(item => item.ticket === ticket);
+    if (player && player.queueToken !== queueToken) return 403;
+    state.waiting = state.waiting.filter(item => item.ticket !== ticket);
+    state.assignments = state.assignments.filter(item => item.ticket !== ticket);
+    tx.set(ref, state);
+    return 204;
+  });
+  return res.status(result).send("");
 }
 
 /** SDP payloads are relayed verbatim, so cap size and shape before storing. */
@@ -140,7 +341,11 @@ async function resumeRoom(req, res, code) {
       [role + "Attempt"]: attempt, [role + "Seen"]: Date.now(),
       [role + "AbsentAt"]: null,
     });
-    return { status: 200, body: { code, role, seed: room.seed, map: room.map, epoch } };
+    return { status: 200, body: {
+      code, role, seed: room.seed, map: room.map, epoch,
+      hostName: room.hostName || "Игрок",
+      guestName: room.guestName || "Игрок",
+    } };
   });
   return res.status(result.status).json(result.body);
 }
@@ -163,12 +368,13 @@ async function presence(req, res, code) {
 }
 
 /**
- * POST /api/rooms { seed, map }
+ * POST /api/rooms { seed, map, name }
  * Host creates a room and receives the join code plus its host token.
  */
 async function createRoom(req, res) {
   const seed = Number.isInteger(req.body?.seed) ? req.body.seed : 0;
   const map = Number.isInteger(req.body?.map) ? req.body.map : 0;
+  const hostName = normalizePlayerName(req.body?.name) || "Игрок";
 
   const hostToken = makeToken();
 
@@ -176,23 +382,13 @@ async function createRoom(req, res) {
     const code = makeCode();
     const ref = db().collection(ROOMS).doc(code);
     try {
-      await ref.create({
-        code,
-        seed,
-        map,
-        hostToken,
-        guestToken: null,
-        protocol: req.body?.protocol === 2 ? 2 : 1,
-        epoch: 0,
-        hostSeen: Date.now(),
-        guestSeen: null,
-        offer: null,
-        answer: null,
-        hostCandidates: [],
-        guestCandidates: [],
-        createdAt: FieldValue.serverTimestamp(),
+      const fields = newRoomFields({ code, seed, map, hostToken, hostName });
+      fields.protocol = req.body?.protocol === 2 ? 2 : 1;
+      await ref.create(fields);
+      return res.status(201).json({
+        code, token: hostToken, role: "host",
+        hostName: fields.hostName, guestName: null,
       });
-      return res.status(201).json({ code, token: hostToken, role: "host" });
     } catch (err) {
       if (err.code === 6) continue; // ALREADY_EXISTS — try another code
       throw err;
@@ -209,6 +405,7 @@ async function createRoom(req, res) {
 async function joinRoom(req, res, code) {
   const ref = db().collection(ROOMS).doc(code);
   const guestToken = makeToken();
+  const guestName = normalizePlayerName(req.body?.name) || "Игрок";
 
   try {
     const result = await db().runTransaction(async (tx) => {
@@ -248,6 +445,7 @@ async function joinRoom(req, res, code) {
 
       tx.update(ref, {
         guestToken,
+        guestName,
         ...reset,
         // Bumped so the host notices and renegotiates from scratch.
         guestEpoch: (room.guestEpoch || 0) + 1,
@@ -263,6 +461,8 @@ async function joinRoom(req, res, code) {
           map: room.map,
           epoch: reset.epoch ?? room.epoch ?? 0,
           rejoin,
+          hostName: room.hostName || "Игрок",
+          guestName,
           // A stale offer would carry the previous connection's ICE
           // credentials; the host publishes a new one for this epoch.
           offer: rejoin || room.protocol === 2 ? null : room.offer || null,
@@ -341,6 +541,11 @@ async function getSignal(req, res, code) {
     const sameEpoch = Number(req.query?.epoch) === (room.epoch || 0);
     return [200, {
       code, seed: room.seed, map: room.map,
+      hostName: room.hostName || "Игрок",
+      guestName: room.guestName || "Игрок",
+      peerName: role === "host"
+        ? room.guestName || null
+        : room.hostName || "Игрок",
       peerJoined: Boolean(room.guestToken), guestEpoch: room.guestEpoch || 0,
       epoch: room.epoch || 0,
       peerAbsentAt: room[peer + "AbsentAt"] ??
@@ -399,6 +604,18 @@ functions.http("twivvySignal", async (req, res) => {
 
     if (path === "/api/rooms" && req.method === "POST") {
       return await createRoom(req, res);
+    }
+
+    if (path === "/api/matchmaking") {
+      if (req.method === "GET") return await matchmakingOverview(req, res);
+      if (req.method === "POST") return await enterMatchmaking(req, res);
+    }
+
+    const matchmakingMatch = path.match(/^\/api\/matchmaking\/([^/]+)$/);
+    if (matchmakingMatch) {
+      const ticket = matchmakingMatch[1];
+      if (req.method === "GET") return await pollMatchmaking(req, res, ticket);
+      if (req.method === "DELETE") return await leaveMatchmaking(req, res, ticket);
     }
 
     const roomMatch = path.match(/^\/api\/rooms\/([^/]+)(\/join|\/signal|\/resume|\/presence)?$/);

@@ -104,6 +104,97 @@ export function readSession(code) {
   try { return JSON.parse(sessionStorage.getItem(SESSION_KEY + code)); } catch { return null; }
 }
 
+export async function onlinePlayerCount() {
+  const state = await api("/api/matchmaking");
+  return Math.max(0, Number(state.online) || 0);
+}
+
+/** Presence in the public matchmaking pool. The same credentials are reused
+ * on retries, so a lost HTTP response cannot enqueue one browser twice. */
+export class Matchmaker extends EventTarget {
+  constructor() {
+    super();
+    this.ticket = randomSalt();
+    this.token = randomSalt();
+    this.closed = false;
+    this.match = null;
+  }
+
+  _emit(type, detail = {}) {
+    this.dispatchEvent(new CustomEvent(type, { detail }));
+  }
+
+  async join(name) {
+    this.name = name;
+    this.closed = false;
+    const state = await api("/api/matchmaking", {
+      method: "POST",
+      body: JSON.stringify({ name, ticket: this.ticket, token: this.token }),
+    });
+    if (this.closed) {
+      this._remove();
+      return state;
+    }
+    this._accept(state);
+    this._schedule();
+    return state;
+  }
+
+  _accept(state) {
+    this._emit("count", { online: Math.max(0, Number(state.online) || 0) });
+    if (state.match && !this.match) {
+      this.match = state.match;
+      this._emit("matched", state.match);
+    }
+  }
+
+  _schedule() {
+    clearTimeout(this._timer);
+    if (this.closed) return;
+    this._timer = setTimeout(() => this._poll(), this.match ? 5000 : POLL_MS);
+  }
+
+  async _poll() {
+    if (this.closed) return;
+    try {
+      const state = await api(`/api/matchmaking/${this.ticket}?token=${encodeURIComponent(this.token)}`);
+      if (this.closed) return;
+      this._accept(state);
+    } catch (err) {
+      if (this.closed) return;
+      // A backgrounded tab can age out of the waiting list. Re-enter with the
+      // same ticket when it becomes active again, retaining its chosen name.
+      if (err.status === 404 && !this.match) {
+        try {
+          const state = await api("/api/matchmaking", {
+            method: "POST",
+            body: JSON.stringify({ name: this.name, ticket: this.ticket, token: this.token }),
+          });
+          if (!this.closed) this._accept(state);
+        } catch (retryError) {
+          if (!this.closed) this._emit("error", { message: retryError.message });
+        }
+      } else if (!this.match) {
+        this._emit("error", { message: err.message });
+      }
+    }
+    this._schedule();
+  }
+
+  close(remove = true) {
+    if (this.closed) return;
+    this.closed = true;
+    clearTimeout(this._timer);
+    if (remove) this._remove();
+  }
+
+  _remove() {
+    api(`/api/matchmaking/${this.ticket}?token=${encodeURIComponent(this.token)}`, {
+      method: "DELETE",
+    }).catch(() => {});
+  }
+}
+
 /** Signalling remains alive after the data channel opens, so either seat can
  * rebuild its peer connection. All SDP/ICE is scoped to a server epoch. */
 export class Connection extends EventTarget {
@@ -111,6 +202,8 @@ export class Connection extends EventTarget {
     super();
     this.pc = this.channel = null;
     this.role = this.code = this.token = null;
+    this.myName = "Игрок";
+    this.peerName = null;
     this.map = this.seed = 0;
     this.epoch = -1;
     this.closed = false;
@@ -145,7 +238,8 @@ export class Connection extends EventTarget {
     try {
       sessionStorage.setItem(SESSION_KEY + this.code, JSON.stringify({
         code: this.code, token: this.token, role: this.role, seed: this.seed,
-        map: this.map, game: this._game, savedAt: Date.now(),
+        map: this.map, myName: this.myName, peerName: this.peerName,
+        game: this._game, savedAt: Date.now(),
       }));
     } catch {
       if (!this._storageWarning) this._emit("storageerror");
@@ -154,22 +248,34 @@ export class Connection extends EventTarget {
   }
 
   _adopt(room) {
+    const role = room.role || this.role;
     Object.assign(this, { code: room.code, token: room.token || this.token,
-      role: room.role || this.role, seed: room.seed ?? this.seed, map: room.map ?? this.map });
+      role, seed: room.seed ?? this.seed, map: room.map ?? this.map });
+    this.myName = room.myName ||
+      (role === "host" ? room.hostName : room.guestName) || this.myName;
+    this.peerName = room.peerName ||
+      (role === "host" ? room.guestName : room.hostName) || this.peerName;
     this._save();
   }
 
-  async host({ seed, map }) {
-    const room = await api("/api/rooms", { method: "POST", body: JSON.stringify({ seed, map, protocol: 2 }) });
+  async host({ seed, map, name }) {
+    const room = await api("/api/rooms", { method: "POST", body: JSON.stringify({ seed, map, name, protocol: 2 }) });
     this._adopt({ ...room, role: "host", seed, map });
     await this._negotiate(room.epoch ?? 0);
     this._startPolling();
     return this.code;
   }
 
-  async join(code) {
-    const room = await api(`/api/rooms/${code}/join`, { method: "POST", body: JSON.stringify({ protocol: 2 }) });
+  async join(code, { name } = {}) {
+    const room = await api(`/api/rooms/${code}/join`, { method: "POST", body: JSON.stringify({ protocol: 2, name }) });
     this._adopt({ ...room, role: "guest" });
+    await this._negotiate(room.epoch ?? 0);
+    this._startPolling();
+    return room;
+  }
+
+  async acceptMatch(room) {
+    this._adopt(room);
     await this._negotiate(room.epoch ?? 0);
     this._startPolling();
     return room;
@@ -339,6 +445,7 @@ export class Connection extends EventTarget {
             method: "POST", body: JSON.stringify({ token: this.token, attempt }),
           });
           if (!current()) return;
+          this._adopt(room);
           this._attempt = null;
           this._lastAttemptAt = Date.now();
           await this._negotiate(room.epoch);
@@ -347,6 +454,11 @@ export class Connection extends EventTarget {
         const epoch = this.epoch;
         const state = await api(`/api/rooms/${this.code}?token=${encodeURIComponent(this.token)}&since=${this._candidateCursor}&epoch=${epoch}`);
         if (!current()) return;
+        if (typeof state.peerName === "string" && state.peerName && state.peerName !== this.peerName) {
+          this.peerName = state.peerName;
+          this._save();
+          this._emit("peername", { name: this.peerName });
+        }
         if (state.epoch !== this.epoch) {
           this._lostSince ??= Date.now();
           this._emit("peerlost", { since: this._lostSince });

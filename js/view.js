@@ -17,7 +17,7 @@ import {
   RIGHT,
   DOWN,
   LEFT,
-} from "./rules.js?v=20260909-edge-bounce1";
+} from "./rules.js?v=20260909-matchmaking1";
 
 const CELL = 1;
 const GAP = 0.18; // visible gap between platforms, so groups read as units
@@ -338,6 +338,22 @@ export class BoardView {
     this.receivers[ownSide].material.emissive.setHex(0x0d5a52);
     this.receivers[foeSide].material.color.setHex(COLOR.foe);
     this.receivers[foeSide].material.emissive.setHex(0x5c2418);
+  }
+
+  /** Project a receiver centre into viewport pixels for the DOM name labels. */
+  receiverScreenPosition(side) {
+    const receiver = this.receivers[side];
+    if (!receiver) return null;
+    this.scene.updateMatrixWorld(true);
+    this.camera.updateMatrixWorld(true);
+    const point = new THREE.Vector3();
+    receiver.getWorldPosition(point);
+    point.project(this.camera);
+    const rect = this.canvas.getBoundingClientRect();
+    return {
+      x: rect.left + (point.x + 1) * rect.width / 2,
+      y: rect.top + (1 - point.y) * rect.height / 2,
+    };
   }
 
   _resize() {

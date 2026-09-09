@@ -28,6 +28,7 @@ export async function signalFixture({ now = () => Date.now() } = {}) {
       if (rooms.has(code)) throw Object.assign(new Error("exists"), { code: 6 });
       rooms.set(code, clone(fields));
     },
+    async set(fields) { rooms.set(code, clone(fields)); },
     async update(fields) { update(code, fields); },
     async delete() { rooms.delete(code); },
   });
@@ -35,7 +36,11 @@ export async function signalFixture({ now = () => Date.now() } = {}) {
     collection() { return { doc: ref }; }
     runTransaction(callback) {
       const pending = queue.then(() => callback({
-        get: r => r.get(), update: (r, fields) => update(r.code, fields),
+        get: r => r.get(),
+        create: (r, fields) => r.create(fields),
+        set: (r, fields) => r.set(fields),
+        update: (r, fields) => update(r.code, fields),
+        delete: r => r.delete(),
       }));
       queue = pending.catch(() => {});
       return pending;

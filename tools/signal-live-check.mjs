@@ -11,7 +11,8 @@ async function request(method, path, body) {
   try { data = await res.json(); } catch {}
   return { status: res.status, data };
 }
-let host, base;
+let host, base, matchedRoom;
+const matchmaking = [];
 try {
   const created = await request("POST", "/api/rooms", { protocol: 2, map: 0, seed: 100 });
   assert.equal(created.status, 201);
@@ -39,7 +40,30 @@ try {
   const stale = await request("POST", base + "/signal", { token: host.token, epoch: 2, description: { type: "offer", sdp: "stale-test" } });
   assert.equal(stale.status, 409);
   console.log("PASS deployed signalling: both roles resume, tokens remain valid, epoch reset, idempotency and reserved-seat protection");
+
+  for (const name of ["Smoke Alice", "Smoke Bob"]) {
+    const credentials = { ticket: crypto.randomUUID(), token: crypto.randomUUID() };
+    matchmaking.push(credentials);
+    const entered = await request("POST", "/api/matchmaking", { ...credentials, name });
+    assert.equal(entered.status, 200);
+    if (entered.data.match) matchedRoom = entered.data.match;
+  }
+  const firstMatch = await request("GET",
+    `/api/matchmaking/${matchmaking[0].ticket}?token=${matchmaking[0].token}`);
+  assert.equal(firstMatch.status, 200);
+  assert.equal(firstMatch.data.match.code, matchedRoom.code);
+  assert.equal(firstMatch.data.match.hostName, "Smoke Alice");
+  assert.equal(firstMatch.data.match.guestName, "Smoke Bob");
+  console.log("PASS deployed matchmaking: two FIFO players received one named room");
 } finally {
+  for (const credentials of matchmaking) {
+    await request("DELETE", `/api/matchmaking/${credentials.ticket}?token=${credentials.token}`);
+  }
+  if (matchedRoom) {
+    assert.equal((await request("DELETE",
+      `/api/rooms/${matchedRoom.code}?token=${matchedRoom.token}`)).status, 204);
+    console.log("Temporary matchmaking room deleted");
+  }
   if (host) {
     assert.equal((await request("DELETE", base + `?token=${host.token}`)).status, 204);
     console.log("Temporary smoke-test room deleted");

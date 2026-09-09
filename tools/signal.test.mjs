@@ -63,3 +63,63 @@ test("refresh within grace resets presence, and stale pagehide cannot mark the n
   a.advance(2 * 60_000);
   assert.equal((await a.request("GET", a.base + `?token=${a.host.token}&epoch=2`)).status, 200);
 });
+
+test("rooms carry both player names through join and signalling", async () => {
+  const api = await signalFixture();
+  const host = (await api.request("POST", "/api/rooms", {
+    protocol: 2, map: 0, seed: 1, name: "Алиса",
+  })).body;
+  const base = `/api/rooms/${host.code}`;
+  const guest = (await api.request("POST", base + "/join", {
+    protocol: 2, name: "Боб",
+  })).body;
+  assert.equal(guest.hostName, "Алиса");
+  assert.equal(guest.guestName, "Боб");
+  const hostState = await api.request("GET", base + `?token=${host.token}&epoch=1`);
+  assert.equal(hostState.body.peerName, "Боб");
+});
+
+test("matchmaking pairs the longest-waiting players and keeps one odd player queued", async () => {
+  let clock = 200_000;
+  const api = await signalFixture({ now: () => clock });
+  const credentials = ["a", "b", "c"].map(letter => ({
+    ticket: letter.repeat(24), token: letter.toUpperCase().repeat(24),
+  }));
+  const enter = (index, name) => api.request("POST", "/api/matchmaking", {
+    ...credentials[index], name,
+  });
+
+  const first = await enter(0, "Первый");
+  assert.equal(first.body.online, 1);
+  assert.equal(first.body.match, null);
+  clock += 10;
+  const second = await enter(1, "Второй");
+  assert.equal(second.body.match.role, "guest");
+  const firstPoll = await api.request("GET",
+    `/api/matchmaking/${credentials[0].ticket}?token=${credentials[0].token}`);
+  assert.equal(firstPoll.body.match.role, "host");
+  assert.equal(firstPoll.body.match.code, second.body.match.code);
+  assert.equal(firstPoll.body.match.hostName, "Первый");
+  assert.equal(firstPoll.body.match.guestName, "Второй");
+
+  clock += 10;
+  const third = await enter(2, "Третий");
+  assert.equal(third.body.match, null);
+  assert.equal(third.body.online, 3, "two playing users and one waiter are online");
+});
+
+test("a matched room remains recoverable after presence drops from the online count", async () => {
+  let clock = 300_000;
+  const api = await signalFixture({ now: () => clock });
+  const first = { ticket: "d".repeat(24), token: "D".repeat(24), name: "Даша" };
+  const second = { ticket: "e".repeat(24), token: "E".repeat(24), name: "Егор" };
+  await api.request("POST", "/api/matchmaking", first);
+  await api.request("POST", "/api/matchmaking", second);
+  clock += 20_000;
+  assert.equal((await api.request("GET", "/api/matchmaking")).body.online, 0);
+  const recovered = await api.request("GET",
+    `/api/matchmaking/${first.ticket}?token=${first.token}`);
+  assert.equal(recovered.status, 200);
+  assert.equal(recovered.body.match.hostName, "Даша");
+  assert.equal(recovered.body.online, 1);
+});

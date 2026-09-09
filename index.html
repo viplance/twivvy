@@ -13,7 +13,7 @@
     />
     <meta name="theme-color" content="#0b1020" />
     <!-- Root-absolute so assets resolve the same from / and from /CODE. -->
-    <link rel="stylesheet" href="/css/style.css?v=20260909-edge-bounce1" />
+    <link rel="stylesheet" href="/css/style.css?v=20260909-matchmaking1" />
     <link
       rel="icon"
       href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='26' font-size='26'>🌀</text></svg>"
@@ -40,6 +40,10 @@
     </div>
 
     <div id="round-title" class="round-title hidden" role="status" aria-live="polite"></div>
+    <div id="player-labels" class="player-labels hidden" aria-live="polite">
+      <div id="opponent-name" class="receiver-name opponent-name">Соперник</div>
+      <div id="own-name" class="receiver-name own-name">Игрок</div>
+    </div>
 
     <!-- Menu -->
     <div id="menu" class="panel">
@@ -49,6 +53,7 @@
       </p>
 
       <button id="create" class="primary">Создать игру</button>
+      <button id="play-online">Играть онлайн</button>
 
       <div class="divider"><span>или</span></div>
 
@@ -77,6 +82,29 @@
       </details>
     </div>
 
+    <!-- Name prompt shared by invite, room creation and public matchmaking. -->
+    <div id="name-modal" class="modal-backdrop hidden" role="presentation">
+      <form id="name-form" class="panel modal" aria-modal="true" aria-labelledby="name-title" role="dialog">
+        <h2 id="name-title">Играть онлайн</h2>
+        <label class="name-field" for="player-name">
+          <span>Имя</span>
+          <input
+            id="player-name"
+            maxlength="24"
+            autocomplete="nickname"
+            enterkeyhint="done"
+            required
+          />
+        </label>
+        <p id="online-count" class="online-count hidden" aria-live="polite">
+          Человек в сети: <strong>0</strong>
+        </p>
+        <p id="matchmaking-status" class="hint hidden" aria-live="polite"></p>
+        <button id="name-submit" class="primary" type="submit">Подключиться</button>
+        <button id="name-cancel" class="ghost" type="button">Отмена</button>
+      </form>
+    </div>
+
     <!-- Lobby -->
     <div id="lobby" class="panel hidden">
       <h2>Комната создана</h2>
@@ -96,6 +124,6 @@
 
     <div id="toast" class="hidden"></div>
 
-    <script type="module" src="/js/main.js?v=20260909-edge-bounce1"></script>
+    <script type="module" src="/js/main.js?v=20260909-matchmaking1"></script>
   </body>
 </html>

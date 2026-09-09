@@ -103,12 +103,34 @@ test("a stale HTTP response cannot replace a newer negotiation", async (t) => {
   assert.equal(lobbyUpdates, 0);
 });
 
-async function controllerHarness({ pathname = "/", joinError = null, brokenView = false } = {}) {
+test("a matchmaking assignment adopts the room role and both player names", async (t) => {
+  const connection = new Connection();
+  t.mock.method(connection, "_negotiate", async () => {});
+  t.mock.method(connection, "_startPolling", () => {});
+  await connection.acceptMatch({
+    code: "MATCH",
+    token: "room-token",
+    role: "guest",
+    seed: 12,
+    map: 2,
+    epoch: 0,
+    hostName: "Алиса",
+    guestName: "Боб",
+  });
+  assert.equal(connection.role, "guest");
+  assert.equal(connection.myName, "Боб");
+  assert.equal(connection.peerName, "Алиса");
+});
+
+async function controllerHarness({ pathname = "/", joinError = null, brokenView = false,
+  storedName = null } = {}) {
   const source = await readFile(new URL("../js/main.js", import.meta.url), "utf8");
   const elements = new Map();
   const getElement = (id) => {
     if (!elements.has(id)) {
-      const classes = new Set(["lobby", "hud", "over"].includes(id) ? ["hidden"] : []);
+      const classes = new Set(["lobby", "hud", "over", "name-modal", "player-labels"].includes(id) ? ["hidden"] : []);
+      const listeners = new Map();
+      const child = { textContent: "" };
       elements.set(id, {
         classList: {
           toggle(name, force) { force ? classes.add(name) : classes.delete(name); },
@@ -116,7 +138,16 @@ async function controllerHarness({ pathname = "/", joinError = null, brokenView 
         },
         style: {},
         value: "",
-        addEventListener() {},
+        disabled: false,
+        addEventListener(type, callback) {
+          if (!listeners.has(type)) listeners.set(type, []);
+          listeners.get(type).push(callback);
+        },
+        dispatch(type, event = {}) {
+          for (const callback of listeners.get(type) || []) callback(event);
+        },
+        querySelector() { return child; },
+        focus() {}, setCustomValidity() {}, reportValidity() {},
       });
     }
     return elements.get(id);
@@ -127,17 +158,30 @@ async function controllerHarness({ pathname = "/", joinError = null, brokenView 
   let joinedCode = null;
   let sessionCallbacks = null;
   let currentSession = null;
+  let hostedName = null;
+  let queuedName = null;
   class FakeConnection extends EventTarget {
     constructor() { super(); conn = this; this.code = "TEST"; this.map = 0; }
-    host() { return new Promise((resolve) => { finishHost = resolve; }); }
+    host({ name } = {}) {
+      this.role = "host";
+      this.myName = name;
+      hostedName = name;
+      return new Promise((resolve) => { finishHost = resolve; });
+    }
     async join(code) {
       joinedCode = code;
+      this.role = "guest";
       if (joinError) throw joinError;
     }
     inviteLink() { return "https://example.test/TEST"; }
   }
   const sandbox = {
     Connection: FakeConnection,
+    Matchmaker: class extends EventTarget {
+      async join(name) { queuedName = name; }
+      close() {}
+    },
+    onlinePlayerCount: async () => 0,
     readSession: () => null,
     MatchSession: class {
       constructor(_connection, callbacks) {
@@ -168,7 +212,11 @@ async function controllerHarness({ pathname = "/", joinError = null, brokenView 
     MAPS: [{}], DECIDE_MS: 30_000, RESOLVE_MS: 1200, TICKS: 30,
     basePath: () => "/", codeFromLocation: () => codeFromLocation({ pathname, search: "" }),
     document: { getElementById: getElement },
-    window: {}, history: { replaceState() {} },
+    window: { addEventListener() {}, innerHeight: 800 }, history: { replaceState() {} },
+    localStorage: {
+      getItem() { return storedName; },
+      setItem(_key, value) { storedName = value; },
+    },
     navigator: { clipboard: { writeText: async () => {} } },
     performance: { now: () => 0 }, console: { ...console, error() {} },
     setTimeout: () => 1, clearTimeout() {}, setInterval: () => 1, clearInterval() {},
@@ -180,13 +228,39 @@ async function controllerHarness({ pathname = "/", joinError = null, brokenView 
   return {
     sandbox, getElement, getConnection: () => conn,
     finishHost: () => finishHost(), getStarts: () => starts,
+    getHostedName: () => hostedName,
+    getQueuedName: () => queuedName,
+    getStoredName: () => storedName,
     getJoinedCode: () => joinedCode,
+    dispatch(id, type, event = {}) { getElement(id).dispatch(type, event); },
     activateRound(round) {
       currentSession.match.tick = round - 1;
       sessionCallbacks.active(true);
     },
   };
 }
+
+test("room creation asks for a name and pre-fills the saved browser name", async () => {
+  const app = await controllerHarness({ storedName: "Сохранённое имя" });
+  app.dispatch("create", "click");
+  assert.equal(app.getElement("name-modal").classList.contains("hidden"), false);
+  assert.equal(app.getElement("player-name").value, "Сохранённое имя");
+  app.dispatch("name-form", "submit", { preventDefault() {} });
+  assert.equal(app.getHostedName(), "Сохранённое имя");
+  app.finishHost();
+  await Promise.resolve();
+});
+
+test("online play saves the name and enters matchmaking", async () => {
+  const app = await controllerHarness();
+  app.dispatch("play-online", "click");
+  assert.equal(app.getElement("online-count").classList.contains("hidden"), false);
+  app.getElement("player-name").value = "  Новый   игрок  ";
+  app.dispatch("name-form", "submit", { preventDefault() {} });
+  await Promise.resolve();
+  assert.equal(app.getQueuedName(), "Новый игрок");
+  assert.equal(app.getStoredName(), "Новый игрок");
+});
 
 test("late room creation cannot show the lobby over an already-started match", async () => {
   const { sandbox, getElement, getConnection, finishHost, getStarts } = await controllerHarness();
@@ -202,8 +276,13 @@ test("late room creation cannot show the lobby over an already-started match", a
   assert.equal(getStarts(), 1, "duplicate readiness must not reset a running match");
 });
 
-test("HMH9T invitation automatically joins and hides the create-room menu", async () => {
+test("HMH9T invitation asks for a name before joining", async () => {
   const app = await controllerHarness({ pathname: "/HMH9T" });
+  assert.equal(app.getJoinedCode(), null);
+  assert.equal(app.getElement("name-modal").classList.contains("hidden"), false);
+  app.getElement("player-name").value = "Алиса";
+  app.dispatch("name-form", "submit", { preventDefault() {} });
+  await Promise.resolve();
   assert.equal(app.getJoinedCode(), "HMH9T");
   assert.equal(app.getElement("menu").classList.contains("hidden"), true);
   assert.equal(app.getElement("lobby").classList.contains("hidden"), false);
@@ -212,6 +291,8 @@ test("HMH9T invitation automatically joins and hides the create-room menu", asyn
 test("failed invitation keeps the code and a visible explanation instead of the new-game menu", async () => {
   const error = Object.assign(new Error("Room not found."), { status: 404 });
   const app = await controllerHarness({ pathname: "/HMH9T", joinError: error });
+  app.getElement("player-name").value = "Алиса";
+  app.dispatch("name-form", "submit", { preventDefault() {} });
   for (let i = 0; i < 5; i++) await Promise.resolve();
   assert.equal(app.getElement("menu").classList.contains("hidden"), true);
   assert.equal(app.getElement("lobby").classList.contains("hidden"), false);
@@ -221,6 +302,9 @@ test("failed invitation keeps the code and a visible explanation instead of the 
 
 test("startup failure cannot leave a false connecting status or a running match", async () => {
   const app = await controllerHarness({ pathname: "/HMH9T", brokenView: true });
+  app.getElement("player-name").value = "Алиса";
+  app.dispatch("name-form", "submit", { preventDefault() {} });
+  await Promise.resolve();
   app.getConnection().dispatchEvent(new Event("open"));
   assert.equal(vm.runInContext("running", app.sandbox), false);
   assert.match(app.getElement("lobby-hint").textContent, /Не удалось запустить игру/);

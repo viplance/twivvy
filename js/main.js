@@ -7,16 +7,18 @@ import {
   DECIDE_MS,
   RESOLVE_MS,
   TICKS,
-} from "./rules.js?v=20260909-edge-bounce1";
-import { BoardView } from "./view.js?v=20260909-edge-bounce1";
+} from "./rules.js?v=20260909-matchmaking1";
+import { BoardView } from "./view.js?v=20260909-matchmaking1";
 import {
   Connection,
+  Matchmaker,
+  onlinePlayerCount,
   readSession,
   basePath,
   codeFromLocation,
-} from "./net.js?v=20260909-edge-bounce1";
+} from "./net.js?v=20260909-matchmaking1";
 
-import { MatchSession } from "./session.js?v=20260909-edge-bounce1";
+import { MatchSession } from "./session.js?v=20260909-matchmaking1";
 
 const $ = (id) => document.getElementById(id);
 
@@ -27,6 +29,7 @@ const ui = {
   over: $("over"),
   toast: $("toast"),
   createBtn: $("create"),
+  onlineBtn: $("play-online"),
   joinBtn: $("join"),
   joinCode: $("join-code"),
   copyBtn: $("copy-link"),
@@ -40,10 +43,24 @@ const ui = {
   overScore: $("over-score"),
   againBtn: $("again"),
   menuBtn: $("to-menu"),
+  nameModal: $("name-modal"),
+  nameForm: $("name-form"),
+  nameTitle: $("name-title"),
+  nameInput: $("player-name"),
+  nameSubmit: $("name-submit"),
+  nameCancel: $("name-cancel"),
+  onlineCount: $("online-count"),
+  onlineCountValue: $("online-count").querySelector("strong"),
+  matchmakingStatus: $("matchmaking-status"),
+  playerLabels: $("player-labels"),
+  ownName: $("own-name"),
+  opponentName: $("opponent-name"),
 };
 
+const PLAYER_NAME_KEY = "twivvy-player-name";
 let view = null;
 let connection = null;
+let matchmaker = null;
 let match = null;
 let mySide = "bottom"; // host plays the bottom receiver
 let selection = null; // { platform, dir }
@@ -54,12 +71,90 @@ let acceptingDrag = false;
 let timerFrame = null;
 let roundTitleTimer = null;
 let announcedRound = 0;
+let nameAction = null;
+let onlineCountTimer = null;
+let playerName = readPlayerName();
 // Rematch handshake over the existing data channel: the match restarts once
 // both sides have asked for it. The host picks the map so both agree.
 let rematch = { mine: false, theirs: false, map: null };
 
 function show(el, visible) {
   el.classList.toggle("hidden", !visible);
+}
+
+function normalizePlayerName(value) {
+  return String(value || "").replace(/\s+/g, " ").trim().slice(0, 24);
+}
+
+function readPlayerName() {
+  try { return normalizePlayerName(localStorage.getItem(PLAYER_NAME_KEY)); }
+  catch { return ""; }
+}
+
+function rememberPlayerName(name) {
+  playerName = normalizePlayerName(name);
+  try { localStorage.setItem(PLAYER_NAME_KEY, playerName); } catch {}
+}
+
+function setOnlineCount(count) {
+  ui.onlineCountValue.textContent = String(Math.max(0, Number(count) || 0));
+}
+
+function stopOnlineCount() {
+  clearTimeout(onlineCountTimer);
+  onlineCountTimer = null;
+}
+
+async function refreshOnlineCount() {
+  if (nameAction?.mode !== "online" || matchmaker) return;
+  try { setOnlineCount(await onlinePlayerCount()); } catch {}
+  if (nameAction?.mode === "online" && !matchmaker) {
+    onlineCountTimer = setTimeout(refreshOnlineCount, 2500);
+  }
+}
+
+function hideNamePrompt() {
+  stopOnlineCount();
+  show(ui.nameModal, false);
+  nameAction = null;
+}
+
+function openNamePrompt(mode, code = null) {
+  nameAction = { mode, code };
+  const copy = {
+    create: ["Создать игру", "Создать комнату"],
+    join: ["Войти в игру", "Войти"],
+    online: ["Играть онлайн", "Подключиться"],
+  }[mode];
+  ui.nameTitle.textContent = copy[0];
+  ui.nameSubmit.textContent = copy[1];
+  ui.nameSubmit.disabled = false;
+  ui.nameInput.disabled = false;
+  ui.nameInput.setCustomValidity("");
+  ui.nameInput.value = readPlayerName();
+  ui.matchmakingStatus.textContent = "";
+  show(ui.matchmakingStatus, false);
+  show(ui.onlineCount, mode === "online");
+  show(ui.nameModal, true);
+  if (mode === "online") refreshOnlineCount();
+  setTimeout(() => ui.nameInput.focus(), 0);
+}
+
+function positionPlayerNames() {
+  if (!view || !connection) return;
+  ui.ownName.textContent = connection.myName || playerName || "Игрок";
+  ui.opponentName.textContent = connection.peerName || "Соперник";
+  const own = view.receiverScreenPosition?.(mySide);
+  const foeSide = mySide === "top" ? "bottom" : "top";
+  const foe = view.receiverScreenPosition?.(foeSide);
+  if (own) {
+    ui.ownName.style.left = `${own.x}px`;
+    ui.ownName.style.top = `${Math.min(window.innerHeight - 18, own.y + 31)}px`;
+  }
+  if (foe) {
+    ui.opponentName.style.left = `${foe.x}px`;
+    ui.opponentName.style.top = `${Math.max(18, foe.y - 29)}px`;
+  }
 }
 
 /** Put the room code in the address bar, so the URL itself is the invite. */
@@ -141,6 +236,9 @@ function newConnection() {
     if (connection !== conn || running) return;
     ui.lobbyHint.textContent = "Соперник найден, устанавливаем связь…";
   });
+  conn.addEventListener("peername", () => {
+    if (connection === conn) positionPlayerNames();
+  });
   conn.addEventListener("peerlost", e => {
     if (connection !== conn) return;
     session?.pause(e.detail?.since);
@@ -157,6 +255,7 @@ function newConnection() {
     if (connection !== conn) return;
     try {
       if (!session) startMatch();
+      positionPlayerNames();
       session.connected();
     } catch (err) {
       console.error("match startup failed", err);
@@ -223,14 +322,81 @@ function maybeRematch() {
   session.connected();
 }
 
-async function createRoom() {
+async function beginMatchmaking(name) {
+  stopOnlineCount();
+  ui.nameInput.disabled = true;
+  ui.nameSubmit.disabled = true;
+  ui.nameSubmit.textContent = "Ищем соперника…";
+  ui.matchmakingStatus.textContent = "Вы в очереди. Подбираем соперника…";
+  show(ui.matchmakingStatus, true);
+
+  const queue = new Matchmaker();
+  matchmaker?.close();
+  matchmaker = queue;
+  queue.addEventListener("count", event => {
+    setOnlineCount(event.detail.online);
+    if (!queue.match) {
+      ui.matchmakingStatus.textContent = "Вы в очереди. Подбираем соперника…";
+    }
+  });
+  queue.addEventListener("error", event => {
+    if (matchmaker !== queue) return;
+    ui.matchmakingStatus.textContent = "Связь с очередью прервана. Повторяем попытку…";
+    if (event.detail?.message) console.warn("matchmaking", event.detail.message);
+  });
+  queue.addEventListener("matched", event => connectMatched(event.detail, queue));
+
+  try {
+    await queue.join(name);
+  } catch (err) {
+    if (matchmaker !== queue) return;
+    console.error("matchmaking startup failed", err);
+    queue.close();
+    matchmaker = null;
+    ui.nameInput.disabled = false;
+    ui.nameSubmit.disabled = false;
+    ui.nameSubmit.textContent = "Подключиться";
+    ui.matchmakingStatus.textContent = "Не удалось войти в очередь. Попробуйте ещё раз.";
+  }
+}
+
+async function connectMatched(room, queue) {
+  if (matchmaker !== queue || connection) return;
+  hideNamePrompt();
+  const conn = newConnection();
+  connection = conn;
+  mySide = room.role === "host" ? "bottom" : "top";
+  show(ui.menu, false);
+  show(ui.lobby, true);
+  show(ui.copyBtn, false);
+  ui.inviteCode.textContent = room.code;
+  ui.lobbyHint.textContent = "Соперник найден, устанавливаем связь…";
+  setUrlCode(room.code);
+  try {
+    await conn.acceptMatch(room);
+  } catch (err) {
+    if (connection !== conn || running) return;
+    console.error("matched room connection failed", err);
+    conn.close();
+    connection = null;
+    queue.close();
+    matchmaker = null;
+    clearUrlCode();
+    show(ui.lobby, false);
+    show(ui.menu, true);
+    show(ui.copyBtn, true);
+    toast("Не удалось подключиться к найденному сопернику.");
+  }
+}
+
+async function createRoom(name) {
   ui.createBtn.disabled = true;
   const conn = newConnection();
   connection = conn;
   try {
     mySide = "bottom";
     const mapIndex = Math.floor(Math.random() * MAPS.length);
-    await conn.host({ seed: Date.now() & 0xffff, map: mapIndex });
+    await conn.host({ seed: Date.now() & 0xffff, map: mapIndex, name });
     if (connection !== conn) return;
 
     // The address bar now carries the room, so the URL is itself the invite.
@@ -265,7 +431,7 @@ async function copyInvite() {
   }
 }
 
-async function joinRoom(code) {
+async function joinRoom(code, name = playerName) {
   const conn = newConnection();
   connection = conn;
   try {
@@ -282,10 +448,11 @@ async function joinRoom(code) {
       // Install the saved match before transport can emit readiness.
       conn.role = saved.role;
       conn.map = saved.map;
+      if (saved.myName) rememberPlayerName(saved.myName);
       if (saved.game) startMatch(saved.game);
       await conn.resume(saved);
     } else {
-      await conn.join(code);
+      await conn.join(code, { name });
     }
   } catch (err) {
     if (connection !== conn || running) return;
@@ -327,6 +494,9 @@ function startMatch(saved = null) {
   show(ui.menu, false);
   show(ui.over, false);
   show(ui.hud, true);
+  show(ui.playerLabels, true);
+  positionPlayerNames();
+  requestAnimationFrame(positionPlayerNames);
 
   session = new MatchSession(connection, {
     saved,
@@ -395,6 +565,7 @@ function endMatch(reason) {
   acceptingDrag = false;
   view.setInteractionEnabled(false);
   show(ui.hud, false);
+  show(ui.playerLabels, false);
   show(ui.over, true);
 
   // A rematch reuses the open data channel, so the invite link stays valid.
@@ -458,14 +629,45 @@ function init() {
     getSession: () => session,
   };
 
-  ui.createBtn.addEventListener("click", createRoom);
+  ui.createBtn.addEventListener("click", () => openNamePrompt("create"));
+  ui.onlineBtn.addEventListener("click", () => openNamePrompt("online"));
   ui.copyBtn.addEventListener("click", copyInvite);
   ui.joinBtn.addEventListener("click", () => {
     const code = ui.joinCode.value.trim();
-    if (code) joinRoom(code);
+    if (code) openNamePrompt("join", code.toUpperCase());
   });
   ui.joinCode.addEventListener("keydown", (e) => {
     if (e.key === "Enter") ui.joinBtn.click();
+  });
+
+  ui.nameForm.addEventListener("submit", event => {
+    event.preventDefault();
+    const action = nameAction;
+    const name = normalizePlayerName(ui.nameInput.value);
+    if (!action || !name) {
+      ui.nameInput.setCustomValidity("Введите имя");
+      ui.nameInput.reportValidity();
+      return;
+    }
+    ui.nameInput.setCustomValidity("");
+    rememberPlayerName(name);
+    if (action.mode === "online") {
+      beginMatchmaking(name);
+      return;
+    }
+    hideNamePrompt();
+    if (action.mode === "create") createRoom(name);
+    else joinRoom(action.code, name);
+  });
+
+  ui.nameInput.addEventListener("input", () => ui.nameInput.setCustomValidity(""));
+  ui.nameCancel.addEventListener("click", () => {
+    const wasInvite = nameAction?.mode === "join" && Boolean(codeFromLocation());
+    matchmaker?.close();
+    matchmaker = null;
+    hideNamePrompt();
+    if (wasInvite) clearUrlCode();
+    show(ui.menu, true);
   });
 
   ui.cancelBtn.addEventListener("click", () => {
@@ -476,7 +678,10 @@ function init() {
     running = false;
     connection?.close();
     connection = null;
+    matchmaker?.close();
+    matchmaker = null;
     show(ui.lobby, false);
+    show(ui.playerLabels, false);
     show(ui.menu, true);
     ui.createBtn.disabled = false;
     show(ui.copyBtn, true);
@@ -491,8 +696,11 @@ function init() {
     running = false;
     connection?.close();
     connection = null;
+    matchmaker?.close();
+    matchmaker = null;
     show(ui.over, false);
     show(ui.hud, false);
+    show(ui.playerLabels, false);
     show(ui.menu, true);
     ui.createBtn.disabled = false;
     show(ui.copyBtn, true);
@@ -504,10 +712,18 @@ function init() {
   ui.againBtn.addEventListener("click", requestRematch);
 
   // An invite link lands here as /CODE (older links used ?game= or ?join=).
+  window.addEventListener("resize", positionPlayerNames);
+
   const code = codeFromLocation();
   if (code) {
     ui.joinCode.value = code;
-    joinRoom(code);
+    const saved = readSession(code);
+    if (saved?.token) {
+      if (saved.myName) rememberPlayerName(saved.myName);
+      joinRoom(code, saved.myName || playerName || "Игрок");
+    } else {
+      openNamePrompt("join", code);
+    }
   }
 }
 

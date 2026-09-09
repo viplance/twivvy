@@ -103,6 +103,38 @@ body {
   animation: round-title-cycle 3s both;
 }
 
+.player-labels {
+  position: fixed;
+  inset: 0;
+  z-index: 12;
+  pointer-events: none;
+}
+
+.receiver-name {
+  position: fixed;
+  max-width: min(72vw, 320px);
+  padding: 5px 11px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  background: rgba(11, 16, 32, 0.78);
+  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.32);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transform: translate(-50%, -50%);
+}
+
+.opponent-name {
+  color: var(--foe);
+}
+
+.own-name {
+  color: var(--own);
+}
+
 @keyframes round-title-cycle {
   0% {
     opacity: 0;
@@ -154,6 +186,18 @@ body {
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
   backdrop-filter: blur(16px);
   text-align: center;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgba(5, 8, 18, 0.62);
+  backdrop-filter: blur(5px);
+}
+
+.modal-backdrop .modal {
+  z-index: 51;
 }
 
 .panel h1 {
@@ -214,6 +258,48 @@ body {
   color: var(--muted);
   height: 42px;
   font-weight: 500;
+}
+
+.name-field {
+  display: block;
+  margin-top: 16px;
+  color: var(--muted);
+  font-size: 13px;
+  text-align: left;
+}
+
+.name-field span {
+  display: block;
+  margin: 0 0 6px 3px;
+}
+
+.name-field input {
+  width: 100%;
+  height: 50px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  outline: none;
+  background: rgba(0, 0, 0, 0.28);
+  color: var(--text);
+  padding: 0 14px;
+  font: inherit;
+  font-size: 17px;
+}
+
+.name-field input:focus {
+  border-color: rgba(47, 214, 195, 0.7);
+  box-shadow: 0 0 0 3px rgba(47, 214, 195, 0.12);
+}
+
+.online-count {
+  margin: 14px 0 2px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.online-count strong {
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
 }
 
 .divider {
