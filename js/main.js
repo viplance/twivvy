@@ -7,16 +7,16 @@ import {
   DECIDE_MS,
   RESOLVE_MS,
   TICKS,
-} from "./rules.js?v=20260909-collide1";
-import { BoardView } from "./view.js?v=20260909-collide1";
+} from "./rules.js?v=20260909-nopulse1";
+import { BoardView } from "./view.js?v=20260909-nopulse1";
 import {
   Connection,
   readSession,
   basePath,
   codeFromLocation,
-} from "./net.js?v=20260909-collide1";
+} from "./net.js?v=20260909-nopulse1";
 
-import { MatchSession } from "./session.js?v=20260909-collide1";
+import { MatchSession } from "./session.js?v=20260909-nopulse1";
 
 const $ = (id) => document.getElementById(id);
 

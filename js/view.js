@@ -17,7 +17,7 @@ import {
   RIGHT,
   DOWN,
   LEFT,
-} from "./rules.js?v=20260909-collide1";
+} from "./rules.js?v=20260909-nopulse1";
 
 const CELL = 1;
 const GAP = 0.18; // visible gap between platforms, so groups read as units
@@ -1018,8 +1018,6 @@ export class BoardView {
 
       // Land exactly back on the cell centre, whatever the easing did.
       for (const { mesh, base } of lunges) mesh.position.copy(base);
-
-      for (const d of delivered) this.pulseReceiver(d.side);
     }
 
     this.syncBalls(matchAfter, delivered);
@@ -1085,13 +1083,6 @@ export class BoardView {
       requestAnimationFrame(step);
     };
     requestAnimationFrame(step);
-  }
-
-  pulseReceiver(side) {
-    const mesh = this.receivers[side];
-    const base = mesh.material.emissive.getHex();
-    mesh.material.emissive.setHex(0xffffff);
-    setTimeout(() => mesh.material.emissive.setHex(base), 220);
   }
 
   /**
