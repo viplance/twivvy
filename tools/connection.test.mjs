@@ -137,6 +137,7 @@ async function controllerHarness({ pathname = "/", joinError = null, brokenView 
           contains(name) { return classes.has(name); },
         },
         style: {},
+        setAttribute(name, value) { this[name] = value; },
         value: "",
         disabled: false,
         addEventListener(type, callback) {
@@ -160,6 +161,7 @@ async function controllerHarness({ pathname = "/", joinError = null, brokenView 
   let currentSession = null;
   let hostedName = null;
   let queuedName = null;
+  const sounds = [];
   class FakeConnection extends EventTarget {
     constructor() { super(); conn = this; this.code = "TEST"; this.map = 0; }
     host({ name } = {}) {
@@ -176,6 +178,12 @@ async function controllerHarness({ pathname = "/", joinError = null, brokenView 
     inviteLink() { return "https://example.test/TEST"; }
   }
   const sandbox = {
+    GameAudio: class {
+      enabled = false;
+      setEnabled(enabled) { this.enabled = enabled; }
+      unlock() {}
+      play(name) { sounds.push(name); }
+    },
     Connection: FakeConnection,
     Matchmaker: class extends EventTarget {
       async join(name) { queuedName = name; }
@@ -196,6 +204,7 @@ async function controllerHarness({ pathname = "/", joinError = null, brokenView 
       remaining() { return this.decideMs; }
     },
     BoardView: class {
+      async playTick() {}
       start() {}
       setPerspective() { starts++; }
       clearCollected() {}
@@ -230,6 +239,8 @@ async function controllerHarness({ pathname = "/", joinError = null, brokenView 
     finishHost: () => finishHost(), getStarts: () => starts,
     getHostedName: () => hostedName,
     getQueuedName: () => queuedName,
+    sounds,
+    resolveEvent: event => sessionCallbacks.resolved(event, {}, {}),
     getStoredName: () => storedName,
     getJoinedCode: () => joinedCode,
     dispatch(id, type, event = {}) { getElement(id).dispatch(type, event); },
@@ -322,4 +333,29 @@ test("a new decision round shows its three-second centered title", async () => {
   assert.equal(title.classList.contains("playing"), true);
   app.finishHost();
   await creating;
+});
+
+test('sound button reflects and toggles the audio preference', async () => {
+  const app = await controllerHarness();
+  const button = app.getElement('sound-toggle');
+  assert.equal(button['aria-pressed'], 'false');
+  assert.equal(button.title, 'Включить звук');
+  app.dispatch('sound-toggle', 'click');
+  assert.equal(button['aria-pressed'], 'true');
+  assert.equal(button.title, 'Выключить звук');
+  app.dispatch('sound-toggle', 'click');
+  assert.equal(button['aria-pressed'], 'false');
+});
+
+test("delivery sound plays for either receiver, but not ordinary movement", async () => {
+  const app = await controllerHarness();
+  const creating = vm.runInContext('createRoom()', app.sandbox);
+  app.getConnection().dispatchEvent(new Event('open'));
+  app.finishHost();
+  await creating;
+  for (const side of ['top', 'bottom']) {
+    await app.resolveEvent({ delivered: [{ id: 1, side }] });
+  }
+  await app.resolveEvent({ delivered: [] });
+  assert.deepEqual(app.sounds, ['delivery', 'delivery']);
 });

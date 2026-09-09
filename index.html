@@ -13,7 +13,7 @@
     />
     <meta name="theme-color" content="#0b1020" />
     <!-- Root-absolute so assets resolve the same from / and from /CODE. -->
-    <link rel="stylesheet" href="/css/style.css?v=20260909-names-layout2" />
+    <link rel="stylesheet" href="/css/style.css?v=20260909-sound2" />
     <link
       rel="icon"
       href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='26' font-size='26'>🌀</text></svg>"
@@ -28,6 +28,13 @@
   </head>
   <body>
     <canvas id="scene"></canvas>
+    <button id="sound-toggle" type="button" aria-label="Звук" aria-pressed="false" title="Включить звук">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M11 5 6 9H3v6h3l5 4Z" />
+        <path class="sound-off" d="m16 9 6 6m0-6-6 6" />
+        <path class="sound-on" d="M15 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14" />
+      </svg>
+    </button>
 
     <!-- HUD -->
     <div id="hud" class="hidden">
@@ -124,6 +131,6 @@
 
     <div id="toast" class="hidden"></div>
 
-    <script type="module" src="/js/main.js?v=20260909-names-layout2"></script>
+    <script type="module" src="/js/main.js?v=20260909-sound2"></script>
   </body>
 </html>

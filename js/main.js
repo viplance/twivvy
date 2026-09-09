@@ -7,8 +7,8 @@ import {
   DECIDE_MS,
   RESOLVE_MS,
   TICKS,
-} from "./rules.js?v=20260909-names-layout2";
-import { BoardView } from "./view.js?v=20260909-names-layout2";
+} from "./rules.js?v=20260909-sound2";
+import { BoardView } from "./view.js?v=20260909-sound2";
 import {
   Connection,
   Matchmaker,
@@ -16,9 +16,10 @@ import {
   readSession,
   basePath,
   codeFromLocation,
-} from "./net.js?v=20260909-names-layout2";
+} from "./net.js?v=20260909-sound2";
 
-import { MatchSession } from "./session.js?v=20260909-names-layout2";
+import { MatchSession } from "./session.js?v=20260909-sound2";
+import { GameAudio } from "./audio.js?v=20260909-sound2";
 
 const $ = (id) => document.getElementById(id);
 
@@ -59,6 +60,7 @@ const ui = {
 
 const PLAYER_NAME_KEY = "twivvy-player-name";
 let view = null;
+let sound = null;
 let connection = null;
 let matchmaker = null;
 let match = null;
@@ -538,6 +540,8 @@ function startMatch(saved = null) {
       selection = null;
       animation = view.playTick(event, before, after, RESOLVE_MS);
       await animation;
+      // Both receivers use the same effect, once when the balls arrive.
+      if (event.delivered.length) sound?.play('delivery');
       view.setCooldown(after.cooldown);
     },
     finished(reason) {
@@ -612,9 +616,26 @@ function finishPlatformDrag(platform, dir) {
 // ---------------------------------------------------------------------------
 
 function init() {
+  sound = new GameAudio();
+  const soundToggle = $('sound-toggle');
+  const updateSoundToggle = () => {
+    soundToggle.setAttribute('aria-pressed', String(sound.enabled));
+    soundToggle.title = sound.enabled ? 'Выключить звук' : 'Включить звук';
+  };
+  updateSoundToggle();
+  soundToggle.addEventListener('click', () => {
+    sound.setEnabled(!sound.enabled);
+    updateSoundToggle();
+  });
+  // Resume synchronously inside a trusted gesture, including Safari's release
+  // gesture, so later receiver arrivals can play without another tap.
+  for (const type of ['pointerdown', 'pointerup', 'keydown']) {
+    window.addEventListener(type, () => sound.unlock(), { capture: true, passive: true });
+  }
   view = new BoardView($("scene"), {
     onPlatformDragStart: beginPlatformDrag,
     onPlatformDrag: finishPlatformDrag,
+    onPlatformRelease: () => sound.play('turn'),
   });
   view.start();
 

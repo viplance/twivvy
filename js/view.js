@@ -14,7 +14,7 @@ import {
   RIGHT,
   DOWN,
   LEFT,
-} from "./rules.js?v=20260909-names-layout2";
+} from "./rules.js?v=20260909-sound2";
 
 const CELL = 1;
 const GAP = 0.18; // visible gap between platforms, so groups read as units
@@ -104,10 +104,11 @@ function makeTrackMesh(mask, material) {
 }
 
 export class BoardView {
-  constructor(canvas, { onPlatformDragStart, onPlatformDrag }) {
+  constructor(canvas, { onPlatformDragStart, onPlatformDrag, onPlatformRelease }) {
     this.canvas = canvas;
     this.onPlatformDragStart = onPlatformDragStart;
     this.onPlatformDrag = onPlatformDrag;
+    this.onPlatformRelease = onPlatformRelease;
     this.flipped = false;
     this.ballMeshes = new Map();
     this.platformGroups = [];
@@ -545,7 +546,7 @@ export class BoardView {
 
     const finish = (event, cancelled = false) => {
       if (!this.drag || event.pointerId !== this.drag.pointerId) return;
-      this._finishDrag(cancelled);
+      this._finishDrag(cancelled, true);
       event.preventDefault();
     };
     this.canvas.addEventListener("pointerup", (event) => finish(event));
@@ -626,7 +627,7 @@ export class BoardView {
     return returning.promise;
   }
 
-  _finishDrag(cancelled = false) {
+  _finishDrag(cancelled = false, released = false) {
     if (!this.drag || !this.preview) return;
     const { pointerId, platform, tapResets, moved } = this.drag;
     const threshold = Math.PI / 12;
@@ -661,6 +662,7 @@ export class BoardView {
     });
     // Commit at once, even if the deadline falls during the settling animation.
     this.onPlatformDrag(platform, dir);
+    if (released && dir !== null) this.onPlatformRelease?.();
     return snap.promise;
   }
 

@@ -49,6 +49,23 @@ function fixture(angle) {
   return { view, pointer, commands, animations, ball, base };
 }
 
+test("turn sound fires on a committed pointer release, not a reset, cancellation or deadline", () => {
+  for (const [angle, cancelled, released, expected] of [
+    [Math.PI / 2, false, true, 1],
+    [-Math.PI / 2, false, true, 1],
+    [0, false, true, 0],
+    [Math.PI / 2, true, true, 0],
+    [Math.PI / 2, false, false, 0],
+  ]) {
+    const { view } = fixture(angle);
+    let sounds = 0;
+    view.onPlatformRelease = () => sounds++;
+    view.drag = { pointerId: 1, platform: 0, moved: true };
+    view._finishDrag(cancelled, released);
+    assert.equal(sounds, expected);
+  }
+});
+
 for (const angle of [-Math.PI / 2, Math.PI / 2]) {
   test(`tap returns smoothly from ${angle}, carrying the ball and its arrow backwards`, async () => {
     const { view, pointer, commands, animations, ball, base } = fixture(angle);
