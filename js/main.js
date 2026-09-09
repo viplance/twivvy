@@ -7,8 +7,8 @@ import {
   DECIDE_MS,
   RESOLVE_MS,
   TICKS,
-} from "./rules.js?v=20260909-matchmaking1";
-import { BoardView } from "./view.js?v=20260909-matchmaking1";
+} from "./rules.js?v=20260909-names-layout2";
+import { BoardView } from "./view.js?v=20260909-names-layout2";
 import {
   Connection,
   Matchmaker,
@@ -16,9 +16,9 @@ import {
   readSession,
   basePath,
   codeFromLocation,
-} from "./net.js?v=20260909-matchmaking1";
+} from "./net.js?v=20260909-names-layout2";
 
-import { MatchSession } from "./session.js?v=20260909-matchmaking1";
+import { MatchSession } from "./session.js?v=20260909-names-layout2";
 
 const $ = (id) => document.getElementById(id);
 
@@ -147,13 +147,15 @@ function positionPlayerNames() {
   const own = view.receiverScreenPosition?.(mySide);
   const foeSide = mySide === "top" ? "bottom" : "top";
   const foe = view.receiverScreenPosition?.(foeSide);
+  const desktop = window.innerWidth >= 900 && window.innerHeight >= 600;
+  const gap = desktop ? 12 : 6;
   if (own) {
     ui.ownName.style.left = `${own.x}px`;
-    ui.ownName.style.top = `${Math.min(window.innerHeight - 18, own.y + 31)}px`;
+    ui.ownName.style.top = `${own.bottom + gap}px`;
   }
   if (foe) {
     ui.opponentName.style.left = `${foe.x}px`;
-    ui.opponentName.style.top = `${Math.max(18, foe.y - 29)}px`;
+    ui.opponentName.style.top = `${foe.top - gap + (desktop ? 50 : 0)}px`;
   }
 }
 

@@ -14,7 +14,7 @@ import {
   RIGHT,
   DOWN,
   LEFT,
-} from "./rules.js?v=20260909-matchmaking1";
+} from "./rules.js?v=20260909-names-layout2";
 
 const CELL = 1;
 const GAP = 0.18; // visible gap between platforms, so groups read as units
@@ -112,7 +112,7 @@ export class BoardView {
     this.ballMeshes = new Map();
     this.platformGroups = [];
     this.cellGroups = [];
-    this.animations = [];
+    this.animations = new Set(); // in-flight _animate runs, so they can be cancelled
     this.interactionEnabled = false;
     this.drag = null;
     this.preview = null;
@@ -330,7 +330,7 @@ export class BoardView {
     this.receivers[foeSide].material.emissive.setHex(0x5c2418);
   }
 
-  /** Project a receiver centre into viewport pixels for the DOM name labels. */
+  /** Project the receiver and its outer rim, including room for collected balls. */
   receiverScreenPosition(side) {
     const receiver = this.receivers[side];
     if (!receiver) return null;
@@ -340,9 +340,19 @@ export class BoardView {
     receiver.getWorldPosition(point);
     point.project(this.camera);
     const rect = this.canvas.getBoundingClientRect();
+    const edgeZ = (side === "top" ? -1 : 1) * (SIZE * CELL + 2 * GAP + 1.9) / 2;
+    const ys = [];
+    for (const z of [receiver.position.z - 0.275, receiver.position.z + 0.275, edgeZ]) {
+      for (const y of [-0.55, 0.5]) {
+        const edge = this.pivot.localToWorld(new THREE.Vector3(0, y, z)).project(this.camera);
+        ys.push(rect.top + (1 - edge.y) * rect.height / 2);
+      }
+    }
     return {
       x: rect.left + (point.x + 1) * rect.width / 2,
       y: rect.top + (1 - point.y) * rect.height / 2,
+      top: Math.min(...ys),
+      bottom: Math.max(...ys),
     };
   }
 
@@ -350,6 +360,8 @@ export class BoardView {
     const width = this.canvas.clientWidth || window.innerWidth;
     const height = this.canvas.clientHeight || window.innerHeight;
     this.renderer.setSize(width, height, false);
+    // Clear the previous framing before measuring a resized viewport.
+    this.camera.clearViewOffset();
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
 
@@ -375,16 +387,16 @@ export class BoardView {
     };
     positionCamera();
 
-    // Perspective enlarges the near edge, so on a wide desktop the estimate
-    // above can push the local receiver off-screen. Fit the projected corners
-    // instead; mobile framing is unchanged.
-    if (width >= 900 && height >= 600) {
-      const margin = 30;
+    const desktop = width >= 900 && height >= 600;
+    const lift = desktop ? Math.min(64, height * 0.045) : 8;
+    // Fit the projected board with space for both names after lifting it.
+    {
+      const margin = desktop ? 30 : 12;
       const halfW = width / 2;
       const halfH = height / 2;
       const corners = [];
       for (const x of [-boardW / 2, boardW / 2]) {
-        for (const y of [-0.55, 0.1]) {
+        for (const y of [-0.55, 0.5]) {
           for (const z of [-boardD / 2, boardD / 2]) {
             corners.push(new THREE.Vector3(x, y, z));
           }
@@ -408,7 +420,7 @@ export class BoardView {
       };
       const fits = ({ minX, maxX, minY, maxY }) =>
         minX >= margin && maxX <= width - margin &&
-        minY >= margin && maxY <= height - margin;
+        minY >= margin + 40 + lift && maxY <= height - margin - 40 + lift;
 
       if (!fits(projectedBounds())) {
         const lowStart = dist;
@@ -432,7 +444,9 @@ export class BoardView {
       }
     }
 
-    this.camera.clearViewOffset();
+    // A projection offset moves the board without changing its perspective;
+    // raycasting and projected name anchors use this same camera.
+    this.camera.setViewOffset(width, height, 0, lift, width, height);
     this.camera.updateProjectionMatrix();
   }
 
@@ -597,6 +611,9 @@ export class BoardView {
     const returning = { preview };
     this._previewReturns.set(preview.platform, returning);
     returning.promise = this._animate(240, (t) => {
+      // Also stop once a resolve has taken the preview over, or this would keep
+      // writing ball positions while playTick rotates the same platform.
+      if (this._resolving) return;
       if (this._previewReturns.get(preview.platform) !== returning) return;
       const progress = 1 - Math.pow(1 - t, 3);
       this._applyPreviewState(preview, startAngle * (1 - progress));
@@ -631,7 +648,9 @@ export class BoardView {
     const snap = {};
     this._previewSnap = snap;
     snap.promise = this._animate(240, (t) => {
-      // A new drag/reset may replace this preview before the animation ends.
+      // A new drag/reset may replace this preview before the animation ends,
+      // and a resolve may take over the board entirely.
+      if (this._resolving) return;
       if (this._previewSnap !== snap || this.preview !== preview) return;
       const progress = 1 - Math.pow(1 - t, 3);
       this._applyPreviewAngle(startAngle + (targetAngle - startAngle) * progress);
@@ -862,11 +881,34 @@ export class BoardView {
    */
   async playTick(event, matchBefore, matchAfter, resolveMs) {
     // Finish a drop at the deadline before adding the opponent's rotation.
-    const settling = [
-      this._previewSnap?.promise,
-      ...[...(this._previewReturns?.values() || [])].map(item => item.promise),
-    ].filter(Boolean);
-    await Promise.all(settling);
+    //
+    // Re-checked in a loop, not sampled once: _finishDrag commits the move and
+    // starts its 240 ms settle in the same breath, so a release right on the
+    // deadline can begin settling after this await was set up. Waiting once let
+    // that animation keep writing ball positions while the platforms turned.
+    // The bound stops a stream of new drags from holding the tick open; anything
+    // still running is finished outright below.
+    for (let guard = 0; guard < 4; guard++) {
+      const settling = [
+        this._previewSnap?.promise,
+        ...[...(this._previewReturns?.values() || [])].map(item => item.promise),
+      ].filter(Boolean);
+      if (!settling.length) break;
+      await Promise.all(settling);
+    }
+    // Only one writer from here on: claim the board, then land any straggler on
+    // its final state so the rotation starts from a defined angle.
+    this._resolving = true;
+    this._cancelAnimations();
+    try {
+      await this._playTickBody(event, matchBefore, matchAfter, resolveMs);
+    } finally {
+      // Never leave the flag set: it would mute every later preview animation.
+      this._resolving = false;
+    }
+  }
+
+  async _playTickBody(event, matchBefore, matchAfter, resolveMs) {
     const rotateMs = Math.min(330, resolveMs * 0.4);
     const moveMs = resolveMs - rotateMs;
     // Keep the local drag: animate only the rest, mainly the opponent's turn.
@@ -1076,17 +1118,25 @@ export class BoardView {
   /**
    * Run `step(0..1)` over `duration`. A hidden tab delivers no frames, so a
    * timer guarantees the final state and an always-settling promise.
+   *
+   * Every run registers in `this.animations` so it can be cancelled. Two
+   * animations writing the same meshes is the bug this prevents: a drag settling
+   * at the deadline used to keep moving balls while the resolve turned their
+   * platform. `_cancelAnimations` finishes the stragglers before a tick starts.
    */
   _animate(duration, step) {
     return new Promise((resolve) => {
       const start = performance.now();
       let done = false;
 
-      const finish = () => {
+      const finish = (applyFinalState = true) => {
         if (done) return;
         done = true;
         clearTimeout(guard);
-        step(1);
+        this.animations?.delete(running);
+        // Land on the final state so a cancelled animation leaves a clean,
+        // predictable position rather than whatever mid-frame value it held.
+        if (applyFinalState) step(1);
         resolve();
       };
 
@@ -1098,9 +1148,23 @@ export class BoardView {
         else finish();
       };
 
+      // Cancelling clears the guard too, or it would fire step(1) later and
+      // move meshes after something else had taken over.
+      const running = { finish };
+      this.animations?.add(running);
       const guard = setTimeout(finish, duration + 120);
       requestAnimationFrame(frame);
     });
+  }
+
+  /**
+   * Settle every animation still running, so only one writer touches the meshes.
+   * Each lands on its final state, leaving a defined angle to continue from.
+   */
+  _cancelAnimations() {
+    if (!this.animations) return;
+    for (const running of [...this.animations]) running.finish(true);
+    this.animations.clear();
   }
 
   start() {
