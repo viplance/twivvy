@@ -153,8 +153,8 @@ test("balls spawn only on the scheduled ticks, at most 12 per match", () => {
     assert.ok(ev.spawned.length <= 2, "at most one ball per source");
     totalSpawned += ev.spawned.length;
   }
-  // Balls no longer expire, so a ball still standing on a source cell blocks
-  // that source's next spawn. 12 is the ceiling, not a guarantee.
+  // Balls never expire, so one parked on a source blocks its next spawn:
+  // 12 is a ceiling, not a guarantee.
   assert.ok(totalSpawned <= 12, `spawned ${totalSpawned}, expected at most 12`);
   assert.ok(totalSpawned > 0, "some balls must spawn");
 });
@@ -167,10 +167,8 @@ test("spawn events carry the source cell for the view", () => {
     assert.ok(Number.isInteger(s.id), "spawn has a ball id");
     assert.ok(Number.isInteger(s.row) && Number.isInteger(s.col), "has a cell");
   }
-  // The event reports where the ball ENTERED the board. The ball may already
-  // have moved on within the same tick, so this is the origin, not its
-  // end-of-tick position — that is what the spawn animation needs.
-  // Sources are the two fixed centre cells, never a rotating platform.
+  // The origin, not the end-of-tick position: the ball may already have moved
+  // on, and the spawn animation needs where it entered.
   const cells = ev.spawned.map(s => `${s.row},${s.col}`).sort();
   assert.deepEqual(cells, ["2,2", "3,3"]);
 });
@@ -194,8 +192,7 @@ test("a spawned ball only ever rolls out along a port its piece has", () => {
 });
 
 test("spawn direction is drawn from the available ports, not a fixed order", () => {
-  // A piece open on all four sides must produce every direction over time,
-  // roughly evenly — otherwise the ball always leaves the same way.
+  // A four-way piece must produce every direction, roughly evenly.
   const counts = [0, 0, 0, 0];
   for (let tick = 1; tick <= 2000; tick++) {
     for (let si = 0; si < SOURCES.length; si++) {
@@ -221,8 +218,7 @@ test("spawn direction never leaves along a port the piece lacks", () => {
 });
 
 test("the random spawn direction is identical on both peers", () => {
-  // The two clients only exchange commands; they must draw the same direction
-  // from the same log, or their boards diverge.
+  // Peers exchange only commands, so the same log must draw the same direction.
   const log = Array.from({ length: TICKS }, (_, i) => ({ platform: (i * 5) % 9, dir: i % 2 ? 1 : -1 }));
   const peerA = createMatch(2);
   const peerB = createMatch(2);
@@ -322,8 +318,7 @@ test("a ball reverses through the other port of a corner piece", () => {
 
 test("a ball entering a corner leaves by the far port", () => {
   const m = createMatch(0);
-  // Away from the two spawn sources at (2,2) and (3,3): a ball spawning into
-  // the same cell would block this one under the one-ball-per-cell rule.
+  // Away from the sources at (2,2)/(3,3), or a spawn would block this ball.
   m.cells[0][0] = PIECE.EW;   // exits RIGHT
   m.cells[0][1] = PIECE.NW;   // has LEFT and UP -> enters LEFT, exits UP
   m.balls = [{ id: 5, row: 0, col: 0, exit: RIGHT, life: 5 }];
@@ -400,8 +395,7 @@ test("two balls heading into each other reverse instead of swapping cells", () =
 
 test("rotating a platform carries the ball and its heading", () => {
   const m = createMatch(0);
-  // Ball at platform 0 local (0,0), heading UP. One CW turn carries it to
-  // local (0,1) heading RIGHT, then it rolls onto the adjacent platform.
+  // Local (0,0) heading UP: one CW turn carries it to (0,1) heading RIGHT.
   m.tick = 1;
   m.cells = m.cells.map(r => r.map(() => PIECE.EMPTY));
   m.cells[0][0] = PIECE.NS;
@@ -424,8 +418,7 @@ test("rotating a platform carries the ball and its heading", () => {
 
 test("a ball never expires: only delivery takes it off the board", () => {
   const m = createMatch(0);
-  // A ball trapped on horizontal tracks can never reach either receiver and
-  // would previously have been removed once its lifetime ran out.
+  // Trapped on horizontal tracks: unreachable receivers, formerly expired.
   m.cells = m.cells.map(r => r.map(() => PIECE.EW));
   m.balls = [{ id: 3, row: 2, col: 0, exit: LEFT }];
 

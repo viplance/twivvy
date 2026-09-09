@@ -302,8 +302,8 @@ function sanitizeCandidates(list) {
 function isExpired(room) {
   const created = room.createdAt?.toMillis?.() ?? 0;
   if (room.protocol === 2) {
-    // Active games have no absolute lifetime. Each occupied seat has its own
-    // grace period; the remaining player's heartbeat cannot extend it.
+    // No absolute lifetime: each seat has its own grace period, and the other
+    // player's heartbeat cannot extend it.
     const now = Date.now();
     const host = room.hostAbsentAt ?? (room.hostSeen + 10_000);
     const guest = room.guestAbsentAt ?? ((room.guestSeen ?? created) + 10_000);
@@ -425,16 +425,13 @@ async function joinRoom(req, res, code) {
         return { status: 409, body: { error: "This seat is reserved. Return using the original browser." } };
       }
 
-      // The seat is reclaimable: a guest who reloaded the page lost their
-      // token, and refusing them would make the invite link a one-shot. The
-      // newest arrival holds the seat. Their old ICE candidates and answer
-      // belong to a dead peer connection, so clear them and ask the host for
-      // a fresh offer.
+      // Reclaimable seat: a guest who reloaded lost their token, and refusing
+      // them would make the invite one-shot. Newest arrival holds it; their old
+      // answer and candidates are dead, so clear them and ask for a new offer.
       const rejoin = Boolean(room.guestToken);
 
-      // On a first join everything the host published is still valid, so keep
-      // it. Only a rejoin invalidates the handshake: the host will replace the
-      // offer and its candidates for the new epoch.
+      // A first join keeps everything the host published; only a rejoin
+      // invalidates the handshake for the new epoch.
       const reset = rejoin
         ? { answer: null, guestCandidates: [], hostCandidates: [] }
         : {};
@@ -463,8 +460,7 @@ async function joinRoom(req, res, code) {
           rejoin,
           hostName: room.hostName || "Игрок",
           guestName,
-          // A stale offer would carry the previous connection's ICE
-          // credentials; the host publishes a new one for this epoch.
+          // A stale offer carries dead ICE credentials; the host republishes.
           offer: rejoin || room.protocol === 2 ? null : room.offer || null,
         },
       };

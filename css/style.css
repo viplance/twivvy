@@ -56,7 +56,7 @@ body {
   pointer-events: none;
 }
 
-/* Score counters were removed: delivered balls stay in the receivers on the
+/* No score counters: delivered balls stay in the receivers on the
    board, so the trays themselves show who has won how many. */
 
 .timer-row {
@@ -213,6 +213,9 @@ body {
 #menu {
   max-height: calc(100dvh - var(--safe-top) - var(--safe-bottom) - 28px);
   overflow-y: auto;
+  /* Vertical scrolling is intended on a short screen; horizontal never is.
+     `auto` on one axis makes the other scrollable too, so state it. */
+  overflow-x: hidden;
 }
 
 .panel h2 {
@@ -329,10 +332,15 @@ body {
 .join-row {
   display: flex;
   gap: 8px;
+  /* The row must never push the panel wider than the screen. */
+  max-width: 100%;
 }
 
 .join-row input {
-  flex: 1;
+  /* Flex defaults to min-width:auto, which refuses to shrink below eight
+     letter-spaced characters — that overflowed the panel on a 320px phone. */
+  flex: 1 1 0;
+  min-width: 0;
   height: 50px;
   border-radius: 14px;
   border: 1px solid var(--line);
@@ -352,8 +360,13 @@ body {
 }
 
 .join-row button {
-  width: 96px;
+  /* A fixed width starves the input; shrink to a comfortable tap target. */
+  width: auto;
+  flex: 0 1 96px;
+  min-width: 72px;
+  padding: 0 12px;
   margin-top: 0;
+  white-space: nowrap;
 }
 
 .code {
@@ -418,5 +431,18 @@ body {
 @media (max-width: 380px) {
   .code {
     font-size: 28px;
+  }
+
+  /* Only ~246px of content box on a 320px phone: trim type and spacing so all
+     eight characters stay visible. */
+  .join-row input {
+    font-size: 17px;
+    letter-spacing: 0.14em;
+    padding: 0 8px;
+  }
+
+  .join-row button {
+    flex-basis: 82px;
+    font-size: 15px;
   }
 }

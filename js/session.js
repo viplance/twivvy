@@ -12,8 +12,8 @@ export function freshRound(remaining) {
     peerHash: null, peerReveal: null };
 }
 
-/** Rebuild, don't trust a remote board. History must extend our exact prefix;
- * an interrupted resolve may add at most one committed, verifiable round. */
+/** Rebuild rather than trust a remote board: history must extend our exact
+ * prefix, and an interrupted resolve may add at most one verifiable round. */
 export async function reconcile(local, remote, side, decideMs = DECIDE_MS) {
   if (!remote || remote.id !== local.id || remote.map !== local.map ||
       !Array.isArray(remote.log) || remote.log.length > TICKS ||
@@ -98,7 +98,7 @@ export class MatchSession {
 
   pause(since = Date.now()) {
     if (this.ended) return;
-    // Disabling interaction finishes an in-flight drag and persists its choice.
+    // Disabling interaction settles any in-flight drag and saves its choice.
     this.callbacks.lock?.();
     this.round.remaining = this.remaining();
     this.pausedAt ??= since;

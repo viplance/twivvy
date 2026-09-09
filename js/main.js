@@ -74,8 +74,8 @@ let announcedRound = 0;
 let nameAction = null;
 let onlineCountTimer = null;
 let playerName = readPlayerName();
-// Rematch handshake over the existing data channel: the match restarts once
-// both sides have asked for it. The host picks the map so both agree.
+// Rematch over the open data channel: restarts once both sides ask. The host
+// picks the map so the two cannot disagree.
 let rematch = { mine: false, theirs: false, map: null };
 
 function show(el, visible) {
@@ -184,9 +184,8 @@ function stopTimerAnimation() {
   timerFrame = null;
 }
 
-// MatchSession checks the authoritative deadline at a deliberately modest
-// cadence. The HUD reads that same deadline every painted frame so the bar
-// moves continuously without changing any game timing or network behaviour.
+// MatchSession polls the authoritative deadline slowly; the HUD reads the same
+// deadline every frame, so the bar is smooth without affecting timing.
 function animateTimer() {
   timerFrame = null;
   if (!running || session?.phase !== "decide") return;
@@ -213,8 +212,7 @@ function announceRound(round) {
   ui.roundTitle.textContent = `Раунд ${round} из ${TICKS}`;
   show(ui.roundTitle, true);
   ui.roundTitle.classList.toggle("playing", false);
-  // Force style recalculation so a new round restarts the keyframes even if
-  // the previous 3-second cycle has not quite completed yet.
+  // Force reflow so a new round restarts the keyframes mid-cycle.
   void ui.roundTitle.offsetWidth;
   ui.roundTitle.classList.toggle("playing", true);
   roundTitleTimer = setTimeout(hideRoundTitle, 3000);
@@ -466,8 +464,8 @@ async function joinRoom(code, name = playerName) {
         : "Не удалось подключиться. Обновите страницу, чтобы повторить вход.";
     ui.lobbyHint.textContent = message;
     toast(message);
-    // Keep the invitation visible, including the code and error. Returning
-    // silently to the create-room menu makes a failed join look like a new game.
+    // Keep the code and error visible: dropping to the menu would make a failed
+    // join look like a new game.
   }
 }
 
@@ -530,8 +528,7 @@ function startMatch(saved = null) {
       }
     },
     timer(fraction) {
-      // Fallback for a suspended animation frame (for example, while the tab
-      // is becoming visible again).
+      // Fallback while animation frames are suspended (tab becoming visible).
       if (timerFrame === null) setTimerFraction(fraction);
     },
     async resolved(event, before, after) {
@@ -568,8 +565,7 @@ function endMatch(reason) {
   show(ui.playerLabels, false);
   show(ui.over, true);
 
-  // A rematch reuses the open data channel, so the invite link stays valid.
-  // Offer it only while the peer is still reachable.
+  // A rematch reuses the channel, so the link stays valid while the peer is up.
   rematch = { mine: false, theirs: false, map: null };
   const canRematch = connection?.channel?.readyState === "open";
   show(ui.againBtn, canRematch);
@@ -707,8 +703,7 @@ function init() {
     clearUrlCode();
   });
 
-  // The peer connection outlives a match, so a rematch reuses it and the
-  // original invite link keeps working for both players.
+  // The peer connection outlives a match, so the original invite still works.
   ui.againBtn.addEventListener("click", requestRematch);
 
   // An invite link lands here as /CODE (older links used ?game= or ?join=).

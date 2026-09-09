@@ -1,11 +1,9 @@
 // WebRTC peer connection + commit/reveal command exchange.
 //
-// The cloud function is signalling only: it relays SDP and ICE candidates and
-// never sees a game command. Because there is no authoritative server, each
-// tick uses a commit/reveal handshake — both sides publish a salted SHA-256
-// hash of their command first, and only reveal the command itself once the
-// opponent's hash is in hand. A revealed command that does not match the hash
-// received earlier is a protocol violation, not a chance to change the move.
+// The cloud function only relays SDP and ICE; it never sees a command. With no
+// authoritative server, each tick commits a salted SHA-256 hash first and
+// reveals the command once the opponent's hash is in hand. A reveal that does
+// not match its hash is a protocol violation, not a chance to change the move.
 
 const SIGNAL_URL =
   window.TWIVVY_SIGNAL_URL ||
@@ -44,9 +42,8 @@ async function api(path, options = {}) {
 const CODE_RE = /^[A-Z0-9]{4,8}$/;
 
 /**
- * Directory the app is served from, always with a trailing slash. A room code
- * or an index.html filename in the current path is stripped, so links built
- * while already inside a room still point at the site root.
+ * The app's directory, trailing slash included. A room code or index.html is
+ * stripped, so links built inside a room still point at the site root.
  */
 export function basePath(pathname = window.location.pathname) {
   const parts = pathname.split("/");
@@ -162,8 +159,7 @@ export class Matchmaker extends EventTarget {
       this._accept(state);
     } catch (err) {
       if (this.closed) return;
-      // A backgrounded tab can age out of the waiting list. Re-enter with the
-      // same ticket when it becomes active again, retaining its chosen name.
+      // A backgrounded tab ages out of the list: re-enter on the same ticket.
       if (err.status === 404 && !this.match) {
         try {
           const state = await api("/api/matchmaking", {

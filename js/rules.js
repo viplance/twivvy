@@ -1,19 +1,17 @@
 // Twivvy («Перекрут») — deterministic match simulation.
 //
-// Pure module: no DOM, no randomness, no time. Both peers run it over the same
+// Pure: no DOM, no randomness, no time. Both peers replay it over the same
 // command log and must reach identical state. Keep it that way.
 //
-// Geometry: 6x6 cells, nine 2x2 platforms. Rows count from the top (row 0 is
-// the top player's edge), columns from the left. Ports are named by absolute
-// screen direction and never by player perspective.
+// 6x6 cells, nine 2x2 platforms. Row 0 is the top player's edge. Ports are
+// named by absolute screen direction, never by player perspective.
 
 export const RULES_VERSION = 6;
 
 export const SIZE = 6;
 export const PLATFORMS = 9;
 export const TICKS = 30;
-// A 30-second decide window: long enough to read the board and plan a move
-// rather than react. The resolve window is the animation budget.
+// 30 s to plan a move rather than react; RESOLVE_MS is the animation budget.
 export const DECIDE_MS = 30_000;
 export const RESOLVE_MS = 1200;
 export const TICK_MS = DECIDE_MS + RESOLVE_MS;
@@ -64,10 +62,7 @@ export function platformOrigin(platform) {
   return { row: Math.floor(platform / 3) * 2, col: (platform % 3) * 2 };
 }
 
-/**
- * Rotate a cell within its 2x2 platform.
- * Clockwise: (0,0)->(0,1)->(1,1)->(1,0)->(0,0).
- */
+/** Rotate a cell within its 2x2 platform: (0,0)->(0,1)->(1,1)->(1,0). */
 function rotateCellInPlatform(localRow, localCol, quarters) {
   let r = localRow;
   let c = localCol;
@@ -84,8 +79,7 @@ function rotateCellInPlatform(localRow, localCol, quarters) {
 // Maps
 // ---------------------------------------------------------------------------
 
-// Hand-designed starting maps. Each is 6 rows of 6 pieces and is symmetric
-// under a 180° rotation, so neither edge starts with an advantage.
+// Hand-designed maps, each 180°-symmetric so neither edge has an advantage.
 const N = PIECE.NS;
 const E = PIECE.EW;
 const a = PIECE.NE;
@@ -94,9 +88,8 @@ const c = PIECE.SW;
 const d = PIECE.NW;
 const X = PIECE.EMPTY;
 
-// Each grid is 180°-rotation symmetric and was validated by simulating many
-// matches: both receivers score at a similar rate, scoreless matches are rare,
-// and few ticks pass with every ball stuck. See tools/validate-maps.mjs.
+// Validated by simulation: even scoring, few scoreless matches, little stalling.
+// See tools/validate-maps.mjs.
 export const MAPS = [
   {
     name: "Развилка",
@@ -138,12 +131,8 @@ export const MAPS = [
 // ---------------------------------------------------------------------------
 
 /**
- * Ball sources are pinned to two fixed centre cells (spec numbers rows and
- * columns from 1; these are the 0-indexed equivalents).
- *
- * `order` is the tie-break sequence used when the piece offers no choice or
- * when the draw has to fall back to something; the spawn direction itself is
- * drawn from the ports actually available. See pickSpawnExit.
+ * The two fixed centre cells balls spawn from. `order` only breaks ties; the
+ * direction itself is drawn from the ports available — see pickSpawnExit.
  */
 export const SOURCES = [
   { row: 2, col: 2, order: [UP, RIGHT, DOWN, LEFT] },
@@ -151,13 +140,8 @@ export const SOURCES = [
 ];
 
 /**
- * Deterministic hash of the spawn's coordinates in the match: same inputs give
- * the same number on both peers, different inputs scatter. This is what stands
- * in for randomness here — a real RNG would desync the two clients, since they
- * only ever exchange commands and replay this module over them.
- *
- * Integer arithmetic throughout (xorshift-style mixing, `>>> 0` to stay in
- * unsigned 32-bit): no floats, so no platform-dependent rounding.
+ * Stands in for randomness: a real RNG would desync the peers, which exchange
+ * only commands. Integer-only mixing, so no platform-dependent rounding.
  */
 function spawnNoise(tick, sourceIndex, ballId) {
   let x = (tick * 0x9e3779b1) ^ (sourceIndex * 0x85ebca6b) ^ (ballId * 0xc2b2ae35);
@@ -167,12 +151,8 @@ function spawnNoise(tick, sourceIndex, ballId) {
 }
 
 /**
- * Choose the port a freshly spawned ball rolls out through: an even draw among
- * the directions its piece actually connects, rather than a fixed preference.
- *
- * Candidates are collected in a fixed port order (UP..LEFT) so the list both
- * peers index into is identical; `source.order` only breaks the tie when the
- * piece has no open port at all.
+ * Even draw among the ports the piece actually connects. Candidates are
+ * collected in fixed port order so both peers index the same list.
  */
 export function pickSpawnExit(mask, source, tick, sourceIndex, ballId) {
   const available = [];
@@ -271,8 +251,7 @@ function spawnBalls(match) {
     if (occupied.has(cell)) continue;
 
     const mask = match.cells[source.row][source.col];
-    // Reserve the id first: it is part of what the direction is drawn from, so
-    // two sources spawning on the same tick roll independently.
+    // Reserve the id first — the draw uses it, so both sources roll apart.
     const id = match.nextBallId;
     const exit = pickSpawnExit(mask, source, match.tick, sourceIndex, id);
     if (exit === undefined) continue;
@@ -286,16 +265,13 @@ function spawnBalls(match) {
     };
     match.balls.push(ball);
     occupied.add(cell);
-    // Carry the cell so the view can animate the ball rising from its source.
+    // The view animates the ball rising from this cell.
     spawned.push({ id: ball.id, row: ball.row, col: ball.col });
   }
   return spawned;
 }
 
-/**
- * Move every ball at most one cell, all read from a single snapshot of the
- * field so that order of processing cannot matter.
- */
+/** Move every ball one cell at most, read from one snapshot so order cannot matter. */
 function moveBalls(match) {
   const moves = [];
   const delivered = [];
@@ -325,8 +301,7 @@ function moveBalls(match) {
       continue;
     }
 
-    // Side walls are closed, but they are still a dead end of the current
-    // track: recoil through the piece's other port instead of waiting forever.
+    // A closed side wall is still a dead end: recoil rather than wait forever.
     if (nc < 0 || nc >= SIZE) {
       prepareBounce(ball, "dead-end");
       continue;
@@ -336,8 +311,7 @@ function moveBalls(match) {
     const targetMask = match.cells[nr][nc];
 
     if (!(targetMask & (1 << entryPort))) {
-      // The track ends inside the board. Stay in the current cell, but head
-      // back through the other end of this piece on the next step.
+      // Track ends inside the board: stay put, leave by this piece's other end.
       prepareBounce(ball, "dead-end");
       continue;
     }
@@ -347,18 +321,15 @@ function moveBalls(match) {
     ball.pendingExit = otherPort(targetMask, entryPort);
   }
 
-  // One ball per cell: a ball may not roll onto a cell that stays occupied.
-  // Resolved by repetition rather than in one pass, so the outcome does not
-  // depend on the order balls happen to sit in the array — both peers must
-  // reach the same state. A ball blocked here stays in its cell and reverses
-  // along its current track.
+  // One ball per cell. Repeated to a fixed point rather than resolved in one
+  // pass, so the result cannot depend on array order — both peers must agree.
+  // A blocked ball stays put and reverses along its track.
   const deliveredIdSet = new Set(delivered.map((d) => d.id));
 
   for (let changed = true; changed; ) {
     changed = false;
 
-    // Cells that will still be occupied after this step: every ball that is
-    // not moving and not leaving the board.
+    // Cells still occupied after this step.
     const occupied = new Set();
     for (const ball of match.balls) {
       if (deliveredIdSet.has(ball.id)) continue;
@@ -375,8 +346,7 @@ function moveBalls(match) {
       claims.get(key).push(ball);
     }
 
-    // Two adjacent balls heading into each other's cells collide rather than
-    // passing through one another by swapping positions.
+    // Adjacent balls heading into each other collide instead of swapping.
     const origins = new Map();
     for (const ball of match.balls) {
       if (!deliveredIdSet.has(ball.id)) origins.set(`${ball.row},${ball.col}`, ball);
@@ -396,9 +366,8 @@ function moveBalls(match) {
       const key = `${ball.pendingRow},${ball.pendingCol}`;
 
       const blockedByStaying = occupied.has(key);
-      // When several balls want one cell, none of them takes it: picking a
-      // winner would need a tie-break both peers must agree on, and standing
-      // still is the behaviour the rest of the rules already use.
+      // Contested cell: nobody takes it. A winner would need a tie-break both
+      // peers agree on, and standing still is what the rest of the rules do.
       const contested = (claims.get(key) || []).length > 1;
       const swapping = swaps.has(ball.id);
 
@@ -452,18 +421,14 @@ function moveBalls(match) {
   }
   match.balls = match.balls.filter((ball) => !deliveredIds.has(ball.id));
 
-  // Balls have no lifetime: one stays on the board until it is delivered, so
-  // the only way to clear it is to steer it into a receiver. `expired` stays in
-  // the event shape — the view and the replay still read the field.
+  // No lifetime: a ball leaves only by delivery. `expired` stays in the event
+  // shape because the view and the replay still read the field.
   const expired = [];
 
   return { moves, delivered, expired };
 }
 
-/**
- * Resolve one tick from both players' hidden commands.
- * Returns an event record describing what happened, for animation and replay.
- */
+/** Resolve one tick; returns an event record for animation and replay. */
 export function resolveTick(match, topCommand, bottomCommand) {
   if (match.finished) return null;
 
@@ -493,8 +458,7 @@ export function resolveTick(match, topCommand, bottomCommand) {
 
   const movement = moveBalls(match);
 
-  // Any platform that received a command this tick — even one that cancelled
-  // out — is locked for the next decide phase.
+  // Any platform commanded this tick — even a cancelled one — locks next phase.
   match.cooldown = [...quarters.keys()];
 
   const event = {

@@ -128,8 +128,7 @@ test("colliding balls lunge toward each other and end back on their cells", asyn
     mesh.userData = { arrow: { rotation: { y: 0 }, position: {}, scale: { setScalar() {} } } };
   }
 
-  // Two balls on adjacent cells of one row, heading into each other. The rules
-  // report both as bounced by a collision, at their own (unchanged) cells.
+  // Adjacent balls heading into each other; both bounce at their own cells.
   const match = rules.createMatch();
   match.balls = [
     { id: 10, row: 0, col: 0, exit: rules.RIGHT },
@@ -149,7 +148,7 @@ test("colliding balls lunge toward each other and end back on their cells", asyn
     ],
   };
 
-  // Drive the animation by hand so we can inspect the midpoint.
+  // Drive the animation by hand to inspect the midpoint.
   const samples = [];
   view._animate = async (duration, step) => {
     for (const t of [0, 0.5, 1]) {
@@ -200,7 +199,7 @@ test("a ball at a dead end rolls up to the missing track and returns", async () 
   mesh.position.set(0, 0.16, 0);
   await view.playTick(event, before, match, 1200);
 
-  // It heads RIGHT (+x), reaches furthest at the midpoint, then comes back.
+  // Heads RIGHT (+x), furthest at the midpoint, then back.
   assert.ok(xs[2] > xs[1], `must still be advancing at the midpoint: ${xs}`);
   assert.ok(xs[3] < xs[2], `must be returning after the midpoint: ${xs}`);
   // Far edge touches the cell boundary (0.5) without crossing it.

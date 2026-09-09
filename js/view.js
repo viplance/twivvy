@@ -1,9 +1,6 @@
-// Three.js presentation layer.
-//
-// The renderer owns no rules. It reads a match state produced by rules.js and
-// animates the events returned by resolveTick. The bottom edge of the screen is
-// always the local player's receiver: the guest's camera is flipped 180°, so
-// both players see their own goal near them while the underlying grid is shared.
+// Three.js presentation layer. Owns no rules: reads match state from rules.js
+// and animates resolveTick's events. The local player's receiver is always at
+// the bottom — the guest's camera is flipped 180° over the shared grid.
 
 import * as THREE from "three";
 import {
@@ -24,16 +21,11 @@ const GAP = 0.18; // visible gap between platforms, so groups read as units
 const TRACK_R = 0.13;
 const BALL_R = 0.17;
 // How far a ball noses into a blocked cell before recoiling, as a fraction of
-// portOffset (half a cell).
-//
-// Collision: two balls meeting head-on each cover this much, so the 1-cell gap
-// between their centres closes by 2 * 0.5 * LUNGE_REACH. At 0.5 they stop about
-// 0.5 apart — clear of touching (2 * BALL_R = 0.34) while the impact reads.
+// portOffset (half a cell). Head-on, the two centres close to 0.5 apart —
+// clear of touching (2 * BALL_R = 0.34) while the impact still reads.
 const LUNGE_REACH = 0.5;
-// Dead end: nothing occupies the cell ahead, so the ball rolls right up to
-// where the track stops. It travels 0.5 * DEAD_END_REACH of a cell; at 0.66
-// its centre reaches 0.33 and its far edge (+ BALL_R = 0.17) just touches the
-// cell boundary at 0.5 without crossing into the neighbour.
+// Nothing blocks a dead end, so the ball reaches where the track stops: centre
+// at 0.33, far edge exactly on the 0.5 cell boundary, never past it.
 const DEAD_END_REACH = 0.66;
 
 const COLOR = {
@@ -197,8 +189,7 @@ export class BoardView {
       this.receivers[side] = mesh;
     }
 
-    // Delivered balls stay in the receiver they rolled into, so the tray
-    // itself shows the score and no on-screen counter is needed.
+    // The tray keeps its delivered balls, so it shows the score itself.
     this.collected = { top: [], bottom: [] };
     this.collectedZ = {
       top: -spanZ / 2 - 0.42,
@@ -256,9 +247,8 @@ export class BoardView {
       }
     }
 
-    // Ball-source wells are physical parts of their platform. The logical
-    // source cells stay fixed between turns, but during a preview/resolution
-    // the wells must travel with the plate just like tracks and balls do.
+    // Wells belong to their platform: the source cells are fixed between turns,
+    // but a well must travel with the plate during a preview or resolve.
     this.sourceMarkers = [];
     for (const source of SOURCES) {
       const marker = new THREE.Group();
@@ -367,8 +357,7 @@ export class BoardView {
     const boardW = SIZE * CELL + 2 * GAP + 0.9;
     const boardD = SIZE * CELL + 2 * GAP + 1.9;
 
-    // The camera looks down a tilted axis, so the depth of the board is
-    // foreshortened by cos(tilt) while its height contributes sin(tilt).
+    // Tilted axis: depth is foreshortened by cos(tilt), height adds sin(tilt).
     const tilt = 1.06; // radians from the horizon; ~61°, a readable table view
     const vFov = (this.camera.fov * Math.PI) / 180;
     const hFov = 2 * Math.atan(Math.tan(vFov / 2) * this.camera.aspect);
@@ -386,11 +375,9 @@ export class BoardView {
     };
     positionCamera();
 
-    // Perspective makes the near (bottom) edge much larger than the far edge.
-    // On a wide desktop the simple apparent-depth estimate above can therefore
-    // leave the base and the local receiver below the viewport. Fit the actual
-    // projected corners with a fixed pixel gutter; keep the compact mobile
-    // framing unchanged.
+    // Perspective enlarges the near edge, so on a wide desktop the estimate
+    // above can push the local receiver off-screen. Fit the projected corners
+    // instead; mobile framing is unchanged.
     if (width >= 900 && height >= 600) {
       const margin = 30;
       const halfW = width / 2;
@@ -479,8 +466,7 @@ export class BoardView {
       const startAngle = this._pointerAngle(event.clientX, event.clientY, platform);
       if (startAngle === null) return;
 
-      // Keep the visible rotation when pressing the selected platform. A tap
-      // will animate it back on release; a drag continues from this angle.
+      // Keep the visible angle: a tap animates back on release, a drag continues.
       const samePlatform = this.preview?.platform === platform;
       if (samePlatform) {
         this._previewSnap = null; // Freeze any unfinished snap at its current angle.
@@ -492,8 +478,8 @@ export class BoardView {
           this._returnPreview(previous);
         }
 
-        // A very quick switch can revisit a platform while its return is still
-        // running. Continue from the rendered angle instead of jumping.
+        // A quick switch can revisit a platform mid-return: continue from the
+        // rendered angle instead of jumping.
         const returning = this._previewReturns?.get(platform);
         if (returning) {
           this._previewReturns.delete(platform);
@@ -627,8 +613,7 @@ export class BoardView {
     if (!this.drag || !this.preview) return;
     const { pointerId, platform, tapResets, moved } = this.drag;
     const threshold = Math.PI / 12;
-    // Three.js positive Y rotation is counter-clockwise on this board, while
-    // the rules encode clockwise as +1.
+    // Three.js +Y rotation is counter-clockwise here; the rules encode CW as +1.
     const dir =
       cancelled || (tapResets && !moved) || Math.abs(this.preview.angle) < threshold
         ? null
@@ -655,8 +640,7 @@ export class BoardView {
       this._previewSnap = null;
       if (dir === null) this.clearPreview();
     });
-    // Commit the choice immediately, even if the decision deadline falls
-    // during the visual settling animation.
+    // Commit at once, even if the deadline falls during the settling animation.
     this.onPlatformDrag(platform, dir);
     return snap.promise;
   }
@@ -708,8 +692,7 @@ export class BoardView {
   _syncBallDirection(mesh, platformAngle = 0) {
     const arrow = mesh.userData.arrow;
     const scale = mesh.scale.x || 1;
-    // Cancel any transient scaling (the spawn animation) so the road marking
-    // stays legible at a constant size.
+    // Cancel transient scaling (spawn) so the marking keeps a constant size.
     arrow.scale.setScalar(1 / scale);
     arrow.position.y = (TRACK_R / 2 + 0.012 - mesh.position.y) / scale;
     arrow.rotation.y = -mesh.userData.exit * Math.PI / 2 + platformAngle;
@@ -717,21 +700,13 @@ export class BoardView {
   }
 
   /**
-   * Work out which bounced balls should nose forward before recoiling, and how
-   * far each may travel. Without this a bounce only spins the arrow, and the
-   * reversal looks arbitrary.
+   * Which bounced balls nose forward before recoiling, and how far. Without it
+   * a bounce only spins the arrow and the reversal looks arbitrary.
    *
-   * How far depends on why the ball turned back:
+   * - "collision": the cell ahead is occupied, so stop short of it.
+   * - "dead-end": nothing is in the way, so reach the cell edge and return.
    *
-   * - "collision": something occupies the cell ahead, so the ball must stop
-   *   short of it or the two meshes would overlap. Two balls that met head-on
-   *   each come a quarter cell and halt nose to nose.
-   * - "dead-end": the cell ahead has no matching port, so nothing is in the
-   *   way. The ball rolls to the very edge of its own cell, bumps the missing
-   *   track, and returns — which is what makes the dead end legible.
-   *
-   * `at` is the ball's post-rotation cell, which is where its mesh already sits
-   * by the time this animation runs.
+   * `at` is the post-rotation cell, where the mesh already sits by now.
    */
   _bounceLunges(event, matchBefore) {
     const lunges = [];
@@ -746,8 +721,7 @@ export class BoardView {
       const before = headings.get(move.id);
       if (!mesh || !before || !move.at) continue;
 
-      // The direction it was trying to go is the heading it had on entry.
-      // portOffset points half a cell that way, in world space.
+      // It was heading this way on entry; portOffset is half a cell of it.
       const toward = portOffset(before.exit);
 
       lunges.push({ mesh, toward, reach, base: mesh.position.clone() });
@@ -798,9 +772,8 @@ export class BoardView {
   }
 
   /**
-   * Resting place for the next ball delivered into `side`. Balls line up
-   * across the tray from its centre outwards, so the row itself reads as the
-   * score. Twelve balls exist in a match, so the row never runs out of space.
+   * Where the next ball delivered into `side` rests. They line up from the
+   * tray's centre outwards, so the row reads as the score; 12 balls always fit.
    */
   _collectSlot(side) {
     const index = this.collected[side].length;
@@ -816,11 +789,7 @@ export class BoardView {
     );
   }
 
-  /**
-   * `delivered` names balls that just scored: their meshes are handed to the
-   * receiver's collection instead of being destroyed, so the tray keeps
-   * showing how many each side has won.
-   */
+  /** Meshes of `delivered` balls move to the tray instead of being destroyed. */
   syncBalls(match, delivered = []) {
     for (const d of delivered) {
       const mesh = this.ballMeshes.get(d.id);
@@ -843,8 +812,7 @@ export class BoardView {
 
       const pos = cellPosition(ball.row, ball.col);
       mesh.position.set(pos.x, 0.16, pos.z);
-      // Balls never expire, so every ball on the board looks the same: one
-      // size, one brightness. Nothing here may depend on how old a ball is.
+      // Balls never expire: same size and brightness, never age-dependent.
       mesh.userData.life = null;
       mesh.userData.exit = ball.exit;
       mesh.userData.baseEmissive = 0.7;
@@ -889,9 +857,8 @@ export class BoardView {
   }
 
   /**
-   * Animate a resolved tick: rotate platforms, then slide the balls.
-   * The rotation keeps its original snappy timing; the ball travel is given
-   * the rest of the budget so the route a ball takes is easy to follow.
+   * Animate a resolved tick: platforms turn, then balls slide. Rotation keeps
+   * its snappy timing; travel gets the rest, so a ball's route is followable.
    */
   async playTick(event, matchBefore, matchAfter, resolveMs) {
     // Finish a drop at the deadline before adding the opponent's rotation.
@@ -902,23 +869,19 @@ export class BoardView {
     await Promise.all(settling);
     const rotateMs = Math.min(330, resolveMs * 0.4);
     const moveMs = resolveMs - rotateMs;
-    // Keep the local drag in place. Resolution animates only the missing part
-    // of the combined result (most visibly, the opponent's hidden rotation).
+    // Keep the local drag: animate only the rest, mainly the opponent's turn.
     const preview = this.preview;
     this.preview = null;
     this.drag = null;
     this._updatePlatformAppearance();
 
-    // Direction markers describe the next decision phase, not the travel
-    // animation. Recreate their headings from the resolved state in syncBalls.
+    // Markers describe the next phase; syncBalls rebuilds them from the result.
     for (const mesh of this.ballMeshes.values()) mesh.userData.arrow.visible = false;
 
-    // New balls rise out of their source before anything else moves, so it is
-    // clear they came from the marked cell rather than appearing at random.
+    // New balls rise first, so it is clear they came from the marked cell.
     if (event.spawned.length) {
-      // A locally previewed platform is already at its chosen angle. Treat a
-      // newly spawned ball as preview-carried so the later resolve animation
-      // continues from the visible well instead of rotating it twice.
+      // A previewed platform already sits at its angle: treat the new ball as
+      // preview-carried so the resolve does not rotate it twice.
       if (preview) {
         for (const spawn of event.spawned) {
           if (platformOf(spawn.row, spawn.col) !== preview.platform) continue;
@@ -930,11 +893,9 @@ export class BoardView {
     }
 
     if (event.rotations.length) {
-      // A platform carries its balls: they must turn WITH the plate and only
-      // then roll on. Ball meshes hang off the pivot, not off the platform
-      // group, so spin their positions by hand around the platform centre —
-      // otherwise they sit still during the turn and afterwards appear to fly
-      // across the board to their new cell.
+      // A platform carries its balls. Their meshes hang off the pivot, not the
+      // platform group, so spin them by hand around the platform centre —
+      // otherwise they stand still and then fly across the board.
       const carried = [];
       for (const { platform, quarters } of event.rotations) {
         const group = this.platformGroups[platform];
@@ -1055,10 +1016,7 @@ export class BoardView {
     this.syncSourceMarkers(matchAfter);
   }
 
-  /**
-   * Lift newly spawned balls out of their source cell: they scale up from
-   * nothing while rising from below the board, and the source ring flashes.
-   */
+  /** Raise new balls from below the board, scaling up, and flash the ring. */
   async playSpawn(spawned, duration) {
     const entries = [];
 
@@ -1116,9 +1074,8 @@ export class BoardView {
   }
 
   /**
-   * Run `step(0..1)` over `duration`. A hidden tab stops delivering animation
-   * frames, so a timer guarantees the final state is applied and the tick loop
-   * is never left waiting on a promise that cannot settle.
+   * Run `step(0..1)` over `duration`. A hidden tab delivers no frames, so a
+   * timer guarantees the final state and an always-settling promise.
    */
   _animate(duration, step) {
     return new Promise((resolve) => {
