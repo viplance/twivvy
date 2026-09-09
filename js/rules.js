@@ -7,7 +7,7 @@
 // the top player's edge), columns from the left. Ports are named by absolute
 // screen direction and never by player perspective.
 
-export const RULES_VERSION = 5;
+export const RULES_VERSION = 6;
 
 export const SIZE = 6;
 export const PLATFORMS = 9;
@@ -325,8 +325,10 @@ function moveBalls(match) {
       continue;
     }
 
-    // Side walls are closed.
+    // Side walls are closed, but they are still a dead end of the current
+    // track: recoil through the piece's other port instead of waiting forever.
     if (nc < 0 || nc >= SIZE) {
+      prepareBounce(ball, "dead-end");
       continue;
     }
 

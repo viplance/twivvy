@@ -278,15 +278,20 @@ test("a ball delivered through the bottom edge scores for bottom", () => {
   assert.equal(m.score.bottom, 1);
 });
 
-test("a ball facing a side wall waits", () => {
+test("a ball bounces off the outer edge of the last platform", () => {
   const m = createMatch(0);
-  m.cells[2][0] = PIECE.EW;
-  m.balls = [{ id: 7, row: 2, col: 0, exit: LEFT, life: 5 }];
-  resolveTick(m, null, null);
+  m.tick = 1;
+  m.cells[4][5] = PIECE.EW;
+  m.balls = [{ id: 7, row: 4, col: 5, exit: RIGHT, life: 5 }];
+  const ev = resolveTick(m, null, null);
   const ball = m.balls.find(b => b.id === 7);
-  assert.equal(ball.row, 2);
-  assert.equal(ball.col, 0, "must not leave through the side");
-  assert.equal(ball.exit, LEFT, "the outer edge does not reverse the ball");
+  assert.equal(platformOf(ball.row, ball.col), 8, "ball remains on the last platform");
+  assert.equal(ball.row, 4);
+  assert.equal(ball.col, 5, "bouncing ball stays in its edge cell");
+  assert.equal(ball.exit, LEFT, "the outer edge reverses the ball along its track");
+  assert.deepEqual(ev.moves.find(move => move.id === 7), {
+    id: 7, kind: "bounce", reason: "dead-end", at: { row: 4, col: 5 },
+  });
 });
 
 test("a ball reverses when its track ends inside the board", () => {
@@ -395,27 +400,32 @@ test("two balls heading into each other reverse instead of swapping cells", () =
 
 test("rotating a platform carries the ball and its heading", () => {
   const m = createMatch(0);
-  // Ball at platform 0 local (1,0), heading DOWN. One CW turn -> local (0,0),
-  // heading LEFT, where the side wall keeps it in place without a dead-end bounce.
-  m.cells = m.cells.map(r => r.map(() => PIECE.NS));
-  m.balls = [{ id: 900, row: 1, col: 0, exit: DOWN, life: 5 }];
+  // Ball at platform 0 local (0,0), heading UP. One CW turn carries it to
+  // local (0,1) heading RIGHT, then it rolls onto the adjacent platform.
+  m.tick = 1;
+  m.cells = m.cells.map(r => r.map(() => PIECE.EMPTY));
+  m.cells[0][0] = PIECE.NS;
+  m.cells[0][2] = PIECE.EW;
+  m.balls = [{ id: 900, row: 0, col: 0, exit: UP, life: 5 }];
   const m2 = cloneMatch(m);
-  // Rotate only; block movement by making the target unreachable is hard here,
-  // so check position/heading directly after rotation via a fresh sim step.
-  resolveTick(m2, { platform: 0, dir: 1 }, null);
-  // The platform carries the ball from local (1,0) to (0,0) and turns its
-  // heading DOWN -> LEFT.
+  const ev = resolveTick(m2, { platform: 0, dir: 1 }, null);
   const ball = m2.balls.find(b => b.id === 900);
   assert.ok(ball, "ball still alive");
   assert.equal(ball.row, 0);
-  assert.equal(ball.col, 0, "carried with the platform");
-  assert.equal(ball.exit, LEFT, "heading turned with the platform");
+  assert.equal(ball.col, 2, "moves right after being carried with the platform");
+  assert.equal(ball.exit, RIGHT, "heading turned clockwise with the platform");
+  assert.deepEqual(ev.moves.find(move => move.id === 900), {
+    id: 900,
+    kind: "move",
+    from: { row: 0, col: 1 },
+    to: { row: 0, col: 2 },
+  });
 });
 
 test("a ball never expires: only delivery takes it off the board", () => {
   const m = createMatch(0);
-  // A ball parked against a side wall has nowhere to go and would previously
-  // have been removed once its lifetime ran out.
+  // A ball trapped on horizontal tracks can never reach either receiver and
+  // would previously have been removed once its lifetime ran out.
   m.cells = m.cells.map(r => r.map(() => PIECE.EW));
   m.balls = [{ id: 3, row: 2, col: 0, exit: LEFT }];
 

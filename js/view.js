@@ -17,7 +17,7 @@ import {
   RIGHT,
   DOWN,
   LEFT,
-} from "./rules.js?v=20260909-deadend1";
+} from "./rules.js?v=20260909-edge-bounce1";
 
 const CELL = 1;
 const GAP = 0.18; // visible gap between platforms, so groups read as units
