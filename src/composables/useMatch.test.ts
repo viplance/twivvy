@@ -91,6 +91,27 @@ test("a delivered ball sounds once, ordinary movement does not", async () => {
   expect(sounds).toEqual([]);
 });
 
+test("training result exposes the final in-place score instead of a cached draw", async () => {
+  const { game, callbacks } = startHostMatch();
+  const finalMatch = game.match.value!;
+
+  // GameOver stays mounted while hidden, so these computed values are read and
+  // cached before the mutable engine reaches the final result.
+  expect(game.myScore.value).toBe(0);
+  expect(game.foeScore.value).toBe(0);
+  expect(game.resultTitle.value).toBe("Draw");
+
+  finalMatch.score.bottom = 5;
+  finalMatch.score.top = 2;
+  finalMatch.finished = true;
+  await callbacks.resolved(tickEvent({}), emptyMatch(), finalMatch);
+  callbacks.finished(null);
+
+  expect(game.myScore.value).toBe(5);
+  expect(game.foeScore.value).toBe(2);
+  expect(game.resultTitle.value).toBe("Victory");
+});
+
 test("a reset release still sounds but does not suppress the resolve", () => {
   const game = useMatch();
   game.mySide.value = "bottom";

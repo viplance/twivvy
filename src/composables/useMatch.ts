@@ -1,4 +1,4 @@
-import { computed, ref, shallowRef } from "vue";
+import { computed, ref, shallowRef, triggerRef } from "vue";
 import { createMatch, matchResult, DECIDE_MS, RESOLVE_MS, TICKS } from "../../js/rules.js";
 import { MatchSession } from "../../js/session.js";
 import { TrainingSession } from "../../js/bot.js";
@@ -138,6 +138,10 @@ export function useMatch() {
       async resolved(event: TickEvent, before: Match, after: Match) {
         const current = session.value;
         match.value = after;
+        // resolveTick mutates the session's Match in place. Because `match` is
+        // intentionally shallow, assigning that same object does not notify
+        // computed scores or the result title without an explicit trigger.
+        triggerRef(match);
         selection.value = null;
         playTurnSound(event);
         animation = view.playTick(event, before, after, RESOLVE_MS);
