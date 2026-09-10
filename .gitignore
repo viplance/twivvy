@@ -2,6 +2,11 @@
 node_modules/
 dist/
 
+# pnpm keeps its real store outside the project; a local one is a leftover from
+# a --store-dir run and must never be committed.
+.pnpm-store/
+.pnpm/
+
 # Private product research — business strategy, not code. Kept local.
 ios-pvp-market-perekrut.md
 
