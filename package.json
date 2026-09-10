@@ -2,6 +2,7 @@
   "name": "twivvy",
   "version": "1.0.0",
   "private": true,
+  "license": "UNLICENSED",
   "description": "Twivvy («Перекрут») — browser PvP prototype",
   "type": "module",
   "scripts": {
