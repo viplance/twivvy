@@ -6,6 +6,7 @@
     "moduleResolution": "Bundler",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "allowJs": true,
+    "allowImportingTsExtensions": true,
     "checkJs": false,
     "strict": false,
     "noEmit": true,

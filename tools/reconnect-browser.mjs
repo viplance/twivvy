@@ -47,6 +47,10 @@ const browser = await puppeteer.launch({
 const errors = [];
 async function page() {
   const p = await browser.newPage();
+  await p.evaluateOnNewDocument(() => {
+    Object.defineProperty(navigator, "language", { get: () => "ru-RU" });
+    Object.defineProperty(navigator, "languages", { get: () => ["ru-RU", "ru"] });
+  });
   p.on("pageerror", err => errors.push(err.message));
   p.on("console", msg => { if (msg.type() === "error") console.log("BROWSER", msg.text()); });
   if (process.env.LIVE_ORIGIN) {

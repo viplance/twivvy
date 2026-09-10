@@ -2,9 +2,15 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import vm from "node:vm";
+import { messages } from "../src/locales.ts";
 
 globalThis.window = { location: { pathname: "/", href: "https://example.test/" } };
 const { Connection, codeFromLocation } = await import("../js/net.js");
+
+function russianTranslate(key, named = {}) {
+  const value = key.split(".").reduce((part, segment) => part?.[segment], messages.ru);
+  return String(value ?? key).replace(/\{(\w+)\}/g, (_match, name) => String(named[name] ?? `{${name}}`));
+}
 
 class Channel {
   constructor(state = "connecting") {
@@ -225,6 +231,7 @@ async function controllerHarness({ pathname = "/", joinError = null, brokenView 
     TickExchange: class {},
     createMatch: () => ({ tick: 0, cooldown: [], finished: false }),
     MAPS: [{}], DECIDE_MS: 30_000, RESOLVE_MS: 1200, TICKS: 30,
+    translate: russianTranslate,
     basePath: () => "/", codeFromLocation: () => codeFromLocation({ pathname, search: "" }),
     document: { getElementById: getElement },
     window: { addEventListener() {}, innerHeight: 800 }, history: { replaceState() {} },

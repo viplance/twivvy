@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "license": "UNLICENSED",
-  "description": "Twivvy («Перекрут») — browser PvP prototype",
+  "description": "Twivvy",
   "type": "module",
   "packageManager": "pnpm@10.12.4",
   "scripts": {
@@ -18,7 +18,8 @@
   },
   "dependencies": {
     "three": "0.169.0",
-    "vue": "3.5.42"
+    "vue": "3.5.42",
+    "vue-i18n": "11.4.10"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "6.0.8",

@@ -21,6 +21,7 @@ import {
 import { MatchSession } from "../js/session.js";
 import { GameAudio } from "../js/audio.js";
 import { TrainingSession } from "../js/bot.js";
+import { translate } from "./i18n";
 
 const $ = (id: string): any => {
   const element = document.getElementById(id);
@@ -142,13 +143,13 @@ function hideNamePrompt() {
 function openNamePrompt(mode, code = null) {
   nameAction = { mode, code };
   const copy = {
-    create: ["Играть с другом", "Создать комнату"],
-    join: ["Войти в игру", "Войти"],
-    online: ["Случайный соперник", "Подключиться"],
-    training: ["Тренировка", "Начать тренировку"],
+    create: ["dialog.createTitle", "dialog.createSubmit"],
+    join: ["dialog.joinTitle", "dialog.joinSubmit"],
+    online: ["dialog.onlineTitle", "dialog.onlineSubmit"],
+    training: ["dialog.trainingTitle", "dialog.trainingSubmit"],
   }[mode];
-  ui.nameTitle.textContent = copy[0];
-  ui.nameSubmit.textContent = copy[1];
+  ui.nameTitle.textContent = translate(copy[0]);
+  ui.nameSubmit.textContent = translate(copy[1]);
   ui.nameSubmit.disabled = false;
   ui.nameInput.disabled = false;
   ui.nameInput.setCustomValidity("");
@@ -168,8 +169,8 @@ function openNamePrompt(mode, code = null) {
 
 function positionPlayerNames() {
   if (!view || !connection) return;
-  ui.ownName.textContent = connection.myName || playerName || "Игрок";
-  ui.opponentName.textContent = connection.peerName || "Соперник";
+  ui.ownName.textContent = connection.myName || playerName || translate("player.you");
+  ui.opponentName.textContent = connection.peerName || translate("player.opponent");
   const own = view.receiverScreenPosition?.(mySide);
   const foeSide = mySide === "top" ? "bottom" : "top";
   const foe = view.receiverScreenPosition?.(foeSide);
@@ -202,6 +203,16 @@ function toast(text, ms = 2600) {
   show(ui.toast, true);
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => show(ui.toast, false), ms);
+}
+
+const LEGACY_MESSAGE_KEYS = new Map([
+  ["Партия прервана: соперник отсутствовал более 30 минут.", "error.peerAbsent"],
+  ["Не удалось согласовать сохранённую партию.", "error.restoreMismatch"],
+]);
+
+function localizeMessage(message) {
+  const key = LEGACY_MESSAGE_KEYS.get(String(message));
+  return key ? translate(key) : String(message);
 }
 
 function setTimerFraction(fraction) {
@@ -239,7 +250,7 @@ function announceRound(round) {
   if (round === announcedRound || round < 1 || round > TICKS) return;
   announcedRound = round;
   clearTimeout(roundTitleTimer);
-  ui.roundTitle.textContent = `Раунд ${round} из ${TICKS}`;
+  ui.roundTitle.textContent = translate("status.round", { round, total: TICKS });
   show(ui.roundTitle, true);
   ui.roundTitle.classList.toggle("playing", false);
   // Force reflow so a new round restarts the keyframes mid-cycle.
@@ -257,12 +268,13 @@ function newConnection() {
 
   conn.addEventListener("error", (e: CustomEvent<any>) => {
     if (connection !== conn) return;
-    toast(e.detail.message);
-    if (!running) ui.lobbyHint.textContent = e.detail.message;
+    const message = localizeMessage(e.detail.message);
+    toast(message);
+    if (!running) ui.lobbyHint.textContent = message;
   });
   conn.addEventListener("guestjoined", () => {
     if (connection !== conn || running) return;
-    ui.lobbyHint.textContent = "Соперник найден, устанавливаем связь…";
+    ui.lobbyHint.textContent = translate("status.peerFound");
   });
   conn.addEventListener("peername", () => {
     if (connection === conn) positionPlayerNames();
@@ -274,10 +286,10 @@ function newConnection() {
   conn.addEventListener("expired", (e: CustomEvent<any>) => {
     if (connection !== conn) return;
     if (session) session.finish(e.detail.message);
-    else ui.lobbyHint.textContent = e.detail.message;
+    else ui.lobbyHint.textContent = localizeMessage(e.detail.message);
   });
   conn.addEventListener("storageerror", () => {
-    if (connection === conn) toast("Браузер не разрешает сохранять партию. Не закрывайте эту вкладку.", 6000);
+    if (connection === conn) toast(translate("status.storageUnavailable"), 6000);
   });
   conn.addEventListener("open", () => {
     if (connection !== conn) return;
@@ -293,7 +305,7 @@ function newConnection() {
       show(ui.hud, false);
       show(ui.menu, false);
       show(ui.lobby, true);
-      ui.lobbyHint.textContent = "Не удалось запустить игру. Обновите страницу у обоих игроков.";
+      ui.lobbyHint.textContent = translate("status.startupFailed");
     }
   });
 
@@ -326,7 +338,7 @@ function requestRematch() {
   }
   if (rematch.mine) return;
   if (connection?.channel?.readyState !== "open") {
-    toast("Соперник отключился");
+    toast(translate("status.peerDisconnected"));
     return;
   }
 
@@ -339,7 +351,7 @@ function requestRematch() {
   connection.send({ type: "rematch", map: rematch.map });
 
   ui.againBtn.disabled = true;
-  ui.againBtn.textContent = "Ждём соперника…";
+  ui.againBtn.textContent = translate("status.waitingOpponent");
   maybeRematch();
 }
 
@@ -360,8 +372,8 @@ async function beginMatchmaking(name) {
   stopOnlineCount();
   ui.nameInput.disabled = true;
   ui.nameSubmit.disabled = true;
-  ui.nameSubmit.textContent = "Ищем соперника…";
-  ui.matchmakingStatus.textContent = "Вы в очереди. Подбираем соперника…";
+  ui.nameSubmit.textContent = translate("status.finding");
+  ui.matchmakingStatus.textContent = translate("status.queued");
   show(ui.matchmakingStatus, true);
 
   const queue = new Matchmaker();
@@ -370,12 +382,12 @@ async function beginMatchmaking(name) {
   queue.addEventListener("count", (event: CustomEvent<any>) => {
     setOnlineCount(event.detail.online);
     if (!queue.match) {
-      ui.matchmakingStatus.textContent = "Вы в очереди. Подбираем соперника…";
+      ui.matchmakingStatus.textContent = translate("status.queued");
     }
   });
   queue.addEventListener("error", (event: CustomEvent<any>) => {
     if (matchmaker !== queue) return;
-    ui.matchmakingStatus.textContent = "Связь с очередью прервана. Повторяем попытку…";
+    ui.matchmakingStatus.textContent = translate("status.queueRetry");
     if (event.detail?.message) console.warn("matchmaking", event.detail.message);
   });
   queue.addEventListener("matched", (event: CustomEvent<any>) => connectMatched(event.detail, queue));
@@ -389,8 +401,8 @@ async function beginMatchmaking(name) {
     matchmaker = null;
     ui.nameInput.disabled = false;
     ui.nameSubmit.disabled = false;
-    ui.nameSubmit.textContent = "Подключиться";
-    ui.matchmakingStatus.textContent = "Не удалось войти в очередь. Попробуйте ещё раз.";
+    ui.nameSubmit.textContent = translate("action.connect");
+    ui.matchmakingStatus.textContent = translate("status.queueFailed");
   }
 }
 
@@ -404,7 +416,7 @@ async function connectMatched(room, queue) {
   show(ui.lobby, true);
   show(ui.copyBtn, false);
   ui.inviteCode.textContent = room.code;
-  ui.lobbyHint.textContent = "Соперник найден, устанавливаем связь…";
+  ui.lobbyHint.textContent = translate("status.peerFound");
   setUrlCode(room.code);
   try {
     await conn.acceptMatch(room);
@@ -419,7 +431,7 @@ async function connectMatched(room, queue) {
     show(ui.lobby, false);
     show(ui.menu, true);
     show(ui.copyBtn, true);
-    toast("Не удалось подключиться к найденному сопернику.");
+    toast(translate("error.matchConnect"));
   }
 }
 
@@ -439,7 +451,7 @@ async function createRoom(name) {
     ui.inviteCode.textContent = connection.code;
     // The channel may have opened while the HTTP offer upload was pending.
     if (!running) {
-      ui.lobbyHint.textContent = "Ждём соперника…";
+      ui.lobbyHint.textContent = translate("status.waitingOpponent");
       show(ui.menu, false);
       show(ui.lobby, true);
     }
@@ -448,7 +460,7 @@ async function createRoom(name) {
   } catch (err) {
     if (connection !== conn || running) return;
     console.error(err);
-    toast("Не удалось создать комнату.");
+    toast(translate("error.createRoom"));
     ui.createBtn.disabled = false;
   }
 }
@@ -457,11 +469,11 @@ async function copyInvite() {
   const link = connection.inviteLink();
   try {
     await navigator.clipboard.writeText(link);
-    toast("Ссылка скопирована в буфер обмена");
+    toast(translate("status.copied"));
   } catch {
     // Clipboard needs a user gesture in some browsers; offer the raw link.
     ui.lobbyHint.textContent = link;
-    toast("Скопируйте ссылку вручную");
+    toast(translate("status.copyManual"));
   }
 }
 
@@ -473,7 +485,7 @@ async function joinRoom(code, name = playerName) {
     mySide = saved?.role === "host" ? "bottom" : "top";
     show(ui.menu, false);
     show(ui.lobby, true);
-    ui.lobbyHint.textContent = "Подключаемся…";
+    ui.lobbyHint.textContent = translate("status.connecting");
     ui.inviteCode.textContent = code.toUpperCase();
     show(ui.copyBtn, false);
     setUrlCode(code.toUpperCase());
@@ -491,13 +503,14 @@ async function joinRoom(code, name = playerName) {
   } catch (err) {
     if (connection !== conn || running) return;
     console.error(err);
-    const message = err.status === 404 || err.status === 410
-      ? "Комната не найдена или срок приглашения истёк. Попросите новую ссылку."
+    const key = err.status === 404 || err.status === 410
+      ? "error.notFound"
       : err.status === 426
-        ? "Игра создана старой версией. Обновите страницу у обоих игроков и создайте новую комнату."
+        ? "error.oldVersion"
       : err.status === 409
-        ? "Место занято. Вернитесь в исходную вкладку игры."
-        : "Не удалось подключиться. Обновите страницу, чтобы повторить вход.";
+        ? "error.occupied"
+        : "error.connectFailed";
+    const message = translate(key);
     ui.lobbyHint.textContent = message;
     toast(message);
     // Keep the code and error visible: dropping to the menu would make a failed
@@ -527,7 +540,7 @@ async function pollTrainingPresence(generation = trainingPollGeneration) {
 
 function startTraining(name, difficulty) {
   connection = {
-    training: true, role: 'host', myName: name, peerName: 'Бот',
+    training: true, role: 'host', myName: name, peerName: translate("player.bot"),
     difficulty: ['easy', 'medium', 'hard'].includes(difficulty) ? difficulty : 'medium',
     map: Math.floor(Math.random() * MAPS.length),
     close() { stopTrainingPresence(); },
@@ -596,7 +609,7 @@ function startMatch(saved = null) {
     paused() {
       stopTimerAnimation();
       show(ui.pause, true);
-      ui.pause.textContent = "Соперник отсоединился";
+      ui.pause.textContent = translate("status.peerDisconnected");
       setTimerFraction(session?.remaining() / (Number(window.__TWIVVY_DECIDE_MS) || DECIDE_MS));
     },
     async restore(state, command) {
@@ -650,7 +663,7 @@ function startMatch(saved = null) {
     endMatch(session.ended === true ? null : session.ended);
   } else if (saved) {
     show(ui.pause, true);
-    ui.pause.textContent = "Соперник отсоединился";
+    ui.pause.textContent = translate("status.peerDisconnected");
     setTimerFraction(session.remaining() / session.decideMs);
   }
 }
@@ -671,18 +684,18 @@ function endMatch(reason) {
   const canRematch = connection?.training || connection?.channel?.readyState === "open";
   show(ui.againBtn, canRematch);
   ui.againBtn.disabled = false;
-  ui.againBtn.textContent = "Реванш";
+  ui.againBtn.textContent = translate("action.rematch");
 
   const foeSide = mySide === "top" ? "bottom" : "top";
   const mine = match.score[mySide];
   const theirs = match.score[foeSide];
 
   if (reason) {
-    ui.overTitle.textContent = reason;
+    ui.overTitle.textContent = localizeMessage(reason);
   } else {
     const result = matchResult(match);
     ui.overTitle.textContent =
-      result === "draw" ? "Ничья" : result === mySide ? "Победа" : "Поражение";
+      result === "draw" ? translate("result.draw") : result === mySide ? translate("result.win") : translate("result.loss");
   }
   ui.overScore.textContent = `${mine} : ${theirs}`;
 }
@@ -694,7 +707,7 @@ function endMatch(reason) {
 function beginPlatformDrag(platform) {
   if (!running || !acceptingDrag) return false;
   if (match.cooldown.includes(platform)) {
-    toast("Платформа на охлаждении", 1200);
+    toast(translate("error.platformCooldown"), 1200);
     return false;
   }
   return true;
@@ -720,7 +733,7 @@ export function init() {
   const soundToggle = $('sound-toggle');
   const updateSoundToggle = () => {
     soundToggle.setAttribute('aria-pressed', String(sound.enabled));
-    soundToggle.title = sound.enabled ? 'Выключить звук' : 'Включить звук';
+    soundToggle.title = translate(sound.enabled ? "sound.disable" : "sound.enable");
   };
   updateSoundToggle();
   soundToggle.addEventListener('click', () => {
@@ -772,7 +785,7 @@ export function init() {
     }
     const name = normalizePlayerName(ui.nameInput.value);
     if (!name) {
-      ui.nameInput.setCustomValidity("Введите имя");
+      ui.nameInput.setCustomValidity(translate("error.nameRequired"));
       ui.nameInput.reportValidity();
       return;
     }
@@ -794,7 +807,7 @@ export function init() {
     const action = nameAction;
     const name = normalizePlayerName(ui.nameInput.value);
     if (!action || !name) {
-      ui.nameInput.setCustomValidity("Введите имя");
+      ui.nameInput.setCustomValidity(translate("error.nameRequired"));
       ui.nameInput.reportValidity();
       return;
     }
@@ -876,7 +889,7 @@ export function init() {
     const saved = readSession(code);
     if (saved?.token) {
       if (saved.myName) rememberPlayerName(saved.myName);
-      joinRoom(code, saved.myName || playerName || "Игрок");
+      joinRoom(code, saved.myName || playerName || translate("player.you"));
     } else {
       openNamePrompt("join", code);
     }

@@ -14,9 +14,9 @@ onMounted(async () => {
   <button
     id="sound-toggle"
     type="button"
-    aria-label="Звук"
+    :aria-label="$t('sound.label')"
     aria-pressed="false"
-    title="Включить звук"
+    :title="$t('sound.enable')"
   >
     <svg
       viewBox="0 0 24 24"
@@ -38,35 +38,35 @@ onMounted(async () => {
       <div class="timer-bar"><div id="timer-fill"></div></div>
     </div>
     <p id="pause-status" class="hidden" role="status" aria-live="polite">
-      Соперник отсоединился
+      {{ $t('status.peerDisconnected') }}
     </p>
   </div>
 
   <div id="round-title" class="round-title hidden" role="status" aria-live="polite"></div>
   <div id="player-labels" class="player-labels hidden" aria-live="polite">
-    <div id="opponent-name" class="receiver-name opponent-name">Соперник</div>
-    <div id="own-name" class="receiver-name own-name">Игрок</div>
+    <div id="opponent-name" class="receiver-name opponent-name">{{ $t('player.opponent') }}</div>
+    <div id="own-name" class="receiver-name own-name">{{ $t('player.you') }}</div>
   </div>
 
   <main id="menu" class="panel">
-    <h1>Twivvy</h1>
+    <h1>{{ $t('meta.title') }}</h1>
     <p class="tagline">
-      Поверни лабиринт и забери шарик,<br />который соперник уже считал своим.
+      {{ $t('tagline.first') }}<br />{{ $t('tagline.second') }}
     </p>
 
-    <button id="create" class="primary">Играть с другом</button>
-    <button id="play-online">Случайный соперник</button>
-    <button id="training">Тренировка</button>
+    <button id="create" class="primary">{{ $t('menu.friend') }}</button>
+    <button id="play-online">{{ $t('menu.online') }}</button>
+    <button id="training">{{ $t('menu.training') }}</button>
 
     <details class="rules">
-      <summary>Как играть</summary>
+      <summary>{{ $t('menu.how') }}</summary>
       <ul>
-        <li>Поле из девяти поворотных платформ (3x3).</li>
-        <li>Цель игры — собрать в свой приёмник как можно больше шариков.</li>
-        <li>Игрок может повернуть одну платформу за ход.</li>
-        <li>Новые шарики появляются из двух отмеченных клеток в центре поля.</li>
-        <li>После ожидания открывается ход соперника — повороты складываются.</li>
-        <li>Повёрнутая платформа блокируется на следующий такт.</li>
+        <li>{{ $t('rules.board') }}</li>
+        <li>{{ $t('rules.goal') }}</li>
+        <li>{{ $t('rules.turn') }}</li>
+        <li>{{ $t('rules.spawn') }}</li>
+        <li>{{ $t('rules.combine') }}</li>
+        <li>{{ $t('rules.cooldown') }}</li>
       </ul>
     </details>
   </main>
@@ -79,9 +79,9 @@ onMounted(async () => {
       aria-labelledby="name-title"
       role="dialog"
     >
-      <h2 id="name-title">Случайный соперник</h2>
+      <h2 id="name-title">{{ $t('dialog.onlineTitle') }}</h2>
       <label class="name-field" for="player-name">
-        <span>Ваше имя</span>
+        <span>{{ $t('name.label') }}</span>
         <input
           id="player-name"
           maxlength="24"
@@ -91,54 +91,54 @@ onMounted(async () => {
         />
       </label>
       <p id="online-count" class="online-count hidden" aria-live="polite">
-        Человек в сети: <strong>0</strong>
+        {{ $t('name.online') }} <strong>0</strong>
       </p>
       <p id="matchmaking-status" class="hint hidden" aria-live="polite"></p>
       <fieldset id="training-difficulty" class="difficulty hidden">
-        <legend>Сложность бота</legend>
-        <label><input type="radio" name="difficulty" value="easy" />Легко</label>
-        <label><input type="radio" name="difficulty" value="medium" checked />Средне</label>
-        <label><input type="radio" name="difficulty" value="hard" />Сложно</label>
+        <legend>{{ $t('name.difficulty') }}</legend>
+        <label><input type="radio" name="difficulty" value="easy" />{{ $t('name.easy') }}</label>
+        <label><input type="radio" name="difficulty" value="medium" checked />{{ $t('name.medium') }}</label>
+        <label><input type="radio" name="difficulty" value="hard" />{{ $t('name.hard') }}</label>
       </fieldset>
-      <button id="name-submit" class="primary" type="submit">Подключиться</button>
+      <button id="name-submit" class="primary" type="submit">{{ $t('action.connect') }}</button>
       <div id="join-block" class="hidden">
-        <div class="divider"><span>или</span></div>
+        <div class="divider"><span>{{ $t('name.or') }}</span></div>
         <div class="join-row">
           <input
             id="join-code"
             maxlength="8"
-            placeholder="код"
+            :placeholder="$t('name.code')"
             autocomplete="off"
             autocapitalize="characters"
             spellcheck="false"
           />
-          <button id="join" type="button">Войти</button>
+          <button id="join" type="button">{{ $t('action.join') }}</button>
         </div>
       </div>
-      <button id="name-cancel" class="ghost" type="button">Отмена</button>
+      <button id="name-cancel" class="ghost" type="button">{{ $t('action.cancel') }}</button>
     </form>
   </div>
 
   <section id="lobby" class="panel hidden">
-    <h2>Комната создана</h2>
+    <h2>{{ $t('lobby.created') }}</h2>
     <div id="invite-code" class="code">—</div>
-    <p id="lobby-hint" class="hint">Ждём соперника…</p>
-    <button id="copy-link" class="primary">Скопировать ссылку</button>
-    <button id="cancel" class="ghost">Отмена</button>
+    <p id="lobby-hint" class="hint">{{ $t('lobby.waiting') }}</p>
+    <button id="copy-link" class="primary">{{ $t('action.copy') }}</button>
+    <button id="cancel" class="ghost">{{ $t('action.cancel') }}</button>
   </section>
 
   <section id="over" class="panel hidden">
-    <h2 id="over-title">Победа</h2>
+    <h2 id="over-title">{{ $t('result.win') }}</h2>
     <div id="over-score" class="code">0 : 0</div>
-    <button id="again" class="primary">Реванш</button>
-    <button id="to-menu" class="ghost">Новая игра</button>
+    <button id="again" class="primary">{{ $t('action.rematch') }}</button>
+    <button id="to-menu" class="ghost">{{ $t('action.newGame') }}</button>
   </section>
 
   <div id="toast" class="hidden"></div>
   <div id="training-controls" class="training-controls hidden">
     <button id="human-invite" class="hidden" type="button">
-      Хотите поиграть с человеком?
+      {{ $t('training.humanInvite') }}
     </button>
-    <button id="exit-training" type="button">Выйти из тренировки</button>
+    <button id="exit-training" type="button">{{ $t('training.exit') }}</button>
   </div>
 </template>
