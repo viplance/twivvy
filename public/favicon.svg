@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <defs>
+    <linearGradient id="maze" x1="4" y1="4" x2="28" y2="28" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2fd6c3" />
+      <stop offset="0.58" stop-color="#7ea8ff" />
+      <stop offset="1" stop-color="#ff7a66" />
+    </linearGradient>
+  </defs>
+  <rect x="1" y="1" width="30" height="30" rx="7" fill="#0b1020" />
+  <rect x="2.25" y="2.25" width="27.5" height="27.5" rx="5.75" fill="none" stroke="#263252" stroke-width="1.5" />
+  <path
+    d="M3 10h7V4m6-1v12H9v7H3m10 7v-8h7v-6h9M29 22h-3v7"
+    fill="none"
+    stroke="url(#maze)"
+    stroke-width="3"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  <circle cx="20" cy="21" r="2.25" fill="#ff7a66" stroke="#0b1020" stroke-width="1" />
+</svg>
