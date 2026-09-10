@@ -7,8 +7,8 @@ import {
   DECIDE_MS,
   RESOLVE_MS,
   TICKS,
-} from "./rules.js?v=20260910-turnsound";
-import { BoardView } from "./view.js?v=20260910-turnsound";
+} from "../js/rules.js";
+import { BoardView } from "../js/view.js";
 import {
   Connection,
   Matchmaker,
@@ -16,54 +16,62 @@ import {
   readSession,
   basePath,
   codeFromLocation,
-} from "./net.js?v=20260910-turnsound";
+} from "../js/net.js";
 
-import { MatchSession } from "./session.js?v=20260910-turnsound";
-import { GameAudio } from "./audio.js?v=20260910-turnsound";
-import { TrainingSession } from "./bot.js?v=20260910-turnsound";
+import { MatchSession } from "../js/session.js";
+import { GameAudio } from "../js/audio.js";
+import { TrainingSession } from "../js/bot.js";
 
-const $ = (id) => document.getElementById(id);
-
-const ui = {
-  menu: $("menu"),
-  lobby: $("lobby"),
-  hud: $("hud"),
-  over: $("over"),
-  toast: $("toast"),
-  createBtn: $("create"),
-  onlineBtn: $("play-online"),
-  trainingBtn: $("training"),
-  difficulty: $("training-difficulty"),
-  trainingControls: $("training-controls"),
-  humanInvite: $("human-invite"),
-  exitTraining: $("exit-training"),
-  joinBtn: $("join"),
-  joinCode: $("join-code"),
-  joinBlock: $("join-block"),
-  copyBtn: $("copy-link"),
-  inviteCode: $("invite-code"),
-  lobbyHint: $("lobby-hint"),
-  cancelBtn: $("cancel"),
-  timerFill: $("timer-fill"),
-  roundTitle: $("round-title"),
-  pause: $("pause-status"),
-  overTitle: $("over-title"),
-  overScore: $("over-score"),
-  againBtn: $("again"),
-  menuBtn: $("to-menu"),
-  nameModal: $("name-modal"),
-  nameForm: $("name-form"),
-  nameTitle: $("name-title"),
-  nameInput: $("player-name"),
-  nameSubmit: $("name-submit"),
-  nameCancel: $("name-cancel"),
-  onlineCount: $("online-count"),
-  onlineCountValue: $("online-count").querySelector("strong"),
-  matchmakingStatus: $("matchmaking-status"),
-  playerLabels: $("player-labels"),
-  ownName: $("own-name"),
-  opponentName: $("opponent-name"),
+const $ = (id: string): any => {
+  const element = document.getElementById(id);
+  if (!element) throw new Error(`Missing UI element #${id}`);
+  return element;
 };
+
+let ui;
+
+function bindUi() {
+  return {
+    menu: $("menu"),
+    lobby: $("lobby"),
+    hud: $("hud"),
+    over: $("over"),
+    toast: $("toast"),
+    createBtn: $("create"),
+    onlineBtn: $("play-online"),
+    trainingBtn: $("training"),
+    difficulty: $("training-difficulty"),
+    trainingControls: $("training-controls"),
+    humanInvite: $("human-invite"),
+    exitTraining: $("exit-training"),
+    joinBtn: $("join"),
+    joinCode: $("join-code"),
+    joinBlock: $("join-block"),
+    copyBtn: $("copy-link"),
+    inviteCode: $("invite-code"),
+    lobbyHint: $("lobby-hint"),
+    cancelBtn: $("cancel"),
+    timerFill: $("timer-fill"),
+    roundTitle: $("round-title"),
+    pause: $("pause-status"),
+    overTitle: $("over-title"),
+    overScore: $("over-score"),
+    againBtn: $("again"),
+    menuBtn: $("to-menu"),
+    nameModal: $("name-modal"),
+    nameForm: $("name-form"),
+    nameTitle: $("name-title"),
+    nameInput: $("player-name"),
+    nameSubmit: $("name-submit"),
+    nameCancel: $("name-cancel"),
+    onlineCount: $("online-count"),
+    onlineCountValue: $("online-count").querySelector("strong"),
+    matchmakingStatus: $("matchmaking-status"),
+    playerLabels: $("player-labels"),
+    ownName: $("own-name"),
+    opponentName: $("opponent-name"),
+  };
+}
 
 const PLAYER_NAME_KEY = "twivvy-player-name";
 let view = null;
@@ -187,11 +195,13 @@ function clearUrlCode() {
   history.replaceState(null, "", basePath());
 }
 
+let toastTimer: ReturnType<typeof setTimeout> | undefined;
+
 function toast(text, ms = 2600) {
   ui.toast.textContent = text;
   show(ui.toast, true);
-  clearTimeout(toast._timer);
-  toast._timer = setTimeout(() => show(ui.toast, false), ms);
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => show(ui.toast, false), ms);
 }
 
 function setTimerFraction(fraction) {
@@ -245,7 +255,7 @@ function announceRound(round) {
 function newConnection() {
   const conn = new Connection();
 
-  conn.addEventListener("error", (e) => {
+  conn.addEventListener("error", (e: CustomEvent<any>) => {
     if (connection !== conn) return;
     toast(e.detail.message);
     if (!running) ui.lobbyHint.textContent = e.detail.message;
@@ -257,11 +267,11 @@ function newConnection() {
   conn.addEventListener("peername", () => {
     if (connection === conn) positionPlayerNames();
   });
-  conn.addEventListener("peerlost", e => {
+  conn.addEventListener("peerlost", (e: CustomEvent<any>) => {
     if (connection !== conn) return;
     session?.pause(e.detail?.since);
   });
-  conn.addEventListener("expired", e => {
+  conn.addEventListener("expired", (e: CustomEvent<any>) => {
     if (connection !== conn) return;
     if (session) session.finish(e.detail.message);
     else ui.lobbyHint.textContent = e.detail.message;
@@ -287,7 +297,7 @@ function newConnection() {
     }
   });
 
-  conn.addEventListener("message", (e) => {
+  conn.addEventListener("message", (e: CustomEvent<any>) => {
     if (connection !== conn) return;
     const msg = e.detail;
     if (msg.type !== "rematch") return;
@@ -357,18 +367,18 @@ async function beginMatchmaking(name) {
   const queue = new Matchmaker();
   matchmaker?.close();
   matchmaker = queue;
-  queue.addEventListener("count", event => {
+  queue.addEventListener("count", (event: CustomEvent<any>) => {
     setOnlineCount(event.detail.online);
     if (!queue.match) {
       ui.matchmakingStatus.textContent = "Вы в очереди. Подбираем соперника…";
     }
   });
-  queue.addEventListener("error", event => {
+  queue.addEventListener("error", (event: CustomEvent<any>) => {
     if (matchmaker !== queue) return;
     ui.matchmakingStatus.textContent = "Связь с очередью прервана. Повторяем попытку…";
     if (event.detail?.message) console.warn("matchmaking", event.detail.message);
   });
-  queue.addEventListener("matched", event => connectMatched(event.detail, queue));
+  queue.addEventListener("matched", (event: CustomEvent<any>) => connectMatched(event.detail, queue));
 
   try {
     await queue.join(name);
@@ -700,7 +710,12 @@ function finishPlatformDrag(platform, dir) {
 // Boot
 // ---------------------------------------------------------------------------
 
-function init() {
+let initialized = false;
+
+export function init() {
+  if (initialized) return;
+  initialized = true;
+  ui = bindUi();
   sound = new GameAudio();
   const soundToggle = $('sound-toggle');
   const updateSoundToggle = () => {
@@ -867,5 +882,3 @@ function init() {
     }
   }
 }
-
-init();

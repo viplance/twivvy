@@ -7,8 +7,8 @@
  * yet the status is wrong for a link people share.
  *
  * This Worker rewrites a room-code path to index.html before it reaches GCS,
- * so the response is a clean 200. Everything else — the site root, /js/*,
- * /css/* — is passed through untouched.
+ * so the response is a clean 200. Everything else — the site root and
+ * Vite's /assets/* output — is passed through untouched.
  *
  * Deploy: Cloudflare dashboard -> Workers & Pages -> Create Worker, paste this
  * file, then add a route: twivvy.e-notix.com/* (zone e-notix.com).

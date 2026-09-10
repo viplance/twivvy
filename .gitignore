@@ -1,5 +1,6 @@
 .DS_Store
 node_modules/
+dist/
 
 # Private product research — business strategy, not code. Kept local.
 ios-pvp-market-perekrut.md

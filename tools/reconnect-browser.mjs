@@ -1,5 +1,5 @@
-// Run with PUPPETEER_MODULE pointing to puppeteer-core's module and THREE_MODULE
-// to the pinned Three.js download. No real user's room is joined.
+// Run `pnpm build` first, then point PUPPETEER_MODULE at puppeteer-core.
+// The local fixture serves Vite's production output; no real user's room is joined.
 import http from "node:http";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
@@ -7,7 +7,7 @@ import assert from "node:assert/strict";
 import { setTimeout as delay } from "node:timers/promises";
 import { signalFixture } from "./signal-fixture.mjs";
 const { default: puppeteer } = await import(process.env.PUPPETEER_MODULE || "puppeteer-core");
-const root = path.resolve(import.meta.dirname, "..");
+const root = path.resolve(import.meta.dirname, "../dist");
 const fixture = await signalFixture();
 let blockedToken = null;
 const server = http.createServer(async (req, res) => {
@@ -26,7 +26,12 @@ const server = http.createServer(async (req, res) => {
       return;
     }
     const file = url.pathname === "/" || /^\/[A-Z0-9]{4,8}$/.test(url.pathname) ? "index.html" : url.pathname.slice(1);
-    res.writeHead(200, { "content-type": ({ ".js": "text/javascript", ".css": "text/css", ".html": "text/html" })[path.extname(file)] });
+    res.writeHead(200, { "content-type": ({
+      ".js": "text/javascript",
+      ".css": "text/css",
+      ".html": "text/html",
+      ".mp3": "audio/mpeg",
+    })[path.extname(file)] });
     res.end(await readFile(path.join(root, file)));
   } catch (err) { res.writeHead(500); res.end(err.message); }
 });
@@ -44,7 +49,7 @@ async function page() {
   const p = await browser.newPage();
   p.on("pageerror", err => errors.push(err.message));
   p.on("console", msg => { if (msg.type() === "error") console.log("BROWSER", msg.text()); });
-  if (process.env.THREE_MODULE || process.env.LIVE_ORIGIN) {
+  if (process.env.LIVE_ORIGIN) {
     await p.setRequestInterception(true);
     p.on("request", async request => {
       const url = new URL(request.url());
@@ -53,11 +58,7 @@ async function page() {
       if (blockedToken && token === blockedToken && request.url().startsWith(signalOrigin)) {
         await request.respond({ status: 503, contentType: "application/json",
           headers: { "access-control-allow-origin": origin }, body: '{"error":"Test network outage"}' });
-      } else if (process.env.THREE_MODULE && request.url().startsWith("https://cdn.jsdelivr.net/")) await request.respond({
-        status: 200, contentType: "text/javascript", headers: { "access-control-allow-origin": "*" },
-        body: await readFile(process.env.THREE_MODULE),
-      });
-      else await request.continue();
+      } else await request.continue();
     });
   }
   await p.evaluateOnNewDocument(origin => { window.TWIVVY_SIGNAL_URL = origin; window.__TWIVVY_DECIDE_MS = 8000; }, signalOrigin);

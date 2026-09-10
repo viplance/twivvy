@@ -5,10 +5,24 @@
   "license": "UNLICENSED",
   "description": "Twivvy («Перекрут») — browser PvP prototype",
   "type": "module",
+  "packageManager": "pnpm@10.12.4",
   "scripts": {
-    "start": "python3 -m http.server 8080",
+    "dev": "vite",
+    "start": "vite --host 127.0.0.1 --port 8080",
+    "build": "tsc --noEmit && vite build",
+    "type-check": "tsc --noEmit",
+    "preview": "vite preview --host 127.0.0.1 --port 8080",
     "test": "node --test tools/*.test.mjs",
     "validate-maps": "node tools/validate-maps.mjs",
-    "deploy": "gsutil -m rsync -r -x '^index\\.html$|(^|.*/)\\.git/.*|(^|.*/)\\.DS_Store$|(^|.*/)\\.claude/.*|\\.gitignore$|package\\.json$|(^|.*/)node_modules/.*|(^|.*/)tools/.*|.*\\.md$|cloudflare-worker\\.js$' . gs://twivvy.e-notix.com/ && gsutil -h 'Cache-Control:no-cache' cp index.html gs://twivvy.e-notix.com/index.html"
+    "deploy": "pnpm run build && gsutil -m rsync -r -x '^index\\.html$' dist gs://twivvy.e-notix.com/ && gsutil -h 'Cache-Control:no-cache' cp dist/index.html gs://twivvy.e-notix.com/index.html"
+  },
+  "dependencies": {
+    "three": "0.169.0",
+    "vue": "3.5.42"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "6.0.8",
+    "typescript": "7.0.2",
+    "vite": "8.2.2"
   }
 }

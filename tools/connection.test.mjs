@@ -124,7 +124,10 @@ test("a matchmaking assignment adopts the room role and both player names", asyn
 
 async function controllerHarness({ pathname = "/", joinError = null, brokenView = false,
   storedName = null } = {}) {
-  const source = await readFile(new URL("../js/main.js", import.meta.url), "utf8");
+  const source = (await readFile(new URL("../src/game.ts", import.meta.url), "utf8"))
+    .replace("(id: string): any =>", "(id) =>")
+    .replace("let toastTimer: ReturnType<typeof setTimeout> | undefined;", "let toastTimer;")
+    .replaceAll(": CustomEvent<any>", "");
   const elements = new Map();
   const getElement = (id) => {
     if (!elements.has(id)) {
@@ -237,7 +240,12 @@ async function controllerHarness({ pathname = "/", joinError = null, brokenView 
   // Inject transport/view doubles; execute the real controller and its UI flow.
   sandbox.TrainingSession = sandbox.MatchSession;
   vm.createContext(sandbox);
-  vm.runInContext(source.replace(/^import[\s\S]*?from "[^"\n]+";\n/gm, ""), sandbox);
+  const controller = source
+    .replace(/^import[\s\S]*?from "[^"\n]+";\n/gm, "")
+    .replace("export function init()", "function init()");
+  vm.runInContext(controller, sandbox);
+  assert.equal(elements.size, 0, "controller import must not query Vue DOM before mount");
+  vm.runInContext("init();", sandbox);
   return {
     sandbox, getElement, getConnection: () => conn,
     finishHost: () => finishHost(), getStarts: () => starts,
