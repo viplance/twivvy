@@ -14,7 +14,7 @@ import {
   RIGHT,
   DOWN,
   LEFT,
-} from "./rules.js?v=20260909-sound2";
+} from "./rules.js?v=20260910-joinmodal1";
 
 const CELL = 1;
 const GAP = 0.18; // visible gap between platforms, so groups read as units

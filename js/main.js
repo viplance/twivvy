@@ -7,8 +7,8 @@ import {
   DECIDE_MS,
   RESOLVE_MS,
   TICKS,
-} from "./rules.js?v=20260909-sound2";
-import { BoardView } from "./view.js?v=20260909-sound2";
+} from "./rules.js?v=20260910-joinmodal1";
+import { BoardView } from "./view.js?v=20260910-joinmodal1";
 import {
   Connection,
   Matchmaker,
@@ -16,10 +16,10 @@ import {
   readSession,
   basePath,
   codeFromLocation,
-} from "./net.js?v=20260909-sound2";
+} from "./net.js?v=20260910-joinmodal1";
 
-import { MatchSession } from "./session.js?v=20260909-sound2";
-import { GameAudio } from "./audio.js?v=20260909-sound2";
+import { MatchSession } from "./session.js?v=20260910-joinmodal1";
+import { GameAudio } from "./audio.js?v=20260910-joinmodal1";
 
 const $ = (id) => document.getElementById(id);
 
@@ -33,6 +33,7 @@ const ui = {
   onlineBtn: $("play-online"),
   joinBtn: $("join"),
   joinCode: $("join-code"),
+  joinBlock: $("join-block"),
   copyBtn: $("copy-link"),
   inviteCode: $("invite-code"),
   lobbyHint: $("lobby-hint"),
@@ -137,6 +138,10 @@ function openNamePrompt(mode, code = null) {
   ui.matchmakingStatus.textContent = "";
   show(ui.matchmakingStatus, false);
   show(ui.onlineCount, mode === "online");
+  // Entering a code belongs to "play with a friend": the other two modes reach
+  // an opponent by their own route.
+  show(ui.joinBlock, mode === "create");
+  ui.joinCode.value = "";
   show(ui.nameModal, true);
   if (mode === "online") refreshOnlineCount();
   setTimeout(() => ui.nameInput.focus(), 0);
@@ -651,12 +656,31 @@ function init() {
   ui.createBtn.addEventListener("click", () => openNamePrompt("create"));
   ui.onlineBtn.addEventListener("click", () => openNamePrompt("online"));
   ui.copyBtn.addEventListener("click", copyInvite);
+  // Joining by code now lives in the same modal as creating a room, so the name
+  // is already on screen: validate it here rather than reopening the prompt.
   ui.joinBtn.addEventListener("click", () => {
-    const code = ui.joinCode.value.trim();
-    if (code) openNamePrompt("join", code.toUpperCase());
+    const code = ui.joinCode.value.trim().toUpperCase();
+    if (!code) {
+      ui.joinCode.focus();
+      return;
+    }
+    const name = normalizePlayerName(ui.nameInput.value);
+    if (!name) {
+      ui.nameInput.setCustomValidity("Введите имя");
+      ui.nameInput.reportValidity();
+      return;
+    }
+    ui.nameInput.setCustomValidity("");
+    rememberPlayerName(name);
+    hideNamePrompt();
+    joinRoom(code, name);
   });
   ui.joinCode.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") ui.joinBtn.click();
+    // Enter inside the code field means "join", not "create the room".
+    if (e.key === "Enter") {
+      e.preventDefault();
+      ui.joinBtn.click();
+    }
   });
 
   ui.nameForm.addEventListener("submit", event => {
@@ -734,7 +758,8 @@ function init() {
 
   const code = codeFromLocation();
   if (code) {
-    ui.joinCode.value = code;
+    // The code rides in nameAction, not the input: an invite opens "join" mode,
+    // where the code block is hidden.
     const saved = readSession(code);
     if (saved?.token) {
       if (saved.myName) rememberPlayerName(saved.myName);
