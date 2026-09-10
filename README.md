@@ -33,8 +33,10 @@ The product specification is in
 
 | Area | Technology / file |
 |---|---|
-| UI | Vue 3 and TypeScript — [src/App.vue](src/App.vue), [src/game.ts](src/game.ts) |
-| Localization | Vue I18n — [src/i18n.ts](src/i18n.ts), [src/locales.ts](src/locales.ts) |
+| UI | Vue 3 SFCs and TypeScript — [src/App.vue](src/App.vue), [src/components/](src/components/) |
+| UI state | Composables — [src/composables/](src/composables/) |
+| Shared types and constants | [src/types/](src/types/), [src/constants/](src/constants/) |
+| Localization | Vue I18n, one file per locale — [src/i18n.ts](src/i18n.ts), [src/locales/](src/locales/) |
 | Rendering | Three.js — [js/view.js](js/view.js) |
 | Rules | Deterministic simulation — [js/rules.js](js/rules.js) |
 | Match lifecycle | Timers, commit/reveal, recovery — [js/session.js](js/session.js) |
@@ -57,7 +59,9 @@ signaling service requires Node.js 24.
 pnpm install
 pnpm start          # http://localhost:8080
 pnpm type-check
-pnpm test
+pnpm test           # both suites
+pnpm test:engine    # rules, session, transport — node:test
+pnpm test:ui        # components and composables — vitest
 pnpm validate-maps
 pnpm build          # output: dist/
 pnpm preview

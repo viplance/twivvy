@@ -1,144 +1,343 @@
 <script setup lang="ts">
-import { nextTick, onMounted } from "vue";
-import { init } from "./game";
+import { computed, onBeforeUnmount, onMounted, reactive, ref } from "vue";
+import type { CSSProperties } from "vue";
+import GameBoard from "./components/GameBoard.vue";
+import GameHud from "./components/GameHud.vue";
+import GameLobby from "./components/GameLobby.vue";
+import GameOver from "./components/GameOver.vue";
+import MainMenu from "./components/MainMenu.vue";
+import NameDialog from "./components/NameDialog.vue";
+import PlayerLabels from "./components/PlayerLabels.vue";
+import RoundTitle from "./components/RoundTitle.vue";
+import SoundToggle from "./components/SoundToggle.vue";
+import ToastMessage from "./components/ToastMessage.vue";
+import TrainingControls from "./components/TrainingControls.vue";
+import { Matchmaker } from "../js/net.js";
+import { useGameFlow } from "./composables/useGameFlow.ts";
+import { useSound } from "./composables/useSound.ts";
+import {
+  DESKTOP_MIN_HEIGHT, DESKTOP_MIN_WIDTH, LABEL_GAP_DESKTOP, LABEL_GAP_MOBILE,
+  OPPONENT_LABEL_DESKTOP_OFFSET,
+} from "./constants/index.ts";
+import { translate } from "./i18n.ts";
+import type { BoardView } from "../js/view.js";
+import type { Difficulty, RotationDir } from "./types/index.ts";
 
-onMounted(async () => {
-  await nextTick();
-  init();
+const flow = useGameFlow();
+const { game, conn, round } = flow;
+const sound = useSound();
+
+const ownStyle = reactive<CSSProperties>({});
+const opponentStyle = reactive<CSSProperties>({});
+
+const hudVisible = computed(() => game.running.value && !game.finished.value);
+const labelsVisible = computed(() => game.running.value && !game.finished.value);
+
+let releaseUnlock: (() => void) | undefined;
+
+function onBoardReady(view: BoardView): void {
+  flow.view.value = view;
+  positionLabels();
+  requestAnimationFrame(positionLabels);
+}
+
+/** Place the name labels over each receiver, reading the live 3D projection. */
+function positionLabels(): void {
+  const view = flow.view.value;
+  if (!view?.receiverScreenPosition) return;
+  const desktop =
+    window.innerWidth >= DESKTOP_MIN_WIDTH && window.innerHeight >= DESKTOP_MIN_HEIGHT;
+  const gap = desktop ? LABEL_GAP_DESKTOP : LABEL_GAP_MOBILE;
+  const own = view.receiverScreenPosition(game.mySide.value);
+  const foe = view.receiverScreenPosition(game.foeSide.value);
+  if (own) {
+    ownStyle.left = `${own.x}px`;
+    ownStyle.top = `${own.bottom + gap}px`;
+  }
+  if (foe) {
+    opponentStyle.left = `${foe.x}px`;
+    opponentStyle.top = `${foe.top - gap + (desktop ? OPPONENT_LABEL_DESKTOP_OFFSET : 0)}px`;
+  }
+}
+
+function onDrag(platform: number, dir: RotationDir | null): void {
+  game.commitDrag(platform, dir);
+}
+
+function onDialogSubmit({ name, difficulty }: { name: string; difficulty: Difficulty }): void {
+  flow.remember(name);
+  const mode = flow.prompt.value?.mode;
+  if (mode === "online") {
+    void beginMatchmaking(name);
+    return;
+  }
+  if (mode === "training") {
+    flow.closePrompt();
+    flow.startTraining(name, difficulty);
+    return;
+  }
+  const code = flow.prompt.value?.code ?? null;
+  flow.closePrompt();
+  if (mode === "create") void createRoom(name);
+  else if (code) void joinRoom(code, name);
+}
+
+function onDialogJoin({ code, name }: { code: string; name: string }): void {
+  flow.remember(name);
+  flow.closePrompt();
+  void joinRoom(code, name);
+}
+
+function onDialogCancel(): void {
+  const wasInvite = flow.prompt.value?.mode === "join" && Boolean(flow.codeFromLocation());
+  conn.closeMatchmaker();
+  flow.closePrompt();
+  if (wasInvite) conn.clearUrlCode();
+}
+
+async function beginMatchmaking(name: string): Promise<void> {
+  flow.stopOnlineCount();
+  flow.dialogBusy.value = true;
+  flow.matchmakingStatus.value = translate("status.queued");
+
+  const queue = new Matchmaker();
+  conn.matchmaker.value?.close();
+  conn.matchmaker.value = queue;
+
+  queue.addEventListener("count", (event: Event) => {
+    conn.onlineCount.value = (event as CustomEvent).detail?.online ?? 0;
+    if (!queue.match) flow.matchmakingStatus.value = translate("status.queued");
+  });
+  queue.addEventListener("error", (event: Event) => {
+    if (conn.matchmaker.value !== queue) return;
+    flow.matchmakingStatus.value = translate("status.queueRetry");
+    const message = (event as CustomEvent).detail?.message;
+    if (message) console.warn("matchmaking", message);
+  });
+  queue.addEventListener("matched", (event: Event) => {
+    void connectMatched((event as CustomEvent).detail, queue);
+  });
+
+  try {
+    await queue.join(name);
+  } catch (error) {
+    if (conn.matchmaker.value !== queue) return;
+    console.error("matchmaking startup failed", error);
+    queue.close();
+    conn.matchmaker.value = null;
+    flow.dialogBusy.value = false;
+    flow.matchmakingStatus.value = translate("status.queueFailed");
+  }
+}
+
+async function connectMatched(room: any, queue: any): Promise<void> {
+  if (conn.matchmaker.value !== queue || conn.connection.value) return;
+  flow.closePrompt();
+  const created = flow.newConnection();
+  conn.setConnection(created);
+  game.mySide.value = room.role === "host" ? "bottom" : "top";
+  flow.lobbyVisible.value = true;
+  flow.showCopy.value = false;
+  flow.lobbyCode.value = room.code;
+  flow.lobbyHint.value = translate("status.peerFound");
+  conn.setUrlCode(room.code);
+  try {
+    await created.acceptMatch(room);
+  } catch (error) {
+    if (!conn.isCurrent(created) || game.running.value) return;
+    console.error("matched room connection failed", error);
+    created.close();
+    conn.setConnection(null);
+    queue.close();
+    conn.matchmaker.value = null;
+    conn.clearUrlCode();
+    flow.lobbyVisible.value = false;
+    flow.showCopy.value = true;
+    flow.toast(translate("error.matchConnect"));
+  }
+}
+
+async function createRoom(name: string): Promise<void> {
+  const created = flow.newConnection();
+  conn.setConnection(created);
+  try {
+    game.mySide.value = "bottom";
+    await created.host({ seed: Date.now() & 0xffff, map: conn.randomMap(), name });
+    if (!conn.isCurrent(created)) return;
+    // The address bar now carries the room, so the URL is itself the invite.
+    conn.setUrlCode(created.code);
+    flow.lobbyCode.value = created.code;
+    // The channel may have opened while the HTTP offer upload was pending.
+    if (!game.running.value) {
+      flow.lobbyHint.value = translate("status.waitingOpponent");
+      flow.lobbyVisible.value = true;
+    }
+    await copyInvite();
+  } catch (error) {
+    if (!conn.isCurrent(created) || game.running.value) return;
+    console.error(error);
+    flow.toast(translate("error.createRoom"));
+  }
+}
+
+async function copyInvite(): Promise<void> {
+  const link = conn.connection.value?.inviteLink();
+  if (!link) return;
+  try {
+    await navigator.clipboard.writeText(link);
+    flow.toast(translate("status.copied"));
+  } catch {
+    // Clipboard needs a user gesture in some browsers; offer the raw link.
+    flow.lobbyHint.value = link;
+    flow.toast(translate("status.copyManual"));
+  }
+}
+
+async function joinRoom(code: string, name = flow.playerName.value): Promise<void> {
+  const created = flow.newConnection();
+  conn.setConnection(created);
+  const upper = code.toUpperCase();
+  try {
+    const saved = flow.readSession(upper);
+    game.mySide.value = saved?.role === "host" ? "bottom" : "top";
+    flow.lobbyVisible.value = true;
+    flow.lobbyHint.value = translate("status.connecting");
+    flow.lobbyCode.value = upper;
+    flow.showCopy.value = false;
+    conn.setUrlCode(upper);
+
+    if (saved?.token) {
+      // Install the saved match before transport can emit readiness.
+      created.role = saved.role;
+      created.map = saved.map;
+      if (saved.myName) flow.remember(saved.myName);
+      if (saved.game) flow.beginMatch(saved.game);
+      await created.resume(saved);
+    } else {
+      await created.join(upper, { name });
+    }
+  } catch (error) {
+    if (!conn.isCurrent(created) || game.running.value) return;
+    console.error(error);
+    const status = (error as { status?: number }).status;
+    const key = status === 404 || status === 410 ? "error.notFound"
+      : status === 426 ? "error.oldVersion"
+      : status === 409 ? "error.occupied"
+      : "error.connectFailed";
+    const message = translate(key);
+    // Keep the code and error visible: dropping to the menu would make a
+    // failed join look like a new game.
+    flow.lobbyHint.value = message;
+    flow.toast(message);
+  }
+}
+
+function returnToMenu(): void {
+  if (conn.connection.value?.training) {
+    flow.leaveTraining();
+    return;
+  }
+  game.dispose();
+  round.hide();
+  conn.closeConnection();
+  conn.closeMatchmaker();
+  flow.lobbyVisible.value = false;
+  flow.showCopy.value = true;
+  conn.clearUrlCode();
+}
+
+onMounted(() => {
+  releaseUnlock = sound.bindUnlockGestures();
+  window.addEventListener("resize", positionLabels);
+
+  // An invite link lands here as /CODE (older links used ?game= or ?join=).
+  const code = flow.codeFromLocation();
+  if (!code) return;
+  const saved = flow.readSession(code);
+  if (saved?.token) {
+    if (saved.myName) flow.remember(saved.myName);
+    void joinRoom(code, saved.myName || flow.playerName.value || translate("player.you"));
+  } else {
+    // The code rides in the prompt, not the input: an invite opens "join" mode,
+    // where the code block is hidden.
+    flow.openPrompt("join", code);
+  }
+});
+
+onBeforeUnmount(() => {
+  releaseUnlock?.();
+  window.removeEventListener("resize", positionLabels);
+  flow.stopOnlineCount();
+  flow.stopTrainingPresence();
 });
 </script>
 
 <template>
-  <canvas id="scene"></canvas>
+  <GameBoard
+    @ready="onBoardReady"
+    @drag-start="flow.onDragStart"
+    @drag="onDrag"
+    @release="game.noteRelease"
+  />
 
-  <button
-    id="sound-toggle"
-    type="button"
-    :aria-label="$t('sound.label')"
-    aria-pressed="false"
-    :title="$t('sound.enable')"
-  >
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="1.8"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M11 5 6 9H3v6h3l5 4Z" />
-      <path class="sound-off" d="m16 9 6 6m0-6-6 6" />
-      <path class="sound-on" d="M15 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14" />
-    </svg>
-  </button>
+  <SoundToggle />
 
-  <div id="hud" class="hidden">
-    <div class="timer-row">
-      <div class="timer-bar"><div id="timer-fill"></div></div>
-    </div>
-    <p id="pause-status" class="hidden" role="status" aria-live="polite">
-      {{ $t('status.peerDisconnected') }}
-    </p>
-  </div>
+  <GameHud
+    :visible="hudVisible"
+    :timer-fraction="game.timerFraction.value"
+    :paused="game.paused.value"
+  />
 
-  <div id="round-title" class="round-title hidden" role="status" aria-live="polite"></div>
-  <div id="player-labels" class="player-labels hidden" aria-live="polite">
-    <div id="opponent-name" class="receiver-name opponent-name">{{ $t('player.opponent') }}</div>
-    <div id="own-name" class="receiver-name own-name">{{ $t('player.you') }}</div>
-  </div>
+  <RoundTitle :text="round.text.value" :visible="round.visible.value" :playing="round.playing.value" />
 
-  <main id="menu" class="panel">
-    <h1>{{ $t('meta.title') }}</h1>
-    <p class="tagline">
-      {{ $t('tagline.first') }}<br />{{ $t('tagline.second') }}
-    </p>
+  <PlayerLabels
+    :visible="labelsVisible"
+    :own-name="flow.ownName.value"
+    :opponent-name="flow.opponentName.value"
+    :own-style="ownStyle"
+    :opponent-style="opponentStyle"
+  />
 
-    <button id="create" class="primary">{{ $t('menu.friend') }}</button>
-    <button id="play-online">{{ $t('menu.online') }}</button>
-    <button id="training">{{ $t('menu.training') }}</button>
+  <MainMenu :visible="flow.menuVisible.value" @open="flow.openPrompt" />
 
-    <details class="rules">
-      <summary>{{ $t('menu.how') }}</summary>
-      <ul>
-        <li>{{ $t('rules.board') }}</li>
-        <li>{{ $t('rules.goal') }}</li>
-        <li>{{ $t('rules.turn') }}</li>
-        <li>{{ $t('rules.spawn') }}</li>
-        <li>{{ $t('rules.combine') }}</li>
-        <li>{{ $t('rules.cooldown') }}</li>
-      </ul>
-    </details>
-  </main>
+  <NameDialog
+    :prompt="flow.prompt.value"
+    :initial-name="flow.playerName.value"
+    :online-count="conn.onlineCount.value"
+    :status="flow.matchmakingStatus.value"
+    :busy="flow.dialogBusy.value"
+    :submit-label="flow.submitLabel.value"
+    @submit="onDialogSubmit"
+    @join="onDialogJoin"
+    @cancel="onDialogCancel"
+  />
 
-  <div id="name-modal" class="modal-backdrop hidden" role="presentation">
-    <form
-      id="name-form"
-      class="panel modal"
-      aria-modal="true"
-      aria-labelledby="name-title"
-      role="dialog"
-    >
-      <h2 id="name-title">{{ $t('dialog.onlineTitle') }}</h2>
-      <label class="name-field" for="player-name">
-        <span>{{ $t('name.label') }}</span>
-        <input
-          id="player-name"
-          maxlength="24"
-          autocomplete="nickname"
-          enterkeyhint="done"
-          required
-        />
-      </label>
-      <p id="online-count" class="online-count hidden" aria-live="polite">
-        {{ $t('name.online') }} <strong>0</strong>
-      </p>
-      <p id="matchmaking-status" class="hint hidden" aria-live="polite"></p>
-      <fieldset id="training-difficulty" class="difficulty hidden">
-        <legend>{{ $t('name.difficulty') }}</legend>
-        <label><input type="radio" name="difficulty" value="easy" />{{ $t('name.easy') }}</label>
-        <label><input type="radio" name="difficulty" value="medium" checked />{{ $t('name.medium') }}</label>
-        <label><input type="radio" name="difficulty" value="hard" />{{ $t('name.hard') }}</label>
-      </fieldset>
-      <button id="name-submit" class="primary" type="submit">{{ $t('action.connect') }}</button>
-      <div id="join-block" class="hidden">
-        <div class="divider"><span>{{ $t('name.or') }}</span></div>
-        <div class="join-row">
-          <input
-            id="join-code"
-            maxlength="8"
-            :placeholder="$t('name.code')"
-            autocomplete="off"
-            autocapitalize="characters"
-            spellcheck="false"
-          />
-          <button id="join" type="button">{{ $t('action.join') }}</button>
-        </div>
-      </div>
-      <button id="name-cancel" class="ghost" type="button">{{ $t('action.cancel') }}</button>
-    </form>
-  </div>
+  <GameLobby
+    :visible="flow.lobbyVisible.value"
+    :code="flow.lobbyCode.value"
+    :hint="flow.lobbyHint.value"
+    :show-copy="flow.showCopy.value"
+    @copy="copyInvite"
+    @cancel="returnToMenu"
+  />
 
-  <section id="lobby" class="panel hidden">
-    <h2>{{ $t('lobby.created') }}</h2>
-    <div id="invite-code" class="code">—</div>
-    <p id="lobby-hint" class="hint">{{ $t('lobby.waiting') }}</p>
-    <button id="copy-link" class="primary">{{ $t('action.copy') }}</button>
-    <button id="cancel" class="ghost">{{ $t('action.cancel') }}</button>
-  </section>
+  <GameOver
+    :visible="game.finished.value"
+    :title="game.resultTitle.value"
+    :my-score="game.myScore.value"
+    :foe-score="game.foeScore.value"
+    :can-rematch="flow.canRematch.value"
+    :rematch-pending="flow.rematch.value.mine"
+    @rematch="flow.requestRematch"
+    @menu="returnToMenu"
+  />
 
-  <section id="over" class="panel hidden">
-    <h2 id="over-title">{{ $t('result.win') }}</h2>
-    <div id="over-score" class="code">0 : 0</div>
-    <button id="again" class="primary">{{ $t('action.rematch') }}</button>
-    <button id="to-menu" class="ghost">{{ $t('action.newGame') }}</button>
-  </section>
+  <ToastMessage />
 
-  <div id="toast" class="hidden"></div>
-  <div id="training-controls" class="training-controls hidden">
-    <button id="human-invite" class="hidden" type="button">
-      {{ $t('training.humanInvite') }}
-    </button>
-    <button id="exit-training" type="button">{{ $t('training.exit') }}</button>
-  </div>
+  <TrainingControls
+    :visible="Boolean(conn.connection.value?.training) && game.running.value"
+    :show-human-invite="flow.showHumanInvite.value"
+    @invite="flow.leaveTraining(); flow.openPrompt('online')"
+    @exit="flow.leaveTraining"
+  />
 </template>

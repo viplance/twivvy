@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { messages, supportedLocales } from "../src/locales.ts";
+import { messages, supportedLocales } from "../src/locales/index.ts";
 import { detectLocale } from "../src/i18n.ts";
 
 const requestedLocales = ["en", "be", "es", "ru", "uk", "it", "pt", "pl", "fr", "de", "tr"];

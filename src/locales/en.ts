@@ -1,0 +1,46 @@
+import type { LocaleMessages } from "../types/i18n.ts";
+
+export const en = {
+  meta: { title: "Twivvy", description: "Turn the maze and take the ball your opponent already thought was theirs." },
+  sound: { label: "Sound", enable: "Turn sound on", disable: "Turn sound off" },
+  tagline: { first: "Turn the maze and take the ball", second: "your opponent already thought was theirs." },
+  menu: { friend: "Play with a friend", online: "Random opponent", training: "Training", how: "How to play" },
+  rules: {
+    board: "The board has nine rotating platforms (3×3).",
+    goal: "Collect as many balls as possible in your receiver.",
+    turn: "You can rotate one platform per turn.",
+    spawn: "New balls appear from two marked cells in the centre.",
+    combine: "After the wait, the opponent's move is revealed and rotations combine.",
+    cooldown: "A rotated platform is locked for the next turn.",
+},
+  player: { you: "Player", opponent: "Opponent", bot: "Bot" },
+  name: { label: "Your name", online: "Players online:", difficulty: "Bot difficulty", easy: "Easy", medium: "Medium", hard: "Hard", code: "code", or: "or" },
+  dialog: {
+    createTitle: "Play with a friend", createSubmit: "Create room",
+    joinTitle: "Join game", joinSubmit: "Join",
+    onlineTitle: "Random opponent", onlineSubmit: "Connect",
+    trainingTitle: "Training", trainingSubmit: "Start training",
+},
+  action: { connect: "Connect", join: "Join", cancel: "Cancel", copy: "Copy link", rematch: "Rematch", newGame: "New game" },
+  lobby: { created: "Room created", waiting: "Waiting for an opponent…" },
+  training: { humanInvite: "Want to play with a person?", exit: "Exit training" },
+  status: {
+    round: "Round {round} of {total}", peerFound: "Opponent found, establishing connection…",
+    storageUnavailable: "Your browser cannot save the match. Do not close this tab.",
+    startupFailed: "Could not start the game. Refresh the page on both devices.",
+    peerDisconnected: "Opponent disconnected", waitingOpponent: "Waiting for opponent…",
+    finding: "Finding an opponent…", queued: "You are in the queue. Finding an opponent…",
+    queueRetry: "Queue connection lost. Retrying…", queueFailed: "Could not join the queue. Try again.",
+    connecting: "Connecting…", copied: "Link copied to clipboard", copyManual: "Copy the link manually",
+},
+  error: {
+    matchConnect: "Could not connect to the matched opponent.", createRoom: "Could not create the room.",
+    notFound: "Room not found or the invitation has expired. Ask for a new link.",
+    oldVersion: "The game was created with an older version. Refresh both devices and create a new room.",
+    occupied: "The seat is occupied. Return to the original game tab.",
+    connectFailed: "Could not connect. Refresh the page to try again.",
+    peerAbsent: "Match ended: the opponent was away for more than 30 minutes.",
+    restoreMismatch: "Could not reconcile the saved match.", platformCooldown: "Platform is cooling down", nameRequired: "Enter your name",
+},
+  result: { win: "Victory", loss: "Defeat", draw: "Draw" },
+} as const satisfies LocaleMessages;

@@ -1,0 +1,46 @@
+import type { LocaleMessages } from "../types/i18n.ts";
+
+export const de = {
+  meta: { title: "Drehung", description: "Drehe das Labyrinth und schnapp dir die Kugel, die dein Gegner schon für seine hielt." },
+  sound: { label: "Ton", enable: "Ton einschalten", disable: "Ton ausschalten" },
+  tagline: { first: "Drehe das Labyrinth und schnapp dir die Kugel,", second: "die dein Gegner schon für seine hielt." },
+  menu: { friend: "Mit einem Freund spielen", online: "Zufälliger Gegner", training: "Training", how: "Spielanleitung" },
+  rules: {
+    board: "Das Spielfeld besteht aus neun drehbaren Plattformen (3×3).",
+    goal: "Sammle so viele Kugeln wie möglich in deinem Auffangbehälter.",
+    turn: "Pro Zug kannst du eine Plattform drehen.",
+    spawn: "Neue Kugeln erscheinen auf zwei markierten Feldern in der Mitte.",
+    combine: "Nach der Wartezeit wird der Zug des Gegners aufgedeckt und die Drehungen werden kombiniert.",
+    cooldown: "Eine gedrehte Plattform ist im nächsten Zug gesperrt.",
+},
+  player: { you: "Spieler", opponent: "Gegner", bot: "Bot" },
+  name: { label: "Dein Name", online: "Spieler online:", difficulty: "Bot-Schwierigkeit", easy: "Einfach", medium: "Mittel", hard: "Schwer", code: "Code", or: "oder" },
+  dialog: {
+    createTitle: "Mit einem Freund spielen", createSubmit: "Raum erstellen",
+    joinTitle: "Spiel beitreten", joinSubmit: "Beitreten",
+    onlineTitle: "Zufälliger Gegner", onlineSubmit: "Verbinden",
+    trainingTitle: "Training", trainingSubmit: "Training starten",
+},
+  action: { connect: "Verbinden", join: "Beitreten", cancel: "Abbrechen", copy: "Link kopieren", rematch: "Revanche", newGame: "Neues Spiel" },
+  lobby: { created: "Raum erstellt", waiting: "Warten auf einen Gegner…" },
+  training: { humanInvite: "Möchtest du gegen einen Menschen spielen?", exit: "Training beenden" },
+  status: {
+    round: "Runde {round} von {total}", peerFound: "Gegner gefunden, Verbindung wird hergestellt…",
+    storageUnavailable: "Dein Browser kann das Spiel nicht speichern. Schließe diesen Tab nicht.",
+    startupFailed: "Das Spiel konnte nicht gestartet werden. Aktualisiert die Seite auf beiden Geräten.",
+    peerDisconnected: "Verbindung zum Gegner getrennt", waitingOpponent: "Warten auf den Gegner…",
+    finding: "Gegner wird gesucht…", queued: "Du bist in der Warteschlange. Ein Gegner wird gesucht…",
+    queueRetry: "Verbindung zur Warteschlange unterbrochen. Neuer Versuch…", queueFailed: "Beitritt zur Warteschlange fehlgeschlagen. Versuche es erneut.",
+    connecting: "Verbindung wird hergestellt…", copied: "Link in die Zwischenablage kopiert", copyManual: "Kopiere den Link manuell",
+},
+  error: {
+    matchConnect: "Verbindung zum gefundenen Gegner fehlgeschlagen.", createRoom: "Der Raum konnte nicht erstellt werden.",
+    notFound: "Raum nicht gefunden oder Einladung abgelaufen. Bitte um einen neuen Link.",
+    oldVersion: "Das Spiel wurde mit einer älteren Version erstellt. Aktualisiert beide Geräte und erstellt einen neuen Raum.",
+    occupied: "Der Platz ist belegt. Kehre zum ursprünglichen Spiel-Tab zurück.",
+    connectFailed: "Verbindung fehlgeschlagen. Aktualisiere die Seite, um es erneut zu versuchen.",
+    peerAbsent: "Spiel beendet: Der Gegner war länger als 30 Minuten abwesend.",
+    restoreMismatch: "Das gespeicherte Spiel konnte nicht abgeglichen werden.", platformCooldown: "Die Plattform kühlt ab", nameRequired: "Gib deinen Namen ein",
+},
+  result: { win: "Sieg", loss: "Niederlage", draw: "Unentschieden" },
+} as const satisfies LocaleMessages;

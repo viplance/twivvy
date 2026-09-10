@@ -754,7 +754,11 @@ export class BoardView {
     return lunges;
   }
 
-  /** Empty both receiver trays — a rematch starts from a clean board. */
+  /**
+   * Empty both receiver trays — a rematch starts from a clean board.
+   * @param {object} match
+   * @param {{ platform: number, dir: number } | null} [selection]
+   */
   restoreMatch(match, selection = null) {
     this.clearPreview();
     this.clearCollected();

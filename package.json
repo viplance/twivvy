@@ -12,7 +12,9 @@
     "build": "tsc --noEmit && vite build",
     "type-check": "tsc --noEmit",
     "preview": "vite preview --host 127.0.0.1 --port 8080",
-    "test": "node --test tools/*.test.mjs",
+    "test": "node --test tools/*.test.mjs && vitest run",
+    "test:engine": "node --test tools/*.test.mjs",
+    "test:ui": "vitest run",
     "validate-maps": "node tools/validate-maps.mjs",
     "deploy": "pnpm run build && gsutil -m rsync -r -x '^index\\.html$' dist gs://twivvy.e-notix.com/ && gsutil -h 'Cache-Control:no-cache' cp dist/index.html gs://twivvy.e-notix.com/index.html"
   },
@@ -23,7 +25,10 @@
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "6.0.8",
+    "@vue/test-utils": "^2.5.0",
+    "happy-dom": "^20.14.3",
     "typescript": "7.0.2",
-    "vite": "8.2.2"
+    "vite": "8.2.2",
+    "vitest": "^3.2.7"
   }
 }

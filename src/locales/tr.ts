@@ -1,0 +1,46 @@
+import type { LocaleMessages } from "../types/i18n.ts";
+
+export const tr = {
+  meta: { title: "Dönüş", description: "Labirenti döndür ve rakibinin kendisinin sandığı topu kap." },
+  sound: { label: "Ses", enable: "Sesi aç", disable: "Sesi kapat" },
+  tagline: { first: "Labirenti döndür ve rakibinin", second: "kendisinin sandığı topu kap." },
+  menu: { friend: "Arkadaşınla oyna", online: "Rastgele rakip", training: "Antrenman", how: "Nasıl oynanır" },
+  rules: {
+    board: "Oyun alanı dokuz döner platformdan oluşur (3×3).",
+    goal: "Haznende mümkün olduğunca çok top topla.",
+    turn: "Her turda bir platformu döndürebilirsin.",
+    spawn: "Yeni toplar merkezdeki iki işaretli hücreden çıkar.",
+    combine: "Bekleme sonunda rakibin hamlesi açılır ve dönüşler birleştirilir.",
+    cooldown: "Döndürülen platform bir sonraki tur boyunca kilitlenir.",
+},
+  player: { you: "Oyuncu", opponent: "Rakip", bot: "Bot" },
+  name: { label: "Adınız", online: "Çevrimiçi oyuncular:", difficulty: "Bot zorluğu", easy: "Kolay", medium: "Orta", hard: "Zor", code: "kod", or: "veya" },
+  dialog: {
+    createTitle: "Arkadaşınla oyna", createSubmit: "Oda oluştur",
+    joinTitle: "Oyuna katıl", joinSubmit: "Katıl",
+    onlineTitle: "Rastgele rakip", onlineSubmit: "Bağlan",
+    trainingTitle: "Antrenman", trainingSubmit: "Antrenmanı başlat",
+},
+  action: { connect: "Bağlan", join: "Katıl", cancel: "İptal", copy: "Bağlantıyı kopyala", rematch: "Rövanş", newGame: "Yeni oyun" },
+  lobby: { created: "Oda oluşturuldu", waiting: "Rakip bekleniyor…" },
+  training: { humanInvite: "Bir oyuncuya karşı oynamak ister misin?", exit: "Antrenmandan çık" },
+  status: {
+    round: "{round}. tur / {total}", peerFound: "Rakip bulundu, bağlantı kuruluyor…",
+    storageUnavailable: "Tarayıcınız oyunu kaydedemiyor. Bu sekmeyi kapatmayın.",
+    startupFailed: "Oyun başlatılamadı. Sayfayı her iki cihazda da yenileyin.",
+    peerDisconnected: "Rakibin bağlantısı kesildi", waitingOpponent: "Rakip bekleniyor…",
+    finding: "Rakip aranıyor…", queued: "Sıradasınız. Rakip aranıyor…",
+    queueRetry: "Sıra bağlantısı kesildi. Yeniden deneniyor…", queueFailed: "Sıraya girilemedi. Tekrar deneyin.",
+    connecting: "Bağlanıyor…", copied: "Bağlantı panoya kopyalandı", copyManual: "Bağlantıyı elle kopyalayın",
+},
+  error: {
+    matchConnect: "Bulunan rakibe bağlanılamadı.", createRoom: "Oda oluşturulamadı.",
+    notFound: "Oda bulunamadı veya davetin süresi doldu. Yeni bir bağlantı isteyin.",
+    oldVersion: "Oyun eski bir sürümle oluşturulmuş. Her iki cihazı yenileyip yeni bir oda oluşturun.",
+    occupied: "Yer dolu. Oyunun açık olduğu ilk sekmeye dönün.",
+    connectFailed: "Bağlantı kurulamadı. Tekrar denemek için sayfayı yenileyin.",
+    peerAbsent: "Oyun sona erdi: Rakip 30 dakikadan uzun süre çevrimdışı kaldı.",
+    restoreMismatch: "Kayıtlı oyun eşleştirilemedi.", platformCooldown: "Platform soğuyor", nameRequired: "Adınızı girin",
+},
+  result: { win: "Zafer", loss: "Yenilgi", draw: "Beraberlik" },
+} as const satisfies LocaleMessages;
