@@ -1,4 +1,4 @@
-// Twivvy («Перекрут») — deterministic match simulation.
+// Twivvy — deterministic match simulation.
 //
 // Pure: no DOM, no randomness, no time. Both peers replay it over the same
 // command log and must reach identical state. Keep it that way.

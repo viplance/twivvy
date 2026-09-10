@@ -1,379 +1,118 @@
-# Twivvy («Перекрут») — браузерный прототип
+# Twivvy
 
-Короткая PvP-дуэль на общем поле: игроки одновременно и скрытно поворачивают
-платформы 2×2 вместе с дорожками и шариками на них. Цель — доставить больше
-шариков в свой приёмник.
+[Twivvy](https://twivvy.e-notix.com/) is a short browser-based puzzle duel.
+Players secretly rotate sections of a shared maze and compete to guide more
+balls into their receiver.
 
-Прототип реализует онлайн-дуэль по ссылке-приглашению. Спецификация —
+The product specification is in
 [ios-pvp-market-perekrut.md](ios-pvp-market-perekrut.md).
 
-## Что работает
+## Features
 
-- Поле девять поворотных платформ (3x3) (Three.js).
-- Такт: 30 с на решение, 1,2 с на анимацию; 30 тактов в матче.
-- Два источника шариков отмечаются янтарными кольцами за один ход до появления;
-  новый шарик поднимается из своей клетки, после анимации кольца скрываются.
-- Реванш переиспользует уже открытое соединение: ссылка-приглашение остаётся
-  прежней, матч начинается, когда «Реванш» нажали обе стороны.
-- Публичный матчмейкинг показывает число игроков онлайн и попарно создаёт
-  комнаты для тех, кто дольше всех ждёт; нечётный игрок остаётся в очереди.
-- Имя сохраняется в браузере и показывается рядом со своим и чужим приёмником;
-  при реванше повторный ввод не требуется.
-- Код комнаты попадает в адресную строку: `https://twivvy.e-notix.com/KFUEB`.
-  Адрес и есть приглашение — его можно просто скопировать из строки браузера.
-  Старые ссылки вида `?game=` и `?join=` продолжают работать.
-- Скрытый одновременный выбор; на одной платформе повороты складываются
-  (два по часовой = 180°, встречные компенсируются).
-- Охлаждение платформы на один следующий такт, общее для обоих игроков.
-- До 12 шариков за матч (пары в тактах 1, 5, 9, 13, 17, 21), срок жизни 12 ходов.
-- Одна клетка — один шарик: шарик, которому преградил путь другой шарик,
-  остаётся в своей клетке и разворачивается по дорожке назад.
-  Это отступление от спецификации, где шарики друг друга не блокируют.
-- Доставленные шарики остаются в приёмнике и выкладываются в ряд, поэтому
-  счёт виден на самом поле; отдельных счётчиков в интерфейсе нет.
-- Досрочная победа при 7 очках; ничья фиксируется как ничья.
-- Три вручную отобранные карты, симметричные при повороте на 180°.
-- Оба игрока видят свой приёмник снизу (клиент гостя развёрнут на 180°).
+- A 3×3 board of rotating 2×2 platforms rendered with Three.js.
+- Simultaneous hidden moves with commit/reveal verification.
+- Private rooms through shareable URLs such as `/KFUEB`.
+- Public matchmaking and local training against three bot difficulty levels.
+- Rematches over the existing connection and match recovery after refresh.
+- Eleven UI languages selected from `navigator.languages`: English,
+  Belarusian, Spanish, Russian, Ukrainian, Italian, Portuguese, Polish,
+  French, German, and Turkish. Unknown languages fall back to English.
+- Localized game names, browser titles, status messages, and accessibility text.
+- Optional sound with the preference stored in the browser.
 
-Не входит в этот прототип: обучение, бот, локальный режим «рядом», быстрый
-матч, покупки.
+## Game rules
 
-## Архитектура
+- Each player may rotate one platform per round.
+- Both moves are revealed together; rotations on the same platform combine.
+- A rotated platform is unavailable during the next round.
+- Balls appear from the two marked centre cells on scheduled rounds.
+- Delivered balls remain visible in the receiver; seven points wins early.
+- A match lasts at most 30 rounds.
 
-| Слой | Файл | Роль |
-|---|---|---|
-| UI | [src/App.vue](src/App.vue) | Vue 3 SFC: разметка меню, HUD, диалога, лобби и результата |
-| Локализация | [src/i18n.ts](src/i18n.ts), [src/locales.ts](src/locales.ts) | Vue I18n, определение языка браузера и словари интерфейса |
-| Контроллер | [src/game.ts](src/game.ts) | TypeScript: UI-состояния, приглашения и цикл тактов |
-| Правила | [js/rules.js](js/rules.js) | Чистая детерминированная симуляция: без DOM, времени и случайности |
-| Отрисовка | [js/view.js](js/view.js) | Three.js: платформы, дорожки, шарики, анимация такта |
-| Сеть | [js/net.js](js/net.js) | WebRTC, heartbeat, восстановление обеих ролей |
-| Партия | [js/session.js](js/session.js) | Сохраняемый таймер, commit/reveal, пауза и сверка журнала |
-| Сигналинг | [tools/signal-server/index.cjs](tools/signal-server/index.cjs) | Google Cloud Function (gen2), токены, поколения SDP/ICE и присутствие |
+## Stack
 
-### Честность хода без авторитетного сервера
+| Area | Technology / file |
+|---|---|
+| UI | Vue 3 and TypeScript — [src/App.vue](src/App.vue), [src/game.ts](src/game.ts) |
+| Localization | Vue I18n — [src/i18n.ts](src/i18n.ts), [src/locales.ts](src/locales.ts) |
+| Rendering | Three.js — [js/view.js](js/view.js) |
+| Rules | Deterministic simulation — [js/rules.js](js/rules.js) |
+| Match lifecycle | Timers, commit/reveal, recovery — [js/session.js](js/session.js) |
+| Networking | WebRTC DataChannel — [js/net.js](js/net.js) |
+| Signaling | Google Cloud Function and Firestore — [tools/signal-server](tools/signal-server) |
+| Build | Vite and pnpm |
 
-Матч идёт напрямую между браузерами (WebRTC DataChannel), сервер участвует
-только в установлении соединения и не видит игровых команд. Чтобы никто не мог
-выбрать ход после просмотра чужого, каждый такт проходит в два шага:
+Gameplay traffic goes directly between browsers over WebRTC. The signaling
+service exchanges SDP/ICE data, manages room presence, and powers matchmaking;
+it does not process game moves. Every online round uses a SHA-256 commit/reveal
+exchange so neither player can choose after seeing the opponent's move. Local
+training does not use networking or commit/reveal.
 
-1. **commit** — обе стороны отправляют SHA-256 от `такт|команда|соль`;
-2. **reveal** — только получив хеш соперника, сторона раскрывает саму команду.
+## Development
 
-Раскрытие, не совпадающее с ранее присланным хешем, считается нарушением
-протокола, а не правом заменить ход: матч останавливается.
-
-Симуляция детерминирована, поэтому оба клиента из одного журнала команд
-получают одинаковое состояние — это проверяется тестом.
-
-## Сигнальный сервис
-
-`POST /api/rooms` — создать комнату, вернуть код и токен хоста.
-`POST /api/rooms/:code/join` — занять комнату (второй вызов получает 409).
-`POST /api/rooms/:code/signal` — положить свой SDP и ICE-кандидатов.
-`GET /api/rooms/:code?token=&since=&epoch=` — забрать SDP/ICE и обновить присутствие.
-`POST /api/rooms/:code/resume` — восстановить свою роль по прежнему токену; idempotent attempt.
-`POST /api/rooms/:code/presence` — отметить уход страницы, не удаляя комнату.
-`DELETE /api/rooms/:code` — удалить комнату при явном выходе или истечении ожидания.
-
-`GET /api/matchmaking` — получить число игроков в публичном онлайне.
-`POST /api/matchmaking` — войти в FIFO-очередь с именем игрока.
-`GET /api/matchmaking/:ticket` — heartbeat очереди и получение назначенной комнаты.
-`DELETE /api/matchmaking/:ticket` — покинуть очередь или публичный онлайн.
-
-Комнаты живут в Firestore (`twivvy_rooms`, база `enotix`) и истекают через
-`ROOM_TTL_SECONDS` отсутствия любого игрока, а не с момента создания. Доступ к комнате — по токену, выданному при создании или
-входе; SDP и кандидаты ограничены по размеру и количеству.
-
-## Разработка
-
-Интерфейс доступен на английском, белорусском, испанском, русском, украинском,
-итальянском, португальском, польском, французском, немецком и турецком. При загрузке выбирается
-первый поддерживаемый язык из `navigator.languages`; региональные варианты
-вроде `pt-BR` используют базовый язык `pt`. Для остальных языков используется
-английский.
-Название игры в меню и заголовке вкладки также переводится вместе с интерфейсом.
-
-«Тренировка» запускает `TrainingSession` в браузере без комнаты и WebRTC.
-Лёгкий бот выбирает случайный допустимый ход, средний прогнозирует три такта,
-сложный — четыре такта с оценкой всех возможных ответов игрока. Бот выбирает
-ход до выбора человека. Реванш сохраняет имя и сложность.
-Во время тренировки раз в 5 секунд читается публичный счётчик онлайна:
-при нечётном значении появляется приглашение к игре с человеком.
-Клик завершает тренировку и открывает попап «Случайный соперник»;
-вход в очередь происходит только после нажатия «Подключиться».
-При недоступности сети тренировка продолжает работать без приглашения.
-
-Звуки в `sound/`: WAV — исходники, MP3 (стерео, 96 кбит/с) — файлы для браузера.
-Звук по умолчанию выключен; кнопка справа вверху переключает его и сохраняет выбор в `localStorage` (`twivvy-sound-enabled`).
-`magic_hole_in.mp3` звучит при прибытии шариков в любой приёмник;
-`rising_wind.mp3` — при отпускании платформы с выбранным поворотом.
-Звук разблокируется первым касанием/кликом или нажатием клавиши;
-в скрытой вкладке эффекты пропускаются, без отложенного воспроизведения.
+Requirements: Node.js `^20.19` or `>=22.12` and pnpm 10 for the UI. The
+signaling service requires Node.js 24.
 
 ```bash
-pnpm install            # зависимости Vue, TypeScript, Vite и Three.js
-pnpm start              # Vite dev server: http://localhost:8080
-pnpm type-check         # проверка TypeScript
-pnpm build              # production-сборка в dist/
-pnpm test               # правила, сигналинг, гонки подключения, пауза и восстановление
-pnpm validate-maps      # прогон карт: голы, баланс, доля «застрявших» тактов
+pnpm install
+pnpm start          # http://localhost:8080
+pnpm type-check
+pnpm test
+pnpm validate-maps
+pnpm build          # output: dist/
+pnpm preview
 ```
 
-Для локальной игры нужно открыть две вкладки: в первой «Играть с другом», во
-второй — вставить код или открыть скопированную ссылку.
+To test a private match locally, open two tabs, create a room in one, and open
+the generated room URL in the other.
 
-Vite dev server повторяет SPA-навигацию и отдаёт приложение для ссылок вида
-`/КОД`. UI написан как Vue SFC с `<script setup lang="ts">`; TypeScript и
-production-сборка настроены в [tsconfig.json](tsconfig.json) и
-[vite.config.ts](vite.config.ts). Three.js устанавливается из npm-реестра и входит в
-собранный bundle, внешнего CDN и `importmap` больше нет.
+`tools/reconnect-browser.mjs` runs the recovery flow in real Chrome. Build the
+app first and provide a `PUPPETEER_MODULE` path to `puppeteer-core`.
 
-## Деплой
+## Deployment
+
+Deploy the static app to the `twivvy.e-notix.com` Google Cloud Storage bucket:
 
 ```bash
-# статика
-pnpm run deploy                      # gs://twivvy.e-notix.com
+pnpm run deploy
+```
 
-# сигнальный сервис (сначала сервер, потом статика)
+The script builds first, uploads hashed assets, and publishes `index.html` last
+with `Cache-Control: no-cache`. Existing bucket objects are retained.
+
+Cloudflare proxies `twivvy.e-notix.com` to `c.storage.googleapis.com` with SSL
+mode set to **Full**. The `twivvy-rooms` Worker uses
+[cloudflare-worker.js](cloudflare-worker.js) to rewrite room paths to
+`index.html`, allowing invite URLs to return HTTP 200.
+
+The signaling service is deployed separately:
+
+```bash
 gcloud functions deploy twivvy-signal --gen2 --runtime=nodejs24 \
   --region=us-central1 --source=tools/signal-server --entry-point=twivvySignal \
   --trigger-http --allow-unauthenticated \
   --env-vars-file=../cloud-functions/twivvy-signal/.env.yaml --max-instances=3
 ```
 
-`pnpm run deploy` сначала собирает приложение, затем загружает содержимое
-`dist/` через `gsutil rsync` и отдельно публикует собранный `index.html` с
-`Cache-Control: no-cache`. Существующие объекты не удаляются.
+## Important constraints
 
-Разовая настройка бакета (уже сделана), если понадобится повторить для
-другого домена:
+- Keep [js/rules.js](js/rules.js) deterministic and free of DOM, clock, and
+  unseeded randomness. Both clients must derive identical state from the log.
+- Match deadlines use `Date.now()` and timers, not `requestAnimationFrame`,
+  because animation frames stop in background tabs.
+- Do not delete a waiting room when local polling stops; the invite must remain
+  valid until explicit exit or expiry.
+- Asset URLs must remain root-relative so room paths can load the application.
+- Configure new origins in the signaling service's `ALLOWED_ORIGINS` value.
 
-```bash
-gsutil mb -p enotix -c STANDARD -l US -b on gs://<домен>/
-gsutil iam ch allUsers:objectViewer gs://<домен>/     # публичный доступ
-gsutil web set -m index.html -e index.html gs://<домен>/
-```
+## Limitations
 
-`index.html` задан и как главная страница, и как страница 404 — благодаря
-этому ссылка-приглашение открывается при любом пути.
+- Recovery data lives in the original tab's `sessionStorage` and cannot move to
+  another device.
+- Waiting rooms and matches with an absent player expire after 30 minutes;
+  active rooms remain available.
+- There is no TURN server, so WebRTC may fail behind symmetric NAT.
 
-Поддомен в Cloudflare: CNAME `twivvy` → `c.storage.googleapis.com`, proxied
-(оранжевое облако), режим SSL/TLS — **Full**. При режиме Flexible Cloudflare
-пойдёт к GCS по HTTP, получит редирект на HTTPS и уйдёт в бесконечный цикл.
+## License
 
-Vite добавляет content hash к именам JS, CSS и аудио, поэтому вручную менять
-параметр `v` больше не нужно. Команда деплоя сначала загружает хешированные
-ассеты, затем `index.html`; для HTML сохраняется `Cache-Control: no-cache`,
-чтобы браузер проверял актуальную точку входа при следующем открытии.
-
-### Cloudflare Worker для красивых ссылок
-
-Объекта `/KFUEB` в бакете нет, поэтому GCS отдаёт `index.html`, но со статусом
-**404**: страница открывается и игра работает, однако статус для ссылки,
-которой делятся, неверный. [cloudflare-worker.js](cloudflare-worker.js)
-переписывает путь-код на `/index.html` и отдаёт честный **200**; корень и
-`/assets/*` проходят без изменений.
-
-Без Worker игра тоже работает — отличается только код ответа.
-
-> Установлен: воркер `twivvy-rooms` с маршрутом `twivvy.e-notix.com/*`.
-> Режим отказа — **fail open**: воркер косметический, и при его сбое запрос
-> должен уходить в бакет (страница откроется с кодом 404), а не ронять сайт.
-> Личный адрес воркера `*.workers.dev` к домену сам по себе не подключает —
-> нужен именно Route в зоне; Custom Domain здесь не подойдёт, поддомен занят
-> записью CNAME на бакет.
-
-**Установка через панель Cloudflare:**
-
-1. Cloudflare → аккаунт → **Workers & Pages** → **Create** → **Start with Hello
-   World!** → **Get started**.
-2. Имя, например `twivvy-rooms` → **Deploy** (пока с шаблонным кодом).
-3. **Edit code**, удалить содержимое и вставить целиком
-   [cloudflare-worker.js](cloudflare-worker.js) → **Deploy**.
-4. Вкладка **Settings** воркера → **Domains & Routes** → **Add** → **Route**:
-   - Zone: `e-notix.com`
-   - Route: `twivvy.e-notix.com/*`
-5. Проверить: `curl -sI https://twivvy.e-notix.com/ABCDE` должен вернуть
-   `HTTP/2 200`, а `https://twivvy.e-notix.com/` и `/assets/*` — по-прежнему
-   `200` со своим содержимым.
-
-Маршрут обязательно со звёздочкой: `twivvy.e-notix.com/*`. Без неё воркер
-поймает только корень и не тронет пути-коды, ради которых он и нужен.
-
-**Или через Wrangler:**
-
-```bash
-npx wrangler init twivvy-rooms      # создаст проект
-# заменить src/index.js на cloudflare-worker.js, затем в wrangler.toml:
-#   routes = [{ pattern = "twivvy.e-notix.com/*", zone_name = "e-notix.com" }]
-npx wrangler deploy
-```
-
-`ALLOWED_ORIGINS` в `.env.yaml` ограничивает CORS: сейчас это
-`https://twivvy.e-notix.com` и `http://localhost:8080`.
-
-## Проверено
-
-- 19 тестов правил: сложение поворотов, охлаждение, доставка, срок жизни,
-  приоритет доставки над истечением, совпадение состояния у обоих клиентов.
-- Карты: ~6 голов за матч, баланс сторон, доля матчей без голов ≈ 0.
-- Полный матч из 30 тактов между двумя браузерами: счёт сошёлся у обеих сторон.
-- Реванш: после нажатия одной стороной обе остаются на экране результата;
-  после нажатия второй обе попадают в новый матч — та же карта, счёт 0:0,
-  такты синхронны, адрес страницы у обоих не меняется.
-- Ссылка-приглашение: адрес меняется на `/CODE` при создании, гость по этому
-  адресу подключается, ассеты грузятся, при выходе в меню адрес очищается.
-  В буфер обмена уходит ровно то, что в адресной строке.
-- Worker установлен и работает на боевом домене: `/КОД` отдаёт 200 с
-  `cache-control: no-store` и телом `index.html`; корень и `/assets/*`
-  не затронуты.
-- Сквозная проверка на `https://twivvy.e-notix.com`: хост создаёт комнату,
-  гость заходит по ссылке-пути, матч играется до конца с голами, счёт у сторон
-  зеркальный, реванш переиспользует ту же ссылку.
-- Поздний вход: комната жива через 70 с после создания, гость подключается
-  за 2 с. До исправления комната удалялась на 45-й секунде и ссылка отдавала
-  «Room not found» — сверено прямым A/B на старом и новом коде.
-- Развёрнутая сборка проверена под именем `twivvy.e-notix.com`.
-
-Для автотестов окно решения можно сократить через `window.__TWIVVY_DECIDE_MS`
-(по умолчанию — боевые 30 с).
-
-## Тонкости, которые легко сломать
-
-Всё ниже — грабли, на которые уже наступали. Каждый пункт объясняет, почему
-сделано именно так, чтобы «упрощение» не вернуло старую ошибку.
-
-### Комнату нельзя удалять, пока хост ждёт
-
-Запись комнаты — это и есть приглашение. Пока соперник не зашёл, удаление
-записи ломает уже отправленную ссылку: она навсегда отдаёт `Room not found`.
-
-В [js/net.js](js/net.js) `_stopPolling()` только останавливает локальный цикл.
-Открытие канала и `pagehide` никогда не удаляют комнату. Опрос остаётся активен
-даже во время игры (раз в 5 с), чтобы сервер видел присутствие и чтобы любой
-из игроков мог инициировать новое поколение SDP/ICE после рефреша.
-Удаление происходит только при явном выходе или истечении 30 минут ожидания.
-Прежнего 45-секундного отказа при восстановлении гостя больше нет.
-
-### Никаких игровых таймеров на requestAnimationFrame
-
-В фоновой вкладке Chrome вообще не вызывает `rAF` (проверено — то же самое на
-пустой странице). Если такт зависит от `rAF`, у свернувшего вкладку игрока
-матч останавливается, а у соперника продолжается — рассинхрон.
-
-Дедлайн такта в [js/session.js](js/session.js) проверяется по `Date.now()`
-на `setInterval`; пауза сохраняет остаток. В `_animate()` ([js/view.js](js/view.js)) есть
-страховочный `setTimeout`, который доводит анимацию до конца, даже если кадры
-не приходят, иначе цикл тактов навсегда повиснет на неразрешённом промисе.
-
-Побочный эффект для автотестов: `page.click()` в Puppeteer ждёт отрисованный
-кадр и потому виснет на фоновой вкладке. В тестах нужен
-`page.evaluate(() => el.click())`.
-
-### Карты нельзя писать «на глаз»
-
-Первые три карты, набранные вручную, оказались непроходимыми: на двух из них
-шарики не доезжали ни разу за 300 матчей. Набор случайных прямых и углов легко
-даёт тупики и замкнутые кольца, которые сохраняются при поворотах.
-
-Текущие карты отобраны перебором и проверены симуляцией. Любую новую карту
-надо прогонять через `pnpm validate-maps`: ориентир — около 6 голов за
-матч, баланс сторон и доля матчей без голов близкая к нулю. Ещё требование —
-симметрия при повороте на 180°, иначе одна сторона получает преимущество; это
-проверяется тестом.
-
-### Столкновения шариков решаются итеративно, а не за один проход
-
-Правило «одна клетка — один шарик» нельзя применять простым перебором: тогда
-результат зависел бы от порядка шариков в массиве, и два клиента разошлись бы.
-Блокировка в `moveBalls()` пересчитывается циклом до стабилизации, а на спорную
-клетку, куда метят двое, не встаёт никто. Заблокированные шарики и встречные
-пары остаются на месте и разворачиваются по своим дорожкам назад.
-
-Шарик не появляется в клетке-источнике, если та занята. Иначе два шарика
-накладываются друг на друга, каждый ход претендуют на одну и ту же следующую
-клетку и выглядят как один застрявший шарик. Поэтому тесты, кладущие шарик
-вручную, должны использовать клетки подальше от источников (2,2) и (3,3).
-
-### Платформа поворачивается вместе с шариками
-
-Меши шариков висят на `pivot`, а не на группе платформы (они переезжают между
-платформами, и переподчинять их каждый такт было бы сложнее). Поэтому при
-анимации поворота их позиции доворачиваются вручную вокруг центра платформы.
-Если этого не делать, шарик стоит на месте во время поворота, а затем едет
-из старой клетки в новую — визуально «летит по воздуху».
-
-### Правила должны оставаться чистыми
-
-[js/rules.js](js/rules.js) не обращается к DOM, времени и случайности. На этом
-держится вся сетевая модель: оба клиента считают одно и то же состояние из
-одного журнала команд. Любой `Date.now()` или `Math.random()` внутри правил
-разведёт клиенты — есть тест, который это ловит.
-
-Случайность допустима только снаружи: карту для матча выбирает хост и
-передаёт её сопернику.
-
-### Событие спавна хранит клетку появления, а не текущую
-
-Шарик может появиться и в том же такте уехать. В событии спавна лежит именно
-клетка источника — иначе анимация подъёма стартовала бы не оттуда. Тест это
-фиксирует.
-
-### Источники и приёмники не крутятся
-
-Источники привязаны к двум фиксированным клеткам поля, а не к платформам,
-поэтому в сцене они принадлежат `pivot`, а не группе платформы. Если повесить
-их на платформу, они начнут вращаться вместе с ней — это будет ошибкой правил,
-а не только вида.
-
-### Пути к ассетам — корневые
-
-Страница открывается и как `/`, и как `/КОД`. Точка входа Vite в
-[index.html](index.html) задана от корня (`/src/main.ts`), а production-сборка
-генерирует корневые ссылки на хешированные файлы в `/assets/`. Поэтому код
-комнаты в пути не влияет на загрузку JS, CSS и аудио.
-
-### Имя бакета обязано совпадать с доменом
-
-GCS находит бакет по заголовку `Host`, поэтому бакет называется ровно
-`twivvy.e-notix.com`. Переименовать домен без переименования бакета нельзя.
-
-### `notFoundPage` работает только на website-эндпоинте
-
-`storage.googleapis.com/twivvy.e-notix.com/КОД` отдаёт XML-ошибку 404, а
-`c.storage.googleapis.com` с заголовком `Host` — уже `index.html`. Проверять
-поведение путей нужно на втором, потому что через него и ходит Cloudflare.
-
-### CORS настраивается на сигнальном сервисе
-
-Список разрешённых источников — `ALLOWED_ORIGINS` в `.env.yaml` сервиса, а не
-в бакете. Новый домен или другой порт для локальной разработки требуют правки
-там и передеплоя функции.
-
-## Известные ограничения
-
-- Сохранение находится в `sessionStorage` исходной вкладки, отдельно для каждой роли.
-  Рефреш обеих вкладок поддерживается; перенос партии на другое устройство и очистка
-  данных сайта — нет. Уже начатые старой версией партии не имеют сохранения.
-- После рефреша восстанавливаются поле, шарики в приёмниках, приватный поворот,
-  оставшееся время и соль/хеш уже зафиксированного хода. При разрыве на границе
-  хода сверяется журнал и доказательства commit/reveal: ход нельзя удвоить или пропустить.
-- Логический результат сохраняется до анимации. При рефреше во время движения
-  показывается сохранённый результат этого хода; кадр анимации не сохраняется.
-- 30 минут отсутствия считаются с обнаруженного разрыва. Heartbeat проверяет
-  канал раз в секунду; молча пропавший браузер обнаруживается примерно за 5 секунд.
-- Комната ждёт соперника 30 минут (`ROOM_TTL_SECONDS`), затем ссылка перестаёт
-  работать и нужно создать новую.
-- Без TURN-сервера соединение может не установиться при симметричном NAT;
-  в этом случае нужен TURN.
-- `tools/reconnect-browser.mjs` проверяет две реальные вкладки Chrome, рефреш
-  каждой роли и обеих сразу, заморозку таймера и восстановление мёртвого канала.
-  Перед запуском нужен `pnpm build`; `PUPPETEER_MODULE` задаёт путь к
-  установленному `puppeteer-core`, а локальный сервер раздаёт готовый `dist/`.
-
-## Лицензия
-
-Проприетарная: © 2026 Dzmitry Sharko, все права защищены. Использование,
-копирование, изменение и распространение — только с письменного разрешения
-правообладателя. Полный текст — [LICENSE](LICENSE).
+Proprietary. © 2026 Dzmitry Sharko. See [LICENSE](LICENSE).
