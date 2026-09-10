@@ -1,4 +1,4 @@
-import { createMatch, cloneMatch, resolveTick, isValidCommand, PLATFORMS, SIZE, DECIDE_MS } from './rules.js?v=20260910-training1';
+import { createMatch, cloneMatch, resolveTick, isValidCommand, PLATFORMS, SIZE, DECIDE_MS } from './rules.js?v=20260910-turnsound';
 
 export function legalMoves(match) {
   const moves = [null];

@@ -7,8 +7,8 @@ import {
   DECIDE_MS,
   RESOLVE_MS,
   TICKS,
-} from "./rules.js?v=20260910-training1";
-import { BoardView } from "./view.js?v=20260910-training1";
+} from "./rules.js?v=20260910-turnsound";
+import { BoardView } from "./view.js?v=20260910-turnsound";
 import {
   Connection,
   Matchmaker,
@@ -16,11 +16,11 @@ import {
   readSession,
   basePath,
   codeFromLocation,
-} from "./net.js?v=20260910-training1";
+} from "./net.js?v=20260910-turnsound";
 
-import { MatchSession } from "./session.js?v=20260910-training1";
-import { GameAudio } from "./audio.js?v=20260910-training1";
-import { TrainingSession } from "./bot.js?v=20260910-training1";
+import { MatchSession } from "./session.js?v=20260910-turnsound";
+import { GameAudio } from "./audio.js?v=20260910-turnsound";
+import { TrainingSession } from "./bot.js?v=20260910-turnsound";
 
 const $ = (id) => document.getElementById(id);
 
@@ -73,6 +73,7 @@ let matchmaker = null;
 let match = null;
 let mySide = "bottom"; // host plays the bottom receiver
 let selection = null; // { platform, dir }
+let heardOwnTurn = false; // our own release already played the turn effect
 let session = null;
 let animation = Promise.resolve();
 let running = false;
@@ -561,6 +562,7 @@ function startMatch(saved = null) {
   view.setInteractionEnabled(false);
   running = true;
   acceptingDrag = false;
+  heardOwnTurn = false;
 
   show(ui.lobby, false);
   show(ui.menu, false);
@@ -611,6 +613,15 @@ function startMatch(saved = null) {
       const currentSession = session;
       match = after;
       selection = null;
+      // The opponent's turn is only ever seen here, so it is only ever heard
+      // here. Our own turn already sounded on release, and plays again only if
+      // it was taken over by the deadline instead of released by hand.
+      const foeSide = mySide === "top" ? "bottom" : "top";
+      const turned = event.commands || {};
+      if (turned[foeSide] || (turned[mySide] && !heardOwnTurn)) {
+        sound?.play('turn');
+      }
+      heardOwnTurn = false;
       animation = view.playTick(event, before, after, RESOLVE_MS);
       await animation;
       if (session !== currentSession) return;
@@ -709,7 +720,12 @@ function init() {
   view = new BoardView($("scene"), {
     onPlatformDragStart: beginPlatformDrag,
     onPlatformDrag: finishPlatformDrag,
-    onPlatformRelease: () => sound.play('turn'),
+    onPlatformRelease: () => {
+      // _finishDrag commits through onPlatformDrag first, so `selection` already
+      // says whether this release was a committed turn or a reset back to zero.
+      if (selection) heardOwnTurn = true;
+      sound.play('turn');
+    },
   });
   view.start();
 

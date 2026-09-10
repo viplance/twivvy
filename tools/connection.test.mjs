@@ -162,6 +162,7 @@ async function controllerHarness({ pathname = "/", joinError = null, brokenView 
   let hostedName = null;
   let queuedName = null;
   const sounds = [];
+  let viewCallbacks = null;
   class FakeConnection extends EventTarget {
     constructor() { super(); conn = this; this.code = "TEST"; this.map = 0; }
     host({ name } = {}) {
@@ -201,9 +202,11 @@ async function controllerHarness({ pathname = "/", joinError = null, brokenView 
       }
       connected() {}
       dispose() {}
+      choose(selection) { this.chosen = selection; }
       remaining() { return this.decideMs; }
     },
     BoardView: class {
+      constructor(_canvas, callbacks) { viewCallbacks = callbacks; }
       async playTick() {}
       start() {}
       setPerspective() { starts++; }
@@ -242,6 +245,12 @@ async function controllerHarness({ pathname = "/", joinError = null, brokenView 
     getQueuedName: () => queuedName,
     sounds,
     resolveEvent: event => sessionCallbacks.resolved(event, {}, {}),
+    // _finishDrag commits through onPlatformDrag before sounding the release.
+    releasePlatform({ platform, dir }) {
+      sessionCallbacks.active(true);
+      viewCallbacks.onPlatformDrag(platform, dir);
+      viewCallbacks.onPlatformRelease();
+    },
     getStoredName: () => storedName,
     getJoinedCode: () => joinedCode,
     dispatch(id, type, event = {}) { getElement(id).dispatch(type, event); },
@@ -396,4 +405,27 @@ test("delivery sound plays for either receiver, but not ordinary movement", asyn
   }
   await app.resolveEvent({ delivered: [] });
   assert.deepEqual(app.sounds, ['delivery', 'delivery']);
+});
+
+test("the opponent's turn is heard on resolve; our own released turn is not repeated", async () => {
+  // The host plays the bottom receiver, so "top" is the opponent here.
+  const turn = { platform: 0, dir: 1 };
+  for (const [commands, released, expected] of [
+    [{ top: turn, bottom: null }, false, ['turn']],
+    [{ top: null, bottom: turn }, true, []],
+    // Nobody released it by hand: the deadline committed it, so it is heard now.
+    [{ top: null, bottom: turn }, false, ['turn']],
+    [{ top: turn, bottom: turn }, true, ['turn']],
+    [{ top: null, bottom: null }, false, []],
+  ]) {
+    const app = await controllerHarness();
+    const creating = vm.runInContext('createRoom()', app.sandbox);
+    app.getConnection().dispatchEvent(new Event('open'));
+    app.finishHost();
+    await creating;
+    if (released) app.releasePlatform(turn);
+    app.sounds.length = 0;
+    await app.resolveEvent({ delivered: [], commands });
+    assert.deepEqual(app.sounds, expected, JSON.stringify({ commands, released }));
+  }
 });

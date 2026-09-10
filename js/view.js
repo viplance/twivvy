@@ -14,7 +14,7 @@ import {
   RIGHT,
   DOWN,
   LEFT,
-} from "./rules.js?v=20260910-training1";
+} from "./rules.js?v=20260910-turnsound";
 
 const CELL = 1;
 const GAP = 0.18; // visible gap between platforms, so groups read as units
@@ -662,7 +662,11 @@ export class BoardView {
     });
     // Commit at once, even if the deadline falls during the settling animation.
     this.onPlatformDrag(platform, dir);
-    if (released && dir !== null) this.onPlatformRelease?.();
+    // A reset swings the platform back just as visibly as a commit, so it sounds
+    // too; only a cancel or a deadline takeover leaves the board without input.
+    if (released && !cancelled && (dir !== null || startAngle !== 0)) {
+      this.onPlatformRelease?.();
+    }
     return snap.promise;
   }
 

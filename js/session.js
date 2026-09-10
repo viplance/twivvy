@@ -1,6 +1,6 @@
 // Resumable deterministic match. Private choices never enter sync messages.
-import { createMatch, resolveTick, isValidCommand, DECIDE_MS, TICKS } from "./rules.js?v=20260910-training1";
-import { sha256Hex, encodeCommand, decodeCommand } from "./net.js?v=20260910-training1";
+import { createMatch, resolveTick, isValidCommand, DECIDE_MS, TICKS } from "./rules.js?v=20260910-turnsound";
+import { sha256Hex, encodeCommand, decodeCommand } from "./net.js?v=20260910-turnsound";
 
 export const ABSENCE_MS = 30 * 60_000;
 const copy = value => JSON.parse(JSON.stringify(value));

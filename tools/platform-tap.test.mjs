@@ -49,20 +49,26 @@ function fixture(angle) {
   return { view, pointer, commands, animations, ball, base };
 }
 
-test("turn sound fires on a committed pointer release, not a reset, cancellation or deadline", () => {
-  for (const [angle, cancelled, released, expected] of [
-    [Math.PI / 2, false, true, 1],
-    [-Math.PI / 2, false, true, 1],
-    [0, false, true, 0],
-    [Math.PI / 2, true, true, 0],
-    [Math.PI / 2, false, false, 0],
+test("turn sound fires on any pointer release that moves the platform, including a reset", () => {
+  for (const [angle, cancelled, released, tapResets, expected] of [
+    [Math.PI / 2, false, true, false, 1],
+    [-Math.PI / 2, false, true, false, 1],
+    // A tap on the selected platform resets it: it swings back visibly from its
+    // angle, so it is audible too even though it commits no direction.
+    [Math.PI / 2, false, true, true, 1],
+    // An untouched platform never moves: nothing to hear.
+    [0, false, true, false, 0],
+    [0, false, true, true, 0],
+    [Math.PI / 2, true, true, false, 0],
+    [Math.PI / 2, false, false, false, 0],
   ]) {
-    const { view } = fixture(angle);
+    const { view, commands } = fixture(angle);
     let sounds = 0;
     view.onPlatformRelease = () => sounds++;
-    view.drag = { pointerId: 1, platform: 0, moved: true };
+    view.drag = { pointerId: 1, platform: 0, moved: !tapResets, tapResets };
     view._finishDrag(cancelled, released);
     assert.equal(sounds, expected);
+    if (tapResets) assert.equal(commands.at(-1).dir, null, "a reset commits no direction");
   }
 });
 
