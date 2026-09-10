@@ -232,6 +232,7 @@ async function controllerHarness({ pathname = "/", joinError = null, brokenView 
     requestAnimationFrame: () => 1, cancelAnimationFrame() {},
   };
   // Inject transport/view doubles; execute the real controller and its UI flow.
+  sandbox.TrainingSession = sandbox.MatchSession;
   vm.createContext(sandbox);
   vm.runInContext(source.replace(/^import[\s\S]*?from "[^"\n]+";\n/gm, ""), sandbox);
   return {
@@ -345,6 +346,43 @@ test('sound button reflects and toggles the audio preference', async () => {
   assert.equal(button.title, 'Выключить звук');
   app.dispatch('sound-toggle', 'click');
   assert.equal(button['aria-pressed'], 'false');
+});
+
+test('training starts without a room and offers online play only for odd presence', async () => {
+  const app = await controllerHarness({ storedName: 'Алиса' });
+  app.sandbox.onlinePlayerCount = async () => 3;
+  app.dispatch('training', 'click');
+  assert.equal(app.getElement('name-title').textContent, 'Тренировка');
+  assert.equal(app.getElement('training-difficulty').classList.contains('hidden'), false);
+  app.getElement('training-difficulty').querySelector().value = 'hard';
+  app.dispatch('name-form', 'submit', { preventDefault() {} });
+  for (let i = 0; i < 5; i++) await Promise.resolve();
+  assert.equal(app.getConnection(), undefined, 'no network connection is created');
+  assert.equal(vm.runInContext('connection.peerName', app.sandbox), 'Бот');
+  assert.equal(vm.runInContext('connection.difficulty', app.sandbox), 'hard');
+  assert.equal(app.getElement('human-invite').classList.contains('hidden'), false);
+  app.sandbox.onlinePlayerCount = async () => 2;
+  await vm.runInContext('pollTrainingPresence()', app.sandbox);
+  assert.equal(app.getElement('human-invite').classList.contains('hidden'), true);
+  app.dispatch('human-invite', 'click');
+  assert.equal(vm.runInContext('connection', app.sandbox), null);
+  assert.equal(vm.runInContext('running', app.sandbox), false);
+  assert.equal(app.getElement('name-title').textContent, 'Случайный соперник');
+  assert.equal(app.getElement('player-name').value, 'Алиса');
+  assert.equal(app.getElement('training-controls').classList.contains('hidden'), true);
+});
+
+test('late presence response cannot revive a training invitation after exit', async () => {
+  const app = await controllerHarness({ storedName: 'Алиса' });
+  let respond;
+  app.sandbox.onlinePlayerCount = () => new Promise(resolve => { respond = resolve; });
+  app.dispatch('training', 'click');
+  app.dispatch('name-form', 'submit', { preventDefault() {} });
+  app.dispatch('exit-training', 'click');
+  respond(1);
+  await Promise.resolve();
+  assert.equal(app.getElement('human-invite').classList.contains('hidden'), true);
+  assert.equal(app.getElement('menu').classList.contains('hidden'), false);
 });
 
 test("delivery sound plays for either receiver, but not ordinary movement", async () => {

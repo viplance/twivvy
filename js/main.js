@@ -7,8 +7,8 @@ import {
   DECIDE_MS,
   RESOLVE_MS,
   TICKS,
-} from "./rules.js?v=20260910-joinmodal1";
-import { BoardView } from "./view.js?v=20260910-joinmodal1";
+} from "./rules.js?v=20260910-training1";
+import { BoardView } from "./view.js?v=20260910-training1";
 import {
   Connection,
   Matchmaker,
@@ -16,10 +16,11 @@ import {
   readSession,
   basePath,
   codeFromLocation,
-} from "./net.js?v=20260910-joinmodal1";
+} from "./net.js?v=20260910-training1";
 
-import { MatchSession } from "./session.js?v=20260910-joinmodal1";
-import { GameAudio } from "./audio.js?v=20260910-joinmodal1";
+import { MatchSession } from "./session.js?v=20260910-training1";
+import { GameAudio } from "./audio.js?v=20260910-training1";
+import { TrainingSession } from "./bot.js?v=20260910-training1";
 
 const $ = (id) => document.getElementById(id);
 
@@ -31,6 +32,11 @@ const ui = {
   toast: $("toast"),
   createBtn: $("create"),
   onlineBtn: $("play-online"),
+  trainingBtn: $("training"),
+  difficulty: $("training-difficulty"),
+  trainingControls: $("training-controls"),
+  humanInvite: $("human-invite"),
+  exitTraining: $("exit-training"),
   joinBtn: $("join"),
   joinCode: $("join-code"),
   joinBlock: $("join-block"),
@@ -77,6 +83,8 @@ let announcedRound = 0;
 let nameAction = null;
 let onlineCountTimer = null;
 let playerName = readPlayerName();
+let trainingPollTimer = null;
+let trainingPollGeneration = 0;
 // Rematch over the open data channel: restarts once both sides ask. The host
 // picks the map so the two cannot disagree.
 let rematch = { mine: false, theirs: false, map: null };
@@ -128,6 +136,7 @@ function openNamePrompt(mode, code = null) {
     create: ["Играть с другом", "Создать комнату"],
     join: ["Войти в игру", "Войти"],
     online: ["Случайный соперник", "Подключиться"],
+    training: ["Тренировка", "Начать тренировку"],
   }[mode];
   ui.nameTitle.textContent = copy[0];
   ui.nameSubmit.textContent = copy[1];
@@ -138,6 +147,7 @@ function openNamePrompt(mode, code = null) {
   ui.matchmakingStatus.textContent = "";
   show(ui.matchmakingStatus, false);
   show(ui.onlineCount, mode === "online");
+  show(ui.difficulty, mode === "training");
   // Entering a code belongs to "play with a friend": the other two modes reach
   // an opponent by their own route.
   show(ui.joinBlock, mode === "create");
@@ -297,6 +307,12 @@ function newConnection() {
 
 /** Ask for a rematch; the match restarts when both sides have asked. */
 function requestRematch() {
+  if (connection?.training) {
+    connection.map = Math.floor(Math.random() * MAPS.length);
+    startMatch();
+    session.connected();
+    return;
+  }
   if (rematch.mine) return;
   if (connection?.channel?.readyState !== "open") {
     toast("Соперник отключился");
@@ -482,6 +498,55 @@ async function joinRoom(code, name = playerName) {
 // Match loop
 // ---------------------------------------------------------------------------
 
+function stopTrainingPresence() {
+  trainingPollGeneration++;
+  clearTimeout(trainingPollTimer);
+  show(ui.humanInvite, false);
+}
+
+async function pollTrainingPresence(generation = trainingPollGeneration) {
+  if (!connection?.training || generation !== trainingPollGeneration) return;
+  let count = 0;
+  try { count = await onlinePlayerCount(); } catch {}
+  if (!connection?.training || generation !== trainingPollGeneration) return;
+  // The public pool pairs players in twos; use odd presence as the invitation signal.
+  show(ui.humanInvite, count % 2 === 1);
+  trainingPollTimer = setTimeout(() => pollTrainingPresence(generation), 5000);
+}
+
+function startTraining(name, difficulty) {
+  connection = {
+    training: true, role: 'host', myName: name, peerName: 'Бот',
+    difficulty: ['easy', 'medium', 'hard'].includes(difficulty) ? difficulty : 'medium',
+    map: Math.floor(Math.random() * MAPS.length),
+    close() { stopTrainingPresence(); },
+  };
+  clearUrlCode();
+  startMatch();
+  session.connected();
+  stopTrainingPresence();
+  pollTrainingPresence();
+}
+
+function leaveTraining() {
+  if (!connection?.training) return;
+  session?.dispose();
+  session = null;
+  connection.close();
+  connection = null;
+  running = false;
+  acceptingDrag = false;
+  stopTimerAnimation();
+  hideRoundTitle();
+  view.setInteractionEnabled(false);
+  view.clearPreview();
+  show(ui.trainingControls, false);
+  show(ui.hud, false);
+  show(ui.playerLabels, false);
+  show(ui.over, false);
+  show(ui.menu, true);
+}
+
 function startMatch(saved = null) {
   session?.dispose();
   stopTimerAnimation();
@@ -502,10 +567,12 @@ function startMatch(saved = null) {
   show(ui.over, false);
   show(ui.hud, true);
   show(ui.playerLabels, true);
+  show(ui.trainingControls, Boolean(connection.training));
   positionPlayerNames();
   requestAnimationFrame(positionPlayerNames);
 
-  session = new MatchSession(connection, {
+  const Session = connection.training ? TrainingSession : MatchSession;
+  session = new Session(connection, {
     saved,
     decideMs: Number(window.__TWIVVY_DECIDE_MS) || DECIDE_MS,
     lock() {
@@ -541,10 +608,12 @@ function startMatch(saved = null) {
       if (timerFrame === null) setTimerFraction(fraction);
     },
     async resolved(event, before, after) {
+      const currentSession = session;
       match = after;
       selection = null;
       animation = view.playTick(event, before, after, RESOLVE_MS);
       await animation;
+      if (session !== currentSession) return;
       // Both receivers use the same effect, once when the balls arrive.
       if (event.delivered.length) sound?.play('delivery');
       view.setCooldown(after.cooldown);
@@ -578,7 +647,7 @@ function endMatch(reason) {
 
   // A rematch reuses the channel, so the link stays valid while the peer is up.
   rematch = { mine: false, theirs: false, map: null };
-  const canRematch = connection?.channel?.readyState === "open";
+  const canRematch = connection?.training || connection?.channel?.readyState === "open";
   show(ui.againBtn, canRematch);
   ui.againBtn.disabled = false;
   ui.againBtn.textContent = "Реванш";
@@ -655,6 +724,12 @@ function init() {
 
   ui.createBtn.addEventListener("click", () => openNamePrompt("create"));
   ui.onlineBtn.addEventListener("click", () => openNamePrompt("online"));
+  ui.trainingBtn.addEventListener("click", () => openNamePrompt("training"));
+  ui.exitTraining.addEventListener("click", leaveTraining);
+  ui.humanInvite.addEventListener("click", () => {
+    leaveTraining();
+    openNamePrompt("online");
+  });
   ui.copyBtn.addEventListener("click", copyInvite);
   // Joining by code now lives in the same modal as creating a room, so the name
   // is already on screen: validate it here rather than reopening the prompt.
@@ -698,6 +773,12 @@ function init() {
       beginMatchmaking(name);
       return;
     }
+    if (action.mode === "training") {
+      const difficulty = ui.difficulty.querySelector('input:checked')?.value || 'medium';
+      hideNamePrompt();
+      startTraining(name, difficulty);
+      return;
+    }
     hideNamePrompt();
     if (action.mode === "create") createRoom(name);
     else joinRoom(action.code, name);
@@ -732,6 +813,7 @@ function init() {
   });
 
   ui.menuBtn.addEventListener("click", () => {
+    if (connection?.training) { leaveTraining(); return; }
     session?.dispose();
     stopTimerAnimation();
     hideRoundTitle();

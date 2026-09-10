@@ -69,7 +69,7 @@ body {
    board and more would crowd the playfield. */
 @media (min-width: 700px) and (pointer: fine) {
   #sound-toggle {
-    right: calc(env(safe-area-inset-right, 0px) + 32px);
+    right: calc(env(safe-area-inset-right, 0px) + 24px);
   }
 }
 
@@ -81,6 +81,42 @@ body {
 #sound-toggle[aria-pressed="true"] .sound-off { display: none; }
 
 /* ---------- HUD ---------- */
+
+.difficulty {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin: 14px 0;
+  padding: 12px 4px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+.difficulty legend { color: var(--muted); padding: 0 8px; }
+.difficulty label { display: flex; align-items: center; gap: 4px; cursor: pointer; }
+.difficulty input { width: auto; margin: 0; accent-color: var(--own); }
+.training-controls {
+  position: fixed;
+  top: calc(var(--safe-top) + 22px);
+  left: calc(env(safe-area-inset-left, 0px) + 12px);
+  max-width: calc(100vw - 82px);
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+.training-controls button {
+  padding: 9px 12px;
+  min-height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel);
+  color: var(--muted);
+  font: inherit;
+  cursor: pointer;
+}
+#human-invite { color: var(--own); font-size: 13px; }
+.training-controls button:focus-visible { outline: 2px solid var(--own); }
 
 #hud {
   position: fixed;
