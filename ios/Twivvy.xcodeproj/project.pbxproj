@@ -8,12 +8,14 @@
 
 /* Begin PBXBuildFile section */
 		0B31620DEA1CA9C81F89A331 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ECBF043ED9E150A5732910F /* ContentView.swift */; };
+		0F55B9458CB47DEA6B1EE488 /* TrackGeometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = D84A2150D6B2B1743BACDC04 /* TrackGeometry.swift */; };
 		371C763C77B32D41CE4E2EBD /* select.wav in Resources */ = {isa = PBXBuildFile; fileRef = F3CD2166C81FF771290B2940 /* select.wav */; };
 		43A0B1A19ED4A63E49B864B6 /* OnlineBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE120B89395FDC49E2DC95EF /* OnlineBridge.swift */; };
 		463B03777EEF6C16A723C257 /* countdown.wav in Resources */ = {isa = PBXBuildFile; fileRef = 673B32BB97FBB8B85F7703DB /* countdown.wav */; };
 		46B8D920CEC849ED63E439AD /* TwivvyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E2ABBC8DB5D320BCAC6A06E /* TwivvyApp.swift */; };
 		657F454B719ECA4E699BAEFD /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = ED05F47D159BBA6AEA6C3F04 /* Localizable.strings */; };
 		767448424C6CAF45C53A1997 /* web-fixtures.json in Resources */ = {isa = PBXBuildFile; fileRef = 0F0B37DB7FEA4A059F368AC9 /* web-fixtures.json */; };
+		767E352D66902FE7064AE608 /* TrackGeometryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA643EEEEFB1023B6F2FFD0A /* TrackGeometryTests.swift */; };
 		76D1B72140F92084E68B9C45 /* GameModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E4996232C43792D708ED20F /* GameModel.swift */; };
 		7B7CB526B621D63CF64E3070 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 843D1887ED0D6BA25DA97A16 /* Assets.xcassets */; };
 		80BF8BADF9DF23AE9D12A3B8 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 2E20B8C118CA7BFFB4B17095 /* PrivacyInfo.xcprivacy */; };
@@ -100,6 +102,8 @@
 		BC7BAEFA312D259D9A291FC4 /* pt */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pt; path = pt.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		C10A9130335589296050E98F /* pt */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pt; path = pt.lproj/Localizable.strings; sourceTree = "<group>"; };
 		D7353F3924332F333BF82759 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		D84A2150D6B2B1743BACDC04 /* TrackGeometry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackGeometry.swift; sourceTree = "<group>"; };
+		DA643EEEEFB1023B6F2FFD0A /* TrackGeometryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackGeometryTests.swift; sourceTree = "<group>"; };
 		DE27C2AAC6E25631B2213E5F /* win.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = win.wav; sourceTree = "<group>"; };
 		E06A8E25BA5B6885C0D90149 /* Bot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bot.swift; sourceTree = "<group>"; };
 		E5FC88EE5FE9321E8B6258D3 /* Twivvy.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Twivvy.entitlements; sourceTree = "<group>"; };
@@ -155,6 +159,7 @@
 				1A69B151A28535B3C61B39E7 /* AudioEngine.swift */,
 				749B9CF1A1D3FBF0166814D5 /* BoardScene.swift */,
 				6E4996232C43792D708ED20F /* GameModel.swift */,
+				D84A2150D6B2B1743BACDC04 /* TrackGeometry.swift */,
 			);
 			path = Game;
 			sourceTree = "<group>";
@@ -173,6 +178,7 @@
 			children = (
 				813BC0FCA08C09EB3C03992B /* BridgeTests.swift */,
 				4F553E52B3D7454258242C5F /* RulesTests.swift */,
+				DA643EEEEFB1023B6F2FFD0A /* TrackGeometryTests.swift */,
 				0F0B37DB7FEA4A059F368AC9 /* web-fixtures.json */,
 			);
 			path = Tests;
@@ -422,6 +428,7 @@
 				43A0B1A19ED4A63E49B864B6 /* OnlineBridge.swift in Sources */,
 				AB20E40EC3EA3772A74B31C2 /* Rules.swift in Sources */,
 				BC2D62937540250411237432 /* SessionVault.swift in Sources */,
+				0F55B9458CB47DEA6B1EE488 /* TrackGeometry.swift in Sources */,
 				46B8D920CEC849ED63E439AD /* TwivvyApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -440,6 +447,7 @@
 			files = (
 				F763341F76301EBE3F17CD43 /* BridgeTests.swift in Sources */,
 				B824C40D955F45E27130C4FC /* RulesTests.swift in Sources */,
+				767E352D66902FE7064AE608 /* TrackGeometryTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

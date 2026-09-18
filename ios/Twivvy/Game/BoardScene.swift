@@ -31,6 +31,12 @@ import UIKit
         let origin = tileCenter(Rules.platform(row,col))
         return CGPoint(x:origin.x + (CGFloat(col%2)-0.5)*cell, y:origin.y + (0.5-CGFloat(row%2))*cell)
     }
+    private func track(for ball: Ball, in state: BoardState) -> TrackGeometry {
+        track(row:ball.row,col:ball.col,in:state)
+    }
+    private func track(row: Int, col: Int, in state: BoardState) -> TrackGeometry {
+        TrackGeometry(center:point(row,col), cellSize:cell, mask:state.cells[row][col])
+    }
     private func rounded(_ rect: CGRect, radius: CGFloat, fill: UIColor, stroke: UIColor = .clear, width: CGFloat = 1) -> SKShapeNode {
         let shape = SKShapeNode(rect: rect, cornerRadius: radius)
         shape.fillColor = fill; shape.strokeColor = stroke; shape.lineWidth = width
@@ -70,8 +76,11 @@ import UIKit
             }
         }
         for (index, position) in [(2,2),(3,3)].enumerated() {
+            guard let tile = tiles[Rules.platform(position.0,position.1)] else { continue }
             let source = SKShapeNode(circleOfRadius:19)
-            source.position = point(position.0,position.1); source.strokeColor = UIColor(hex:0xFFE7A2)
+            source.name = "source-\(index)"
+            source.position = tile.convert(track(row:position.0,col:position.1,in:state).midpoint,from:world)
+            source.strokeColor = UIColor(hex:0xFFE7A2)
             source.lineWidth = 2.5; source.fillColor = UIColor(hex:0xFFCE76).withAlphaComponent(0.12)
             source.zPosition = 3
             let upcoming = Rules.spawnTicks.contains(state.tick+1) && !state.finished
@@ -80,37 +89,33 @@ import UIKit
                 source.run(.repeatForever(.sequence([.fadeAlpha(to:0.4,duration:0.9),.fadeAlpha(to:1,duration:0.9)])))
             }
             let dot = SKShapeNode(circleOfRadius:4); dot.fillColor = UIColor(hex:0xFFE7A2); dot.strokeColor = .clear
-            dot.position.x = index == 0 ? -25 : 25; source.addChild(dot); world.addChild(source)
+            // Spawn precedes rotation, so its marker rides the same rail during
+            // previews and animation. The next render restores the fixed sources.
+            dot.position.x = index == 0 ? -25 : 25; source.addChild(dot); tile.addChild(source)
         }
-        for ball in state.balls { let node = orb(exit:ball.exit); node.position = point(ball.row,ball.col); world.addChild(node); ballNodes[ball.id] = node }
+        for ball in state.balls { let node = orb(for:ball); node.position = track(for:ball,in:state).midpoint; world.addChild(node); ballNodes[ball.id] = node }
         receiver(.top, score:state.score.top); receiver(.bottom, score:state.score.bottom)
         setSelection(selection, highlighted: highlighted, enabled:inputEnabled)
     }
     private func addTrack(to parent: SKNode, center: CGPoint, mask: Int, color: UIColor) {
-        let ends = [CGPoint(x:0,y:cell/2),CGPoint(x:cell/2,y:0),CGPoint(x:0,y:-cell/2),CGPoint(x:-cell/2,y:0)]
-        let ports = (0..<4).filter { mask & (1 << $0) != 0 }
-        guard let first = ports.first, let last = ports.last else { return }
-        let path = CGMutablePath()
-        path.move(to:CGPoint(x:center.x+ends[first].x,y:center.y+ends[first].y))
-        if abs(first-last) == 2 { path.addLine(to:CGPoint(x:center.x+ends[last].x,y:center.y+ends[last].y)) }
-        else { path.addQuadCurve(to:CGPoint(x:center.x+ends[last].x,y:center.y+ends[last].y),control:center) }
+        let path = TrackGeometry(center:center,cellSize:cell,mask:mask).path
         for (width, tint) in [(CGFloat(27),UIColor(hex:0x060D20)),(CGFloat(17),color.withAlphaComponent(0.22)),(CGFloat(7),color),(CGFloat(2),UIColor.white.withAlphaComponent(0.75))] {
             let track = SKShapeNode(path:path); track.lineWidth = width; track.strokeColor = tint
             track.lineCap = .round; track.lineJoin = .round; parent.addChild(track)
         }
     }
-    private func orb(exit: Int = 0) -> SKNode {
-        let node = SKNode(); node.zPosition = 10
+    private func orb(for value: Ball) -> SKNode {
+        let node = SKNode(); node.zPosition = 10; node.name = "ball-\(value.id)"
         let halo = SKShapeNode(circleOfRadius:22); halo.fillColor = UIColor(hex:0xFFD88A).withAlphaComponent(0.15)
         halo.strokeColor = .clear; halo.glowWidth = 9; node.addChild(halo)
-        let ball = SKShapeNode(circleOfRadius:13); ball.fillColor = UIColor(hex:0xFFD580)
+        let ball = SKShapeNode(circleOfRadius:11); ball.fillColor = UIColor(hex:0xFFD580)
         ball.strokeColor = UIColor(hex:0xFFF5CE); ball.lineWidth = 2.5; node.addChild(ball)
         let highlight = SKShapeNode(circleOfRadius:4); highlight.position = CGPoint(x:-4,y:5)
         highlight.fillColor = .white; highlight.strokeColor = .clear; node.addChild(highlight)
         let direction = CGMutablePath()
         direction.move(to:CGPoint(x:-5,y:23)); direction.addLine(to:CGPoint(x:0,y:29)); direction.addLine(to:CGPoint(x:5,y:23))
         let arrow = SKShapeNode(path:direction); arrow.name = "heading"; arrow.strokeColor = UIColor(hex:0xFFE7A2); arrow.lineWidth = 2.5
-        arrow.lineCap = .round; arrow.lineJoin = .round; arrow.zRotation = -CGFloat(exit) * .pi / 2; node.addChild(arrow)
+        arrow.lineCap = .round; arrow.lineJoin = .round; arrow.zRotation = -CGFloat(value.exit) * .pi / 2; node.addChild(arrow)
         return node
     }
     private func receiver(_ side: Side, score: Int) {
@@ -146,7 +151,7 @@ import UIKit
         var preview = current
         if let selection { Rules.rotate(&preview,platform:selection.platform,quarters:selection.dir) }
         for ball in preview.balls {
-            ballNodes[ball.id]?.position = point(ball.row,ball.col)
+            ballNodes[ball.id]?.position = track(for:ball,in:preview).midpoint
             ballNodes[ball.id]?.childNode(withName:"heading")?.zRotation = -CGFloat(ball.exit) * .pi / 2
         }
     }
@@ -157,27 +162,40 @@ import UIKit
         var rotated = before
         rotated.balls.append(contentsOf:turn.spawned)
         for ball in turn.spawned {
-            let node = orb(exit:ball.exit); node.position = point(ball.row,ball.col); node.setScale(0.1)
+            let node = orb(for:ball); node.position = track(for:ball,in:before).midpoint; node.setScale(0.1)
             world.addChild(node); ballNodes[ball.id] = node; node.run(.scale(to:1,duration:0.25))
         }
         for (p,q) in turn.rotations {
+            // Ride the platform's transform, including the entire rotation arc.
+            if let tile = tiles[p] {
+                for ball in rotated.balls where Rules.platform(ball.row,ball.col) == p {
+                    guard let node = ballNodes[ball.id] else { continue }
+                    let position = tile.convert(node.position,from:world)
+                    node.removeFromParent(); tile.addChild(node); node.position = position
+                }
+            }
             tiles[p]?.run(.rotate(byAngle:-CGFloat(q) * .pi / 2,duration:0.38))
             Rules.rotate(&rotated,platform:p,quarters:q)
         }
-        for ball in rotated.balls { ballNodes[ball.id]?.run(.move(to:point(ball.row,ball.col),duration:0.38)) }
         let rotatedSnapshot = rotated
         run(.sequence([.wait(forDuration:0.4),.run { [weak self] in
             guard let self else { return }
             self.render(after,side:side)
             for ball in after.balls {
                 guard let origin = rotatedSnapshot.balls.first(where:{$0.id == ball.id}), let node = self.ballNodes[ball.id] else { continue }
-                node.position = self.point(origin.row,origin.col)
-                node.run(.move(to:self.point(ball.row,ball.col),duration:0.52))
+                let source = self.track(for:origin,in:rotatedSnapshot)
+                node.position = source.midpoint
+                if origin.row != ball.row || origin.col != ball.col {
+                    let path = source.path(to:self.track(for:ball,in:after),exit:origin.exit)
+                    node.run(.follow(path,asOffset:false,orientToPath:false,duration:0.52))
+                }
             }
             for (ball, receiver) in turn.delivered {
-                let node = self.orb(exit:ball.exit); node.position = self.point(ball.row,ball.col); self.world.addChild(node)
-                let target = CGPoint(x:node.position.x,y:receiver == .top ? 377 : -377)
-                node.run(.sequence([.move(to:target,duration:0.45),.run { [weak self] in self?.burst(at:target) },.fadeOut(withDuration:0.15),.removeFromParent()]))
+                let source = self.track(for:ball,in:rotatedSnapshot)
+                let node = self.orb(for:ball); node.position = source.midpoint; self.world.addChild(node)
+                let path = source.deliveryPath(exit:ball.exit,receiverY:receiver == .top ? 377 : -377)
+                let target = path.currentPoint
+                node.run(.sequence([.follow(path,asOffset:false,orientToPath:false,duration:0.45),.run { [weak self] in self?.burst(at:target) },.fadeOut(withDuration:0.15),.removeFromParent()]))
             }
         }]))
     }
