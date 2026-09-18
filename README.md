@@ -7,6 +7,12 @@ balls into their receiver.
 The product specification is in
 [ios-pvp-market-perekrut.md](ios-pvp-market-perekrut.md).
 
+## Native iOS game
+
+The SwiftUI + SpriteKit iPhone/iPad app (iOS 18+) is in [ios/](ios/README.md).
+Open [Twivvy.xcodeproj](ios/Twivvy.xcodeproj) in Xcode. Build, signing,
+protocol compatibility and App Store materials are documented there.
+
 ## Features
 
 - A 3×3 board of rotating 2×2 platforms rendered with Three.js.
@@ -88,6 +94,16 @@ Cloudflare proxies `twivvy.e-notix.com` to `c.storage.googleapis.com` with SSL
 mode set to **Full**. The `twivvy-rooms` Worker uses
 [cloudflare-worker.js](cloudflare-worker.js) to rewrite room paths to
 `index.html`, allowing invite URLs to return HTTP 200.
+
+The iOS support/privacy pages and Universal Link association can be published separately:
+
+```bash
+pnpm run deploy:app-pages
+```
+
+This uploads only the three files from `public/`, sets HTML/JSON MIME types,
+and uses `no-transform` to prevent Cloudflare from inserting analytics into
+these static pages. The full deployment also runs this step.
 
 The signaling service is deployed separately:
 

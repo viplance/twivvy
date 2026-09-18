@@ -1,0 +1,32 @@
+{
+  "bundleId": "com.enotix.twivvy",
+  "version": "1.0.0",
+  "build": "1",
+  "primaryCategory": "Games",
+  "gameSubcategories": [
+    "Puzzle",
+    "Strategy"
+  ],
+  "copyright": "2026 Dzmitry Sharko",
+  "supportURL": "https://twivvy.e-notix.com/support.html",
+  "privacyPolicyURL": "https://twivvy.e-notix.com/privacy.html",
+  "marketingURL": "https://twivvy.e-notix.com/",
+  "localizations": {
+    "en-US": {
+      "name": "Twivvy",
+      "subtitle": "Turn the maze. Win the duel.",
+      "promotionalText": "A little twist can change everything. Challenge a friend, find a rival, or sharpen your strategy with three bot levels.",
+      "keywords": "maze,puzzle,duel,strategy,rotate,balls,multiplayer,brain,logic,online,offline",
+      "description": "Turn the maze and take the ball your opponent already thought was theirs.\n\nTwivvy is a puzzle duel on nine rotating platforms. Each round, both players secretly choose a turn. When the timer ends, the moves are revealed together and the balls follow the new paths. Guide them into your receiver to score.\n\nPLAY YOUR WAY\n• Invite a friend with a room link or code.\n• Find an opponent through online matchmaking.\n• Train offline against three bot difficulty levels.\n• Play with friends using the browser version.\n\nSMALL BOARD. BIG DECISIONS.\n• Three balanced maze layouts.\n• Simultaneous hidden moves and one-turn platform cooldowns.\n• Seven points for an early win, or the higher score after 30 rounds.\n• Rematches and recovery after interrupted online games.\n\nMADE FOR IPHONE AND IPAD\nColourful animated tracks, glowing balls, sound effects and optional haptics. Play in portrait or landscape with touch gestures or rotation buttons. Eleven interface languages, VoiceOver controls and support for Reduce Motion.\n\nNo ads, subscriptions, accounts or in-app purchases. Online play requires an internet connection. Training works offline.",
+      "whatsNew": "The first native iPhone and iPad release of Twivvy."
+    },
+    "ru": {
+      "name": "Перекрут — Twivvy",
+      "subtitle": "Поверни лабиринт. Победи.",
+      "promotionalText": "Один поворот меняет всё. Пригласи друга, найди соперника или тренируйся с ботом трёх уровней сложности.",
+      "keywords": "лабиринт,головоломка,дуэль,стратегия,шары,онлайн,офлайн,логика,поворот",
+      "description": "Поверни лабиринт и забери шар, который соперник уже считал своим.\n\nПерекрут — дуэль на девяти вращающихся платформах. Каждый раунд игроки тайно выбирают поворот. Когда время заканчивается, ходы раскрываются одновременно, а шары движутся по новым дорожкам. Направляй их в свой приёмник и набирай очки.\n\nИграй с другом по коду или ссылке, находи случайного соперника или тренируйся офлайн с ботом трёх уровней сложности. Можно играть с друзьями из браузерной версии.\n\nТри симметричные карты, скрытые ходы, блокировка платформ на один раунд и максимум 30 раундов в партии. Семь очков дают досрочную победу. Доступны реванш и восстановление прерванной онлайн-игры.\n\nСоздано для iPhone и iPad: яркие дорожки, светящиеся шары, анимации, звуки и настраиваемый тактильный отклик. Вертикальная и горизонтальная ориентация, жесты и кнопки поворота, 11 языков, VoiceOver и поддержка уменьшения движения.\n\nБез рекламы, подписок, аккаунтов и встроенных покупок. Онлайн-игре нужен интернет. Тренировка работает без подключения.",
+      "whatsNew": "Первая нативная версия Twivvy для iPhone и iPad."
+    }
+  }
+}

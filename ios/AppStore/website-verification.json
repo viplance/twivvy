@@ -1,0 +1,32 @@
+{
+  "verifiedOn": "2026-09-17",
+  "checks": [
+    {
+      "url": "https://twivvy.e-notix.com/privacy.html",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "cacheControl": "public, max-age=300, no-transform",
+      "sha256": "e4e7552a8e154021402b989bea857ceb2eba89b078d6139be67cd31d77ee649f",
+      "matchesLocalFile": true,
+      "redirected": false
+    },
+    {
+      "url": "https://twivvy.e-notix.com/support.html",
+      "status": 200,
+      "contentType": "text/html; charset=utf-8",
+      "cacheControl": "public, max-age=300, no-transform",
+      "sha256": "f2147aae64d91df8499ebbd439dd0168dff0866e746e8a181d350ad4fe5247d2",
+      "matchesLocalFile": true,
+      "redirected": false
+    },
+    {
+      "url": "https://twivvy.e-notix.com/.well-known/apple-app-site-association",
+      "status": 200,
+      "contentType": "application/json",
+      "cacheControl": "public, max-age=300, no-transform",
+      "sha256": "07c339d5a14cf527865c46a06ee2164c31ea2557142bd549801e0b00584f768f",
+      "matchesLocalFile": true,
+      "redirected": false
+    }
+  ]
+}

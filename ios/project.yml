@@ -1,0 +1,78 @@
+name: Twivvy
+options:
+  bundleIdPrefix: com.enotix
+  deploymentTarget:
+    iOS: '18.0'
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: '6.0'
+    DEVELOPMENT_TEAM: W37L5728Y6
+    CODE_SIGN_STYLE: Automatic
+    MARKETING_VERSION: 1.0.0
+    CURRENT_PROJECT_VERSION: 1
+    TARGETED_DEVICE_FAMILY: '1,2'
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+targets:
+  Twivvy:
+    type: application
+    platform: iOS
+    sources:
+      - path: Twivvy
+        excludes: [Resources, Info.plist]
+      - path: Twivvy/Resources
+        excludes: [Bridge]
+      - path: Twivvy/Resources/Bridge
+        type: folder
+        buildPhase: resources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.enotix.twivvy
+        INFOPLIST_FILE: Twivvy/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Twivvy/Twivvy.entitlements
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        SUPPORTS_MACCATALYST: NO
+        SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD: NO
+  TwivvyTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources: [Tests]
+    dependencies:
+      - target: Twivvy
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+  TwivvyUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources: [UITests]
+    dependencies:
+      - target: Twivvy
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+  TwivvyLiveTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources: [LiveTests]
+    dependencies:
+      - target: Twivvy
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+schemes:
+  Twivvy:
+    build:
+      targets:
+        Twivvy: all
+    test:
+      targets: [TwivvyTests, TwivvyUITests]
+      gatherCoverageData: true
+    archive:
+      config: Release
+  TwivvyLive:
+    build:
+      targets:
+        Twivvy: all
+    test:
+      targets: [TwivvyLiveTests]
