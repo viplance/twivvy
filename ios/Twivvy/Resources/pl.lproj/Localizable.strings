@@ -10,7 +10,7 @@
 "menu.training" = "Trening";
 "menu.how" = "Jak grać";
 "rules.board" = "Plansza składa się z dziewięciu obrotowych platform (3×3).";
-"rules.goal" = "Zbierz jak najwięcej kulek w swoim odbiorniku.";
+"rules.goal" = "Zbierz jak najwięcej kulek w swoim odbiorniku. Twój odbiornik zawsze jest na dole.";
 "rules.turn" = "W każdej turze możesz obrócić jedną platformę.";
 "rules.spawn" = "Nowe kulki pojawiają się w dwóch oznaczonych polach pośrodku.";
 "rules.combine" = "Po odczekaniu ruch przeciwnika zostaje ujawniony, a obroty się łączą.";
@@ -90,7 +90,7 @@
 "native.east" = "Prawo";
 "native.south" = "Dół";
 "native.west" = "Lewo";
-"native.selectHint" = "Wybierz platformę i kierunek obrotu.";
+"native.selectHint" = "Przeciągnij platformę, aby ją obrócić. Dotknij dowolnej platformy, aby anulować obrót.";
 "native.selected" = "Platforma {platform} · twój ruch jest ukryty";
 "native.left" = "W lewo";
 "native.right" = "W prawo";
@@ -108,5 +108,7 @@
 "native.support" = "Pomoc";
 "native.language" = "Język aplikacji";
 "native.winRule" = "Siedem punktów daje natychmiastowe zwycięstwo. W innym przypadku wygrywa wyższy wynik po 30 rundach. Równe wyniki oznaczają remis.";
-"native.gestureRule" = "Dotknij platformy i przycisków obrotu lub przesuń wokół jej środka. Możesz zmieniać ruch przez 30 sekund. Twój odbiornik zawsze jest na dole.";
+"native.gestureRule" = "Przeciągnij platformę, aby ją obrócić. Dotknij dowolnej platformy, aby anulować obrót. Możesz zmieniać ruch przez 30 sekund.";
 "native.privacyText" = "Twivvy does not use advertising, analytics, tracking, accounts, or in-app purchases.\n\nYour nickname and preferences stay on your device. Online play sends your nickname, a random room credential and connection details to the Twivvy signaling service. Your opponent sees your nickname and can receive your IP address through the direct WebRTC connection. Moves travel directly between the two players.\n\nWaiting rooms and matches with an absent player expire after 30 minutes. Active rooms remain available. Infrastructure providers may retain technical request logs, including IP addresses, for security and service operation.\n\nRecovery credentials and hidden moves are stored in the iOS Keychain on this device. Leaving an online game clears its recovery data. Sound and haptics can be disabled in Settings. Training works without an internet connection; an optional online-presence check may contact the signaling service.\n\nNo camera, microphone, contacts or location access is requested.\n\nPublisher: Dzmitry Sharko. Support and privacy requests: https://twivvy.e-notix.com/support.html\n\nUpdated: 17 September 2026.";
+
+"native.turnLimitHint" = "Platformę można obrócić tylko raz na rundę.";

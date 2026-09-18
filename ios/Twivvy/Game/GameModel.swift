@@ -5,7 +5,7 @@ import SwiftUI
     var screen: Screen = .menu
     var board = BoardState()
     var selection: Command?
-    var selectedPlatform: Int?
+    var turnLimitHint = false
     var side: Side = .bottom
     var peerName = ""
     var name = UserDefaults.standard.string(forKey: "playerName") ?? ""
@@ -45,10 +45,13 @@ import SwiftUI
     var inviteURL: URL { URL(string: "https://twivvy.e-notix.com/\(roomCode)")! }
 
     init() {
+        boardScene.onDragStart = { [weak self] in self?.turnLimitHint = false }
+        boardScene.onTurnLimit = { [weak self] in
+            guard let self, self.active, !self.paused else { return }
+            self.turnLimitHint = true
+        }
         boardScene.onSelect = { [weak self] platform, direction in
-            guard let self else { return }
-            self.select(platform)
-            if let direction { self.rotate(direction) }
+            self?.chooseTurn(platform:platform,direction:direction)
         }
         boardScene.render(board, side: side)
     }
@@ -88,7 +91,7 @@ import SwiftUI
     private func beginTrainingRound() {
         guard training else { return }
         if board.finished { finish(); return }
-        selection = nil; selectedPlatform = nil; active = false
+        selection = nil; turnLimitHint = false; active = false
         countdown = 4; remaining = 30; paused = false
         let snapshot = board, level = difficulty, token = generation
         Task {
@@ -113,10 +116,11 @@ import SwiftUI
     }
     func resolveTraining() {
         guard training, active else { return }
+        boardScene.finishDrag()
         timer?.invalidate(); active = false
         let before = board
         let turn = Rules.resolve(&board, top: botMove, bottom: selection)
-        selection = nil; selectedPlatform = nil
+        selection = nil; turnLimitHint = false
         animate(before: before, turn: turn)
         let token = generation
         Task {
@@ -125,24 +129,18 @@ import SwiftUI
             beginTrainingRound()
         }
     }
-    func select(_ platform: Int) {
-        guard active, !paused else { return }
-        guard !board.cooldown.contains(platform) else { error = L("error.platformCooldown"); return }
-        selectedPlatform = platform; refreshScene(); AudioEngine.shared.play("select")
-    }
-    func rotate(_ direction: Int) {
-        guard active, let platform = selectedPlatform else { return }
-        let command = Command(platform: platform, dir: direction)
-        guard Rules.valid(command, in: board) else { return }
+    func chooseTurn(platform: Int, direction: Int?) {
+        guard active, !paused, (0..<9).contains(platform) else { return }
+        let command = direction.map { Command(platform:platform,dir:$0) }
+        guard Rules.valid(command,in:board) else { return }
+        turnLimitHint = false
         selection = command
-        if !training { bridge?.send(["action":"choose", "command":["platform":platform,"dir":direction]]) }
-        refreshScene(); AudioEngine.shared.play("turn")
-    }
-    func skip() {
-        guard active else { return }
-        selection = nil; selectedPlatform = nil
-        if !training { bridge?.send(["action":"choose", "command":NSNull()]) }
+        if !training {
+            let value: Any = command.map { ["platform":$0.platform,"dir":$0.dir] as Any } ?? NSNull()
+            bridge?.send(["action":"choose","command":value])
+        }
         refreshScene()
+        if direction != nil { AudioEngine.shared.play("turn") }
     }
     func startOnline(_ action: String, code: String = "") {
         guard rememberName() else { return }
@@ -165,7 +163,7 @@ import SwiftUI
         generation += 1; timer?.invalidate(); presenceTask?.cancel(); presenceTask = nil
         if !training, screen != .menu { bridge?.send(["action":"leave"]); SessionVault.clear(); hasSavedGame = false }
         training = false; active = false; paused = false; suspendedTraining = false
-        selection = nil; selectedPlatform = nil; roomCode = ""; resultReason = nil
+        selection = nil; turnLimitHint = false; roomCode = ""; resultReason = nil
         rematchRequested = false; peerRematch = false; status = ""; screen = .menu
         board = BoardState(); side = .bottom; boardScene.render(board, side: side)
     }
@@ -222,7 +220,7 @@ import SwiftUI
             if let value = decode(data["match"], as: BoardState.self) { board = value }
             if let value = data["side"] as? String { side = Side(rawValue: value) ?? .bottom }
             if let value = data["peerName"] as? String { peerName = value }
-            selection = decode(data["selection"], as: Command.self); selectedPlatform = selection?.platform
+            selection = decode(data["selection"], as: Command.self); turnLimitHint = false
             remaining = data["remaining"] as? Double ?? remaining
             if type == "started" { resultReason = nil; rematchRequested = false; peerRematch = false }
             screen = .game
@@ -238,7 +236,7 @@ import SwiftUI
             var verified = before
             let turn = Rules.resolve(&verified, top: decode(commands["top"], as: Command.self), bottom: decode(commands["bottom"], as: Command.self))
             guard verified == after else { resultReason = L("error.restoreMismatch"); finish(); bridge?.send(["action":"suspend"]); return }
-            board = verified; selection = nil; selectedPlatform = nil; active = false; paused = false
+            board = verified; selection = nil; turnLimitHint = false; active = false; paused = false
             animate(before: before, turn: turn)
         case "finished":
             if let value = decode(data["match"], as: BoardState.self) { board = value }
@@ -263,5 +261,5 @@ import SwiftUI
         timer?.invalidate(); active = false; paused = false; screen = .result
         refreshScene(); AudioEngine.shared.play(ownScore > opponentScore ? "win" : "delivery")
     }
-    func refreshScene() { boardScene.setSelection(selection, highlighted: selectedPlatform, enabled: active && !paused) }
+    func refreshScene() { boardScene.setSelection(selection, highlighted: selection?.platform, enabled: active && !paused) }
 }

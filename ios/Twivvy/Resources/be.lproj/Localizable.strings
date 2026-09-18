@@ -10,7 +10,7 @@
 "menu.training" = "Трэніроўка";
 "menu.how" = "Як гуляць";
 "rules.board" = "Поле складаецца з дзевяці паваротных платформаў (3×3).";
-"rules.goal" = "Збяры ў свой прыёмнік як мага больш шарыкаў.";
+"rules.goal" = "Збяры ў свой прыёмнік як мага больш шарыкаў. Твой прыёмнік заўсёды ўнізе.";
 "rules.turn" = "За ход можна павярнуць адну платформу.";
 "rules.spawn" = "Новыя шарыкі з'яўляюцца з дзвюх пазначаных клетак у цэнтры.";
 "rules.combine" = "Пасля чакання адкрываецца ход суперніка — павароты складаюцца.";
@@ -90,7 +90,7 @@
 "native.east" = "Управа";
 "native.south" = "Уніз";
 "native.west" = "Улева";
-"native.selectHint" = "Абяры платформу і кірунак павароту.";
+"native.selectHint" = "Павярні платформу рухам пальца. Краніся любой платформы, каб скасаваць паварот.";
 "native.selected" = "Платформа {platform} · твой ход схаваны";
 "native.left" = "Улева";
 "native.right" = "Управа";
@@ -108,5 +108,7 @@
 "native.support" = "Падтрымка";
 "native.language" = "Мова праграмы";
 "native.winRule" = "Сем ачкоў — датэрміновая перамога. Пасля 30 раўндаў перамагае большы лік. Роўны лік — нічыя.";
-"native.gestureRule" = "Націсні платформу і кнопку павароту або правядзі вакол цэнтра. Ход можна змяняць на працягу 30 секунд. Твой прыёмнік заўсёды ўнізе.";
+"native.gestureRule" = "Павярні платформу рухам пальца. Краніся любой платформы, каб скасаваць паварот. Ход можна змяняць на працягу 30 секунд.";
 "native.privacyText" = "Twivvy does not use advertising, analytics, tracking, accounts, or in-app purchases.\n\nYour nickname and preferences stay on your device. Online play sends your nickname, a random room credential and connection details to the Twivvy signaling service. Your opponent sees your nickname and can receive your IP address through the direct WebRTC connection. Moves travel directly between the two players.\n\nWaiting rooms and matches with an absent player expire after 30 minutes. Active rooms remain available. Infrastructure providers may retain technical request logs, including IP addresses, for security and service operation.\n\nRecovery credentials and hidden moves are stored in the iOS Keychain on this device. Leaving an online game clears its recovery data. Sound and haptics can be disabled in Settings. Training works without an internet connection; an optional online-presence check may contact the signaling service.\n\nNo camera, microphone, contacts or location access is requested.\n\nPublisher: Dzmitry Sharko. Support and privacy requests: https://twivvy.e-notix.com/support.html\n\nUpdated: 17 September 2026.";
+
+"native.turnLimitHint" = "Платформу можна павярнуць толькі адзін раз за раўнд.";

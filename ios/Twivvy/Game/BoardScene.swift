@@ -3,14 +3,27 @@ import UIKit
 
 @MainActor final class BoardScene: SKScene {
     var onSelect: ((Int, Int?) -> Void)?
+    var onDragStart: (() -> Void)?
+    var onTurnLimit: (() -> Void)?
     private let world = SKNode()
     private var tiles: [Int: SKNode] = [:]
     private var ballNodes: [Int: SKNode] = [:]
     private var current = BoardState()
     private var perspective: Side = .bottom
     private var inputEnabled = false
-    private var touchStart: CGPoint?
-    private var touchPlatform: Int?
+    private var resolving = false
+    private struct Drag {
+        let platform: Int
+        let start: CGPoint
+        let startAngle: CGFloat
+        let initialCommand: Command?
+        var pointerAngle: CGFloat?
+        var angle: CGFloat
+        var rotation: CGFloat = 0
+        var moved = false
+    }
+    private var drag: Drag?
+    private var previewTargets: [Int: CGFloat] = [:]
     private let tileSize: CGFloat = 204
     private let pitch: CGFloat = 216
     private let cell: CGFloat = 98
@@ -44,6 +57,8 @@ import UIKit
     }
     func render(_ state: BoardState, side: Side) {
         removeAllActions(); world.removeAllChildren(); tiles.removeAll(); ballNodes.removeAll()
+        drag = nil; previewTargets.removeAll()
+        resolving = false
         current = state; perspective = side; world.zRotation = side == .top ? .pi : 0
         let frame = rounded(CGRect(x:-338,y:-337,width:676,height:674),radius:36,fill:UIColor(hex:0x111D35),stroke:UIColor(hex:0x33466C),width:2)
         frame.zPosition = -5; world.addChild(frame)
@@ -65,15 +80,7 @@ import UIKit
                     dot.fillColor = colors[p].withAlphaComponent(0.2); dot.strokeColor = .clear; tile.addChild(dot)
                 }
             } }
-            let badge = SKLabelNode(fontNamed:"AvenirNext-Bold")
-            badge.text = "\(p+1)"; badge.fontSize = 15; badge.fontColor = colors[p].withAlphaComponent(0.55)
-            badge.position = CGPoint(x:0,y:-7); badge.zRotation = side == .top ? .pi : 0
-            tile.addChild(badge); world.addChild(tile); tiles[p] = tile
-            if state.cooldown.contains(p) {
-                let lock = SKLabelNode(fontNamed:"AvenirNext-Bold")
-                lock.text = "×"; lock.fontSize = 28; lock.fontColor = UIColor(hex:0xFFCC8C)
-                lock.position = CGPoint(x:80,y:69); lock.name = "lock"; tile.addChild(lock)
-            }
+            world.addChild(tile); tiles[p] = tile
         }
         for (index, position) in [(2,2),(3,3)].enumerated() {
             guard let tile = tiles[Rules.platform(position.0,position.1)] else { continue }
@@ -95,7 +102,7 @@ import UIKit
         }
         for ball in state.balls { let node = orb(for:ball); node.position = track(for:ball,in:state).midpoint; world.addChild(node); ballNodes[ball.id] = node }
         receiver(.top, score:state.score.top); receiver(.bottom, score:state.score.bottom)
-        setSelection(selection, highlighted: highlighted, enabled:inputEnabled)
+        setSelection(selection, highlighted: highlighted, enabled:inputEnabled, animated:false)
     }
     private func addTrack(to parent: SKNode, center: CGPoint, mask: Int, color: UIColor) {
         let path = TrackGeometry(center:center,cellSize:cell,mask:mask).path
@@ -108,14 +115,18 @@ import UIKit
         let node = SKNode(); node.zPosition = 10; node.name = "ball-\(value.id)"
         let halo = SKShapeNode(circleOfRadius:22); halo.fillColor = UIColor(hex:0xFFD88A).withAlphaComponent(0.15)
         halo.strokeColor = .clear; halo.glowWidth = 9; node.addChild(halo)
-        let ball = SKShapeNode(circleOfRadius:11); ball.fillColor = UIColor(hex:0xFFD580)
-        ball.strokeColor = UIColor(hex:0xFFF5CE); ball.lineWidth = 2.5; node.addChild(ball)
+        let ball = SKShapeNode(circleOfRadius:13); ball.fillColor = UIColor(hex:0xFFD580)
+        ball.strokeColor = UIColor(hex:0x060D20); ball.lineWidth = 3; node.addChild(ball)
         let highlight = SKShapeNode(circleOfRadius:4); highlight.position = CGPoint(x:-4,y:5)
         highlight.fillColor = .white; highlight.strokeColor = .clear; node.addChild(highlight)
         let direction = CGMutablePath()
-        direction.move(to:CGPoint(x:-5,y:23)); direction.addLine(to:CGPoint(x:0,y:29)); direction.addLine(to:CGPoint(x:5,y:23))
-        let arrow = SKShapeNode(path:direction); arrow.name = "heading"; arrow.strokeColor = UIColor(hex:0xFFE7A2); arrow.lineWidth = 2.5
-        arrow.lineCap = .round; arrow.lineJoin = .round; arrow.zRotation = -CGFloat(value.exit) * .pi / 2; node.addChild(arrow)
+        direction.move(to:CGPoint(x:-6.5,y:25)); direction.addLine(to:CGPoint(x:0,y:33)); direction.addLine(to:CGPoint(x:6.5,y:25))
+        let heading = SKNode(); heading.name = "heading"; heading.zRotation = -CGFloat(value.exit) * .pi / 2
+        for (width,color) in [(CGFloat(7.5),UIColor(hex:0x060D20)),(CGFloat(3.5),UIColor(hex:0xFFE7A2))] {
+            let arrow = SKShapeNode(path:direction); arrow.strokeColor = color; arrow.lineWidth = width
+            arrow.lineCap = .round; arrow.lineJoin = .round; heading.addChild(arrow)
+        }
+        node.addChild(heading)
         return node
     }
     private func receiver(_ side: Side, score: Int) {
@@ -131,41 +142,79 @@ import UIKit
             dot.strokeColor = .clear; world.addChild(dot)
         }
     }
-    func setSelection(_ selection: Command?, highlighted: Int?, enabled: Bool) {
+    func setSelection(_ selection: Command?, highlighted: Int?, enabled: Bool, animated: Bool = true) {
         self.selection = selection; self.highlighted = highlighted; inputEnabled = enabled
+        guard !resolving else { inputEnabled = false; return }
+        if !enabled { drag = nil }
         for (p,tile) in tiles {
             guard let base = tile.childNode(withName:"base") as? SKShapeNode else { continue }
             let chosen = p == highlighted
-            tile.zRotation = selection?.platform == p ? -CGFloat(selection!.dir) * .pi / 2 : 0
-            base.strokeColor = chosen ? UIColor(hex:0xFFE7A2) : colors[p].withAlphaComponent(current.cooldown.contains(p) ? 0.18 : 0.45)
-            base.lineWidth = chosen ? 5 : 2; base.glowWidth = chosen ? 5 : 0
+            if drag?.platform != p {
+                settlePlatform(p,to:selection?.platform == p ? -CGFloat(selection!.dir) * .pi / 2 : 0,animated:animated)
+            }
+            let hot = current.cooldown.contains(p)
+            base.strokeColor = hot ? UIColor(hex:0xFF626B) : chosen ? UIColor(hex:0xFFE7A2) : colors[p].withAlphaComponent(0.45)
+            base.lineWidth = hot || chosen ? 5 : 2; base.glowWidth = hot || chosen ? 5 : 0
             tile.childNode(withName:"preview")?.removeFromParent()
             if selection?.platform == p {
+                let preview = SKNode(); preview.name = "preview"; preview.zPosition = 20; preview.alpha = 0.6
                 let arrow = SKLabelNode(fontNamed:"AvenirNext-Bold")
-                arrow.name = "preview"; arrow.text = selection?.dir == 1 ? "↻" : "↺"
-                arrow.fontSize = 48; arrow.fontColor = UIColor(hex:0xFFE7A2)
-                arrow.position = CGPoint(x:0,y:-16); arrow.zPosition = 20
-                arrow.zRotation = (perspective == .top ? .pi : 0) - tile.zRotation; tile.addChild(arrow)
+                arrow.text = selection?.dir == 1 ? "↻" : "↺"
+                arrow.fontSize = 72; arrow.fontColor = UIColor(hex:0xFFE7A2)
+                // Center the visible glyph, then counter-rotate around the
+                // platform center rather than around an offset text baseline.
+                let bounds = arrow.frame
+                arrow.position = CGPoint(x:-bounds.midX,y:-bounds.midY)
+                preview.addChild(arrow)
+                preview.zRotation = (perspective == .top ? .pi : 0) - tile.zRotation; tile.addChild(preview)
             }
         }
-        var preview = current
-        if let selection { Rules.rotate(&preview,platform:selection.platform,quarters:selection.dir) }
-        for ball in preview.balls {
-            ballNodes[ball.id]?.position = track(for:ball,in:preview).midpoint
-            ballNodes[ball.id]?.childNode(withName:"heading")?.zRotation = -CGFloat(ball.exit) * .pi / 2
+    }
+    private func applyPreviewAngle(_ angle: CGFloat, platform p: Int) {
+        guard let tile = tiles[p] else { return }
+        tile.zRotation = angle
+        tile.childNode(withName:"preview")?.zRotation = (perspective == .top ? .pi : 0) - angle
+        let center = tileCenter(p)
+        for ball in current.balls where Rules.platform(ball.row,ball.col) == p {
+            guard let node = ballNodes[ball.id] else { continue }
+            let point = track(for:ball,in:current).midpoint
+            let dx = point.x - center.x, dy = point.y - center.y
+            node.position = CGPoint(x:center.x + dx * cos(angle) - dy * sin(angle),
+                                    y:center.y + dx * sin(angle) + dy * cos(angle))
+            node.childNode(withName:"heading")?.zRotation = -CGFloat(ball.exit) * .pi / 2 + angle
         }
     }
+    private func settlePlatform(_ p: Int, to target: CGFloat, animated: Bool = true) {
+        guard let tile = tiles[p] else { return }
+        if animated, previewTargets[p] == target { return }
+        tile.removeAction(forKey:"preview-snap")
+        previewTargets[p] = target
+        let start = tile.zRotation
+        guard animated, !UIAccessibility.isReduceMotionEnabled, abs(start-target) > 0.0001 else {
+            applyPreviewAngle(target,platform:p); return
+        }
+        tile.run(.customAction(withDuration:0.24) { [weak self] _, elapsed in
+            let t = min(1,elapsed / 0.24)
+            let progress = 1 - pow(1 - t,3)
+            self?.applyPreviewAngle(start + (target-start) * progress,platform:p)
+        },withKey:"preview-snap")
+    }
+
     func animate(before: BoardState, after: BoardState, turn: Turn, side: Side) {
+        let visibleAngles = tiles.mapValues { $0.zRotation }
         selection = nil; highlighted = nil; inputEnabled = false
         render(before, side:side)
         guard !UIAccessibility.isReduceMotionEnabled else { render(after,side:side); return }
+        resolving = true
         var rotated = before
         rotated.balls.append(contentsOf:turn.spawned)
         for ball in turn.spawned {
             let node = orb(for:ball); node.position = track(for:ball,in:before).midpoint; node.setScale(0.1)
             world.addChild(node); ballNodes[ball.id] = node; node.run(.scale(to:1,duration:0.25))
         }
-        for (p,q) in turn.rotations {
+        let rotatingPlatforms = Set(turn.rotations.keys).union(visibleAngles.filter { abs($0.value) > 0.0001 }.keys)
+        for p in rotatingPlatforms {
+            let q = turn.rotations[p,default:0]
             // Ride the platform's transform, including the entire rotation arc.
             if let tile = tiles[p] {
                 for ball in rotated.balls where Rules.platform(ball.row,ball.col) == p {
@@ -174,7 +223,13 @@ import UIKit
                     node.removeFromParent(); tile.addChild(node); node.position = position
                 }
             }
-            tiles[p]?.run(.rotate(byAngle:-CGFloat(q) * .pi / 2,duration:0.38))
+            let start = visibleAngles[p,default:0]
+            tiles[p]?.zRotation = start
+            let target = -CGFloat(q) * .pi / 2
+            let delta = atan2(sin(target-start),cos(target-start))
+            let rotation = SKAction.rotate(byAngle:delta,duration:0.38)
+            rotation.timingMode = .easeInEaseOut
+            tiles[p]?.run(rotation)
             Rules.rotate(&rotated,platform:p,quarters:q)
         }
         let rotatedSnapshot = rotated
@@ -207,24 +262,96 @@ import UIKit
             spark.run(.sequence([.group([.moveBy(x:cos(angle)*60,y:sin(angle)*60,duration:0.45),.fadeOut(withDuration:0.45)]),.removeFromParent()]))
         }
     }
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard inputEnabled, let touch = touches.first else { return }
-        let location = touch.location(in:world)
-        guard let p = (0..<9).first(where: { let c = tileCenter($0); return abs(c.x-location.x)<tileSize/2 && abs(c.y-location.y)<tileSize/2 }) else { return }
-        touchStart = location; touchPlatform = p
+    // Locations are in board coordinates, so dragging works from either side.
+    @discardableResult func beginDrag(at location: CGPoint) -> Bool {
+        guard inputEnabled, drag == nil,
+              let p = (0..<9).first(where: { let c = tileCenter($0); return abs(c.x-location.x)<tileSize/2 && abs(c.y-location.y)<tileSize/2 }),
+              let tile = tiles[p] else { return false }
+        tile.removeAction(forKey:"preview-snap")
+        previewTargets.removeValue(forKey:p)
+        let center = tileCenter(p)
+        drag = Drag(platform:p,start:location,startAngle:tile.zRotation,
+                    initialCommand:selection?.platform == p ? selection : nil,
+                    pointerAngle:hypot(location.x-center.x,location.y-center.y) < 12 ? nil : atan2(location.y-center.y,location.x-center.x),angle:tile.zRotation)
+        onDragStart?()
+        return true
     }
-    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard inputEnabled, let touch = touches.first, let start = touchStart, let p = touchPlatform else { return }
-        let end = touch.location(in:world), center = tileCenter(p)
-        let distance = hypot(end.x-start.x,end.y-start.y)
-        var dir: Int?
-        if distance > 28 {
-            let cross = (start.x-center.x)*(end.y-center.y)-(start.y-center.y)*(end.x-center.x)
-            dir = cross < 0 ? 1 : -1
+    func moveDrag(to location: CGPoint) {
+        guard inputEnabled, var gesture = drag else { return }
+        let threshold = 5 * size.width / max(view?.bounds.width ?? size.width,1)
+        if current.cooldown.contains(gesture.platform) {
+            // Hot platforms still accept reset taps, but cannot be dragged.
+            if hypot(location.x-gesture.start.x,location.y-gesture.start.y) >= threshold { gesture.moved = true }
+            drag = gesture; return
         }
-        onSelect?(p,dir); touchStart = nil; touchPlatform = nil
+        let center = tileCenter(gesture.platform)
+        // Crossing the pivot must not turn a tiny finger movement into 180°.
+        guard hypot(location.x-center.x,location.y-center.y) >= 12 else {
+            gesture.pointerAngle = nil; drag = gesture; return
+        }
+        let angle = atan2(location.y-center.y,location.x-center.x)
+        guard let previous = gesture.pointerAngle else {
+            gesture.pointerAngle = angle; drag = gesture; return
+        }
+        let delta = atan2(sin(angle-previous),cos(angle-previous))
+        if !gesture.moved, hypot(location.x-gesture.start.x,location.y-gesture.start.y) >= threshold {
+            gesture.moved = true
+            for other in tiles.keys where other != gesture.platform { settlePlatform(other,to:0) }
+        }
+        if gesture.moved {
+            gesture.rotation = max(-.pi/2,min(.pi/2,gesture.rotation + delta))
+            let displayAngle = gesture.startAngle + gesture.rotation
+            // A second turn can be pulled past the chosen quarter-turn, then
+            // springs back on release. It never becomes a second logical move.
+            gesture.angle = gesture.initialCommand == nil ? max(-.pi/2,min(.pi/2,displayAngle)) : displayAngle
+            applyPreviewAngle(gesture.angle,platform:gesture.platform)
+            gesture.pointerAngle = angle
+        }
+        drag = gesture
     }
-    override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) { touchStart = nil; touchPlatform = nil }
+    func finishDrag(cancelled: Bool = false) {
+        guard let gesture = drag else { return }
+        drag = nil
+        guard gesture.moved else {
+            if cancelled {
+                setSelection(selection,highlighted:selection?.platform,enabled:inputEnabled)
+            } else {
+                setSelection(nil,highlighted:nil,enabled:inputEnabled)
+                onSelect?(gesture.platform,nil)
+            }
+            return
+        }
+        guard !current.cooldown.contains(gesture.platform) else {
+            setSelection(selection,highlighted:selection?.platform,enabled:inputEnabled)
+            return
+        }
+        if let initial = gesture.initialCommand {
+            if cancelled || abs(gesture.rotation) < .pi/24 {
+                setSelection(initial,highlighted:initial.platform,enabled:inputEnabled)
+            } else if gesture.rotation * CGFloat(initial.dir) > 0 {
+                // Measure the reverse gesture from finger-down, not from the
+                // board's zero angle: the same 7.5° threshold also cancels a turn.
+                setSelection(nil,highlighted:nil,enabled:inputEnabled)
+                onSelect?(gesture.platform,nil)
+            } else {
+                setSelection(initial,highlighted:initial.platform,enabled:inputEnabled)
+                onTurnLimit?()
+            }
+            return
+        }
+        let dir: Int? = cancelled || abs(gesture.angle) < .pi/24 ? nil : (gesture.angle < 0 ? 1 : -1)
+        let command = dir.map { Command(platform:gesture.platform,dir:$0) }
+        setSelection(command,highlighted:command?.platform,enabled:inputEnabled)
+        // Commit before settling, so a deadline cannot drop the released move.
+        onSelect?(gesture.platform,dir)
+    }
+    func dragChanged(start: CGPoint, location: CGPoint) {
+        if drag == nil { _ = beginDrag(at:convertPoint(fromView:start)) }
+        moveDrag(to:convertPoint(fromView:location))
+    }
+    func dragEnded(at location: CGPoint) {
+        moveDrag(to:convertPoint(fromView:location)); finishDrag()
+    }
 }
 
 extension UIColor {

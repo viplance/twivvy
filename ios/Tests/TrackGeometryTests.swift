@@ -61,12 +61,12 @@ final class TrackGeometryTests: XCTestCase {
             scene.render(state,side:side)
             try assertBalls(scene,in:state)
             for platform in 0..<9 { for dir in [-1,1] {
-                scene.setSelection(Command(platform:platform,dir:dir),highlighted:platform,enabled:true)
+                scene.setSelection(Command(platform:platform,dir:dir),highlighted:platform,enabled:true,animated:false)
                 var preview = state
                 Rules.rotate(&preview,platform:platform,quarters:dir)
                 try assertBalls(scene,in:preview)
             } }
-            scene.setSelection(nil,highlighted:nil,enabled:true)
+            scene.setSelection(nil,highlighted:nil,enabled:true,animated:false)
             try assertBalls(scene,in:state)
         }
     }
@@ -83,7 +83,7 @@ final class TrackGeometryTests: XCTestCase {
             let scene = BoardScene()
             scene.render(state,side:side)
             for dir in [0,-1,1,0] {
-                scene.setSelection(dir == 0 ? nil : Command(platform:4,dir:dir),highlighted:nil,enabled:true)
+                scene.setSelection(dir == 0 ? nil : Command(platform:4,dir:dir),highlighted:nil,enabled:true,animated:false)
                 var preview = state
                 Rules.rotate(&preview,platform:4,quarters:dir)
                 for (index,ball) in preview.balls.enumerated() {
@@ -130,7 +130,9 @@ final class TrackGeometryTests: XCTestCase {
 
     @MainActor func testCornerRailVisualFixture() throws {
         let scene = BoardScene()
-        scene.render(fixture(),side:.bottom)
+        var state = fixture(); state.cooldown = [0,8]
+        scene.render(state,side:.bottom)
+        scene.setSelection(Command(platform:4,dir:1),highlighted:4,enabled:true,animated:false)
         let view = SKView(frame:CGRect(x:0,y:0,width:720,height:828))
         view.presentScene(scene)
         let texture = try XCTUnwrap(view.texture(from:scene))
@@ -138,6 +140,190 @@ final class TrackGeometryTests: XCTestCase {
         attachment.name = "rails-all-corners-and-straights"
         attachment.lifetime = .keepAlways
         add(attachment)
+    }
+
+    @MainActor func testDragFollowsFingerAndCarriesBallsWithoutPriorSelection() throws {
+        for side in [Side.bottom,.top] { for sign: CGFloat in [-1,1] {
+            let state = fixture()
+            let scene = BoardScene()
+            scene.render(state,side:side)
+            scene.setSelection(nil,highlighted:nil,enabled:true)
+            var commands: [Command?] = []
+            scene.onSelect = { p,dir in commands.append(dir.map { Command(platform:p,dir:$0) }) }
+            XCTAssertTrue(scene.beginDrag(at:CGPoint(x:80,y:0)))
+            let angle = sign * CGFloat.pi / 18
+            scene.moveDrag(to:CGPoint(x:80*cos(angle),y:80*sin(angle)))
+            let tile = try XCTUnwrap(scene.childNode(withName:"//platform-4"))
+            XCTAssertEqual(tile.zRotation,angle,accuracy:0.0001)
+            XCTAssertTrue(commands.isEmpty,"Dragging must not commit until release")
+            let ball = try XCTUnwrap(state.balls.first { $0.row == 2 && $0.col == 2 })
+            let node = try XCTUnwrap(scene.childNode(withName:"//ball-\(ball.id)"))
+            let marker = try XCTUnwrap(scene.childNode(withName:"//source-0"))
+            assertPoint(tile.convert(marker.position,to:try XCTUnwrap(tile.parent)),node.position)
+            scene.finishDrag()
+            XCTAssertEqual(commands,[Command(platform:4,dir:sign < 0 ? 1 : -1)])
+            XCTAssertEqual(tile.zRotation,angle,accuracy:0.0001,"Release must start a snap, not jump")
+            XCTAssertNotNil(tile.action(forKey:"preview-snap"))
+        } }
+    }
+
+    @MainActor func testShortAndCancelledDragsDoNotChooseAMove() throws {
+        for cancelled in [false,true] {
+            let scene = BoardScene()
+            scene.render(BoardState(),side:.bottom)
+            scene.setSelection(nil,highlighted:nil,enabled:true)
+            var callbacks = 0
+            scene.onSelect = { _,dir in callbacks += 1; XCTAssertNil(dir) }
+            XCTAssertTrue(scene.beginDrag(at:CGPoint(x:80,y:0)))
+            let angle: CGFloat = cancelled ? .pi/3 : .pi/36
+            scene.moveDrag(to:CGPoint(x:80*cos(angle),y:80*sin(angle)))
+            scene.finishDrag(cancelled:cancelled)
+            XCTAssertEqual(callbacks,1)
+            XCTAssertNotNil(scene.childNode(withName:"//platform-4")?.action(forKey:"preview-snap"))
+        }
+        var state = BoardState(); state.cooldown = [4]
+        let scene = BoardScene(); scene.render(state,side:.bottom)
+        scene.setSelection(nil,highlighted:nil,enabled:true)
+        XCTAssertTrue(scene.beginDrag(at:CGPoint(x:80,y:0)))
+        scene.moveDrag(to:CGPoint(x:56,y:-56))
+        scene.finishDrag()
+        XCTAssertEqual(scene.childNode(withName:"//platform-4")?.zRotation,0)
+        scene.setSelection(nil,highlighted:nil,enabled:false)
+        XCTAssertFalse(scene.beginDrag(at:CGPoint(x:216,y:0)))
+    }
+
+    @MainActor func testTapOnAnyPlatformClearsTheMoveIncludingHotPlatforms() throws {
+        let game = GameModel()
+        game.training = true; game.active = true
+        game.board.cooldown = [0,8]
+        let scene = game.boardScene
+        scene.render(game.board,side:.bottom)
+        for p in 0..<9 {
+            game.selection = Command(platform:4,dir:1)
+            scene.setSelection(game.selection,highlighted:4,enabled:true,animated:false)
+            let point = CGPoint(x:CGFloat(p % 3 - 1)*216 + 80,y:CGFloat(1 - p / 3)*216)
+            XCTAssertTrue(scene.beginDrag(at:point))
+            scene.finishDrag()
+            XCTAssertNil(game.selection)
+            let tile = try XCTUnwrap(scene.childNode(withName:"//platform-4"))
+            XCTAssertNil(tile.childNode(withName:"preview"))
+            XCTAssertNotNil(tile.action(forKey:"preview-snap"),"Reset must animate back")
+        }
+        game.chooseTurn(platform:0,direction:1)
+        XCTAssertNil(game.selection,"Reset taps must not enable rotation of hot platforms")
+        let hot = try XCTUnwrap(scene.childNode(withName:"//platform-0")?.childNode(withName:"base") as? SKShapeNode)
+        var red: CGFloat = 0, green: CGFloat = 0, blue: CGFloat = 0, alpha: CGFloat = 0
+        XCTAssertTrue(hot.strokeColor.getRed(&red,green:&green,blue:&blue,alpha:&alpha))
+        XCTAssertEqual(red,1,accuracy:0.0001)
+        XCTAssertEqual(green,98.0/255,accuracy:0.0001)
+        XCTAssertEqual(blue,107.0/255,accuracy:0.0001)
+        XCTAssertEqual(hot.glowWidth,5)
+        XCTAssertNil(scene.childNode(withName:"//lock"))
+    }
+
+    @MainActor func testNewDragCanInterruptSnapAndResolveKeepsVisibleAngle() throws {
+        let before = fixture()
+        let scene = BoardScene(); scene.render(before,side:.bottom)
+        scene.setSelection(nil,highlighted:nil,enabled:true)
+        XCTAssertTrue(scene.beginDrag(at:CGPoint(x:80,y:0)))
+        scene.moveDrag(to:CGPoint(x:56,y:-56))
+        scene.finishDrag()
+        let tile = try XCTUnwrap(scene.childNode(withName:"//platform-4"))
+        XCTAssertTrue(scene.beginDrag(at:CGPoint(x:80,y:0)))
+        XCTAssertNil(tile.action(forKey:"preview-snap"))
+        XCTAssertEqual(tile.zRotation,-.pi/4,accuracy:0.0001)
+        scene.moveDrag(to:CGPoint(x:56,y:-56))
+        XCTAssertEqual(tile.zRotation,-.pi/2,accuracy:0.0001)
+        scene.finishDrag()
+        var after = before
+        let turn = Rules.resolve(&after,top:nil,bottom:Command(platform:4,dir:1))
+        scene.animate(before:before,after:after,turn:turn,side:.bottom)
+        let resolvedTile = try XCTUnwrap(scene.childNode(withName:"//platform-4"))
+        XCTAssertEqual(resolvedTile.zRotation,-.pi/2,accuracy:0.0001)
+        let ball = try XCTUnwrap(before.balls.first { $0.row == 2 && $0.col == 2 })
+        let node = try XCTUnwrap(scene.childNode(withName:"//ball-\(ball.id)"))
+        XCTAssertTrue(node.parent === resolvedTile)
+        let original = geometry(ball,in:before).midpoint
+        assertPoint(resolvedTile.convert(node.position,to:try XCTUnwrap(resolvedTile.parent)),CGPoint(x:original.y,y:-original.x))
+    }
+
+    @MainActor func testSnapFinishesAtQuarterTurnAndSwitchReturnsPreviousPlatform() async throws {
+        let scene = BoardScene()
+        scene.render(fixture(),side:.bottom)
+        scene.setSelection(nil,highlighted:nil,enabled:true)
+        let window = UIWindow(frame:CGRect(x:0,y:0,width:360,height:414))
+        let controller = UIViewController()
+        let view = SKView(frame:window.bounds)
+        controller.view = view; window.rootViewController = controller; window.isHidden = false
+        view.presentScene(scene)
+        defer { view.presentScene(nil); window.isHidden = true }
+        XCTAssertTrue(scene.beginDrag(at:CGPoint(x:80,y:0)))
+        scene.moveDrag(to:CGPoint(x:56,y:-56)); scene.finishDrag()
+        try await Task.sleep(for:.milliseconds(600))
+        let tile = try XCTUnwrap(scene.childNode(withName:"//platform-4"))
+        XCTAssertEqual(tile.zRotation,-.pi/2,accuracy:0.001)
+        XCTAssertTrue(scene.beginDrag(at:CGPoint(x:296,y:0)))
+        scene.moveDrag(to:CGPoint(x:272,y:56))
+        try await Task.sleep(for:.milliseconds(400))
+        XCTAssertEqual(tile.zRotation,0,accuracy:0.001)
+        scene.finishDrag(cancelled:true)
+    }
+
+    @MainActor func testReverseDragResetsChosenTurnWithTheSameSmallThreshold() throws {
+        for side in [Side.bottom,.top] { for dir in [-1,1] { for settled in [false,true] {
+            let game = GameModel(); game.training = true; game.active = true
+            game.board = fixture(); game.side = side
+            let scene = game.boardScene
+            scene.render(game.board,side:side)
+            game.chooseTurn(platform:4,direction:dir)
+            if settled { scene.setSelection(game.selection,highlighted:4,enabled:true,animated:false) }
+            let start: CGFloat = 0.6
+            XCTAssertTrue(scene.beginDrag(at:CGPoint(x:80*cos(start),y:80*sin(start))))
+            // Several samples catch accidental use of the platform angle as the finger angle.
+            for degrees in [5.0,10.0] {
+                let angle = start + CGFloat(dir) * CGFloat(degrees) * .pi/180
+                scene.moveDrag(to:CGPoint(x:80*cos(angle),y:80*sin(angle)))
+            }
+            scene.finishDrag()
+            XCTAssertNil(game.selection)
+            XCTAssertFalse(game.turnLimitHint)
+            XCTAssertNotNil(scene.childNode(withName:"//platform-4")?.action(forKey:"preview-snap"))
+        } } }
+    }
+
+    @MainActor func testSecondTurnSpringsBackAndShowsHintWithoutChangingCommand() async throws {
+        let game = GameModel(); game.training = true; game.active = true
+        game.board = fixture()
+        let scene = game.boardScene
+        scene.render(game.board,side:.bottom)
+        let window = UIWindow(frame:CGRect(x:0,y:0,width:360,height:414))
+        let controller = UIViewController(), view = SKView(frame:window.bounds)
+        controller.view = view; window.rootViewController = controller; window.isHidden = false
+        view.presentScene(scene)
+        defer { view.presentScene(nil); window.isHidden = true }
+        for dir in [-1,1] {
+            let command = Command(platform:4,dir:dir)
+            game.chooseTurn(platform:4,direction:dir)
+            scene.setSelection(command,highlighted:4,enabled:true,animated:false)
+            XCTAssertTrue(scene.beginDrag(at:CGPoint(x:80,y:0)))
+            let delta = -CGFloat(dir) * .pi/4
+            scene.moveDrag(to:CGPoint(x:80*cos(delta),y:80*sin(delta)))
+            let tile = try XCTUnwrap(scene.childNode(withName:"//platform-4"))
+            XCTAssertEqual(tile.zRotation,-CGFloat(dir) * .pi / 2 + delta,accuracy:0.001)
+            scene.finishDrag()
+            XCTAssertEqual(game.selection,command)
+            XCTAssertTrue(game.turnLimitHint)
+            XCTAssertNotNil(tile.action(forKey:"preview-snap"))
+            try await Task.sleep(for:.milliseconds(400))
+            XCTAssertEqual(tile.zRotation,-CGFloat(dir) * .pi / 2,accuracy:0.001)
+            XCTAssertTrue(scene.beginDrag(at:CGPoint(x:80,y:0)))
+            scene.moveDrag(to:CGPoint(x:80*cos(-delta),y:80*sin(-delta)))
+            scene.finishDrag()
+            XCTAssertNil(game.selection)
+            XCTAssertFalse(game.turnLimitHint)
+            try await Task.sleep(for:.milliseconds(400))
+            XCTAssertEqual(tile.zRotation,0,accuracy:0.001)
+        }
     }
 
     private func fixture() -> BoardState {

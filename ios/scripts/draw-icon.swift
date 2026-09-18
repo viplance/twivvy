@@ -16,11 +16,22 @@ for index in 0..<4 {
 let paths: [[CGPoint]] = [
  [CGPoint(x:164,y:330),CGPoint(x:330,y:330),CGPoint(x:330,y:494)],
  [CGPoint(x:330,y:846),CGPoint(x:330,y:680),CGPoint(x:494,y:680)],
- [CGPoint(x:516,y:330),CGPoint(x:680,y:330),CGPoint(x:680,y:164)],
+ [CGPoint(x:516,y:330),CGPoint(x:846,y:330)],
  [CGPoint(x:680,y:516),CGPoint(x:680,y:680),CGPoint(x:846,y:680)]
 ]
 for (index,points) in paths.enumerated() {
- let p=NSBezierPath();p.move(to:points[0]);p.line(to:points[1]);p.line(to:points[2]);p.lineCapStyle = .round;p.lineJoinStyle = .round
+ let p=NSBezierPath();p.move(to:points[0])
+ if points.count == 2 {
+  // A straight rail breaks the four-way rotational motif and carries the ball.
+  p.line(to:points[1])
+ } else {
+  // Match the game's rounded quadratic rails, expressed as a cubic for AppKit.
+  let start=points[0], control=points[1], end=points[2]
+  let c1=CGPoint(x:start.x+(control.x-start.x)*2/3,y:start.y+(control.y-start.y)*2/3)
+  let c2=CGPoint(x:end.x+(control.x-end.x)*2/3,y:end.y+(control.y-end.y)*2/3)
+  p.curve(to:end,controlPoint1:c1,controlPoint2:c2)
+ }
+ p.lineCapStyle = .round;p.lineJoinStyle = .round
  color(0x071023).setStroke();p.lineWidth=64;p.stroke()
  color(tints[index]).withAlphaComponent(0.25).setStroke();p.lineWidth=43;p.stroke()
  color(tints[index]).setStroke();p.lineWidth=22;p.stroke()

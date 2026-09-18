@@ -6,15 +6,26 @@ private let coral = Color(red:1,green:0.60,blue:0.71)
 private let muted = Color(red:0.63,green:0.70,blue:0.82)
 
 struct ContentView: View {
+    @GestureState private var boardTouchActive = false
     @Bindable var game: GameModel
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var sheet: Panel?
-    @State private var pendingMode = "training"
     @State private var code = ""
+    @State private var invalidJoinCode = false
     @State private var confirmLeave = false
     @State private var incomingCode: String?
-    enum Panel: String, Identifiable { case setup, settings, rules, privacy; var id: String { rawValue } }
+    enum Panel: Identifiable {
+        case setup(String), settings, rules, privacy
+        var id: String {
+            switch self {
+            case .setup(let mode): "setup-\(mode)"
+            case .settings: "settings"
+            case .rules: "rules"
+            case .privacy: "privacy"
+            }
+        }
+    }
     var body: some View {
         ZStack {
             background
@@ -38,7 +49,7 @@ struct ContentView: View {
             NavigationStack {
                 Group {
                     switch panel {
-                    case .setup: setup
+                    case .setup(let mode): setup(mode:mode)
                     case .settings: settings
                     case .rules: rules
                     case .privacy: privacy
@@ -54,7 +65,7 @@ struct ContentView: View {
         .confirmationDialog(L("native.leaveQuestion"),isPresented:$confirmLeave,titleVisibility:.visible) {
             Button(L("native.leave"),role:.destructive) {
                 game.leave()
-                if let incomingCode { code = incomingCode; self.incomingCode = nil; pendingMode = "join"; sheet = .setup }
+                if let incomingCode { code = incomingCode; self.incomingCode = nil; sheet = .setup("join") }
             }
             Button(L("action.cancel"),role:.cancel) { incomingCode = nil }
         }
@@ -76,7 +87,7 @@ struct ContentView: View {
     }
     private func acceptInvitation(_ url: URL) {
         guard let value = game.handleURL(url) else { return }
-        if game.screen == .menu { code = value; pendingMode = "join"; sheet = .setup }
+        if game.screen == .menu { code = value; sheet = .setup("join") }
         else { incomingCode = value; confirmLeave = true }
     }
     private var background: some View {
@@ -135,18 +146,18 @@ struct ContentView: View {
     }
     private var menuActions: some View {
         VStack(spacing:12) {
-            Button { pendingMode = "online"; sheet = .setup } label: {
+            Button { sheet = .setup("online") } label: {
                 HStack { Image(systemName:"globe.europe.africa.fill"); Text(L("menu.online")); Spacer(); Image(systemName:"arrow.right") }
             }.buttonStyle(GameButtonStyle()).accessibilityIdentifier("menu.online")
             HStack(spacing:12) {
-                Button { pendingMode = "host"; sheet = .setup } label: {
+                Button { sheet = .setup("host") } label: {
                     Label(L("menu.friend"),systemImage:"person.2.fill").frame(maxWidth:.infinity)
                 }.buttonStyle(GameButtonStyle(secondary:true)).accessibilityIdentifier("menu.friend")
-                Button { pendingMode = "training"; sheet = .setup } label: {
+                Button { sheet = .setup("training") } label: {
                     Label(L("menu.training"),systemImage:"sparkles").frame(maxWidth:.infinity)
                 }.buttonStyle(GameButtonStyle(secondary:true)).accessibilityIdentifier("menu.training")
             }
-            Button { pendingMode = "join"; sheet = .setup } label: {
+            Button { sheet = .setup("join") } label: {
                 Label(L("native.haveCode"),systemImage:"link").font(.subheadline.weight(.semibold)).padding(10)
             }.accessibilityIdentifier("menu.join")
             if game.hasSavedGame {
@@ -234,6 +245,22 @@ struct ContentView: View {
     private var boardView: some View {
         SpriteView(scene:game.boardScene,options:[.allowsTransparency])
             .aspectRatio(720/828,contentMode:.fit)
+            // Claim touches on the board before the surrounding ScrollView.
+            .highPriorityGesture(DragGesture(minimumDistance:0)
+                .updating($boardTouchActive) { _, active, _ in active = true }
+                .onChanged { value in
+                    game.boardScene.dragChanged(start:value.startLocation,location:value.location)
+                }
+                .onEnded { value in game.boardScene.dragEnded(at:value.location) })
+            .onChange(of:boardTouchActive) { _, active in
+                if !active {
+                    Task { @MainActor in
+                        // Let onEnded commit a normal release before handling cancellation.
+                        await Task.yield()
+                        if !boardTouchActive { game.boardScene.finishDrag(cancelled:true) }
+                    }
+                }
+            }
             .accessibilityRepresentation {
                 GeometryReader { geometry in
                     VStack(spacing:0) {
@@ -242,13 +269,20 @@ struct ContentView: View {
                                 ForEach(0..<3) { col in
                                     let index = row*3+col
                                     let p = game.side == .bottom ? index : 8-index
-                                    Button { game.select(p) } label: {
-                                        Color.clear.contentShape(Rectangle())
+                                    Color.clear.contentShape(Rectangle())
+                                    .accessibilityElement()
+                                    .accessibilityAction { game.chooseTurn(platform:p,direction:nil) }
+                                    .accessibilityAdjustableAction { direction in
+                                        switch direction {
+                                        case .increment: game.chooseTurn(platform:p,direction:1)
+                                        case .decrement: game.chooseTurn(platform:p,direction:-1)
+                                        @unknown default: break
+                                        }
                                     }
                                     .frame(width:geometry.size.width*0.3,height:geometry.size.height*216/828)
                                     .accessibilityLabel(platformDescription(p))
                                     .accessibilityIdentifier("platform.\(p)")
-                                    .disabled(!game.active || game.board.cooldown.contains(p))
+                                    .disabled(!game.active || game.paused)
                                 }
                             }
                         }
@@ -268,16 +302,9 @@ struct ContentView: View {
     }
     private var turnControls: some View {
         VStack(spacing:14) {
-            Text(game.selection == nil ? L("native.selectHint") : LF("native.selected",["platform":"\(game.selection!.platform+1)"]))
-                .font(.subheadline.weight(.medium)).foregroundStyle(game.selection == nil ? muted : mint).multilineTextAlignment(.center)
-            HStack(spacing:12) {
-                Button { game.rotate(-1) } label: { Label(L("native.left"),systemImage:"arrow.counterclockwise").frame(maxWidth:.infinity) }
-                    .buttonStyle(GameButtonStyle(secondary:true)).accessibilityIdentifier("game.ccw")
-                Button { game.rotate(1) } label: { Label(L("native.right"),systemImage:"arrow.clockwise").frame(maxWidth:.infinity) }
-                    .buttonStyle(GameButtonStyle(secondary:true)).accessibilityIdentifier("game.cw")
-            }.disabled(!game.active || game.selectedPlatform == nil || game.paused)
+            Text(game.turnLimitHint ? L("native.turnLimitHint") : game.selection == nil ? L("native.selectHint") : LF("native.selected",["platform":"\(game.selection!.platform+1)"]))
+                .font(.subheadline.weight(.medium)).foregroundStyle(game.turnLimitHint ? coral : game.selection == nil ? muted : mint).multilineTextAlignment(.center)
             HStack {
-                Button(L("native.skip")) { game.skip() }.disabled(!game.active).accessibilityIdentifier("game.skip")
                 Spacer()
                 if game.training {
                     Button { game.resolveTraining() } label: { Label(L("native.next"),systemImage:"forward.end.fill") }
@@ -285,7 +312,7 @@ struct ContentView: View {
                 } else { Label(L("native.hidden"),systemImage:"lock.fill").font(.caption).foregroundStyle(muted) }
             }.font(.subheadline.weight(.semibold)).frame(minHeight:44)
             if game.training && game.onlineCount % 2 == 1 {
-                Button(L("training.humanInvite")) { pendingMode = "online"; sheet = .setup }.font(.caption)
+                Button(L("training.humanInvite")) { sheet = .setup("online") }.font(.caption)
             }
         }
     }
@@ -301,37 +328,47 @@ struct ContentView: View {
             Button(L("action.newGame")) { game.leave() }.frame(minHeight:44)
         }.padding(24).background(.white.opacity(0.045),in:RoundedRectangle(cornerRadius:28))
     }
-    private var setup: some View {
+    private func setup(mode: String) -> some View {
         Form {
             Section {
                 TextField(L("name.label"),text:$game.name).textContentType(.nickname).autocorrectionDisabled()
                     .onChange(of:game.name) { _,value in game.name = String(value.prefix(24)) }.accessibilityIdentifier("setup.name")
             } header: { Text(L("name.label")) }
-            if pendingMode == "training" {
+            if mode == "training" {
                 Section(L("name.difficulty")) {
                     Picker(L("name.difficulty"),selection:$game.difficulty) { ForEach(Difficulty.allCases,id:\.self) { Text(L("name.\($0.rawValue)")).tag($0) } }.pickerStyle(.segmented)
                 }
             }
-            if pendingMode == "join" {
-                Section(L("native.inviteCode")) {
-                    TextField(L("native.codeHint"),text:$code).textInputAutocapitalization(.characters).autocorrectionDisabled().accessibilityIdentifier("setup.code")
+            if mode == "join" {
+                Section {
+                    InvitationCodeField(code:$code,invalid:$invalidJoinCode)
+                } header: { Text(L("native.inviteCode")) }
+                footer: {
+                    if invalidJoinCode {
+                        Text(L("native.invalidCode")).foregroundStyle(coral).accessibilityIdentifier("setup.code.error")
+                    }
                 }
             }
             Section {
                 Button {
+                    let roomCode = mode == "join" ? GameModel.roomCode(code) : nil
+                    if mode == "join", roomCode == nil {
+                        invalidJoinCode = true
+                        return
+                    }
                     guard game.rememberName() else { return }
-                    if pendingMode == "join" {
-                        guard let valid = GameModel.roomCode(code) else { game.error = L("native.invalidCode"); return }
-                        game.startOnline("join",code:valid)
-                    } else if pendingMode == "training" { game.startTraining() }
-                    else { game.startOnline(pendingMode) }
+                    if let roomCode {
+                        game.startOnline("join",code:roomCode)
+                    } else if mode == "training" { game.startTraining() }
+                    else { game.startOnline(mode) }
                     sheet = nil
-                } label: { Text(L(pendingMode == "training" ? "dialog.trainingSubmit" : pendingMode == "host" ? "dialog.createSubmit" : pendingMode == "join" ? "dialog.joinSubmit" : "dialog.onlineSubmit")).frame(maxWidth:.infinity).font(.headline).padding(8) }
+                } label: { Text(L(mode == "training" ? "dialog.trainingSubmit" : mode == "host" ? "dialog.createSubmit" : mode == "join" ? "dialog.joinSubmit" : "dialog.onlineSubmit")).frame(maxWidth:.infinity).font(.headline).padding(8) }
                 .accessibilityIdentifier("setup.start")
             } footer: {
-                Text(L(pendingMode == "training" ? "native.offline" : "native.onlinePrivacy"))
+                Text(L(mode == "training" ? "native.offline" : "native.onlinePrivacy"))
             }
-        }.navigationTitle(L(pendingMode == "training" ? "dialog.trainingTitle" : pendingMode == "host" ? "dialog.createTitle" : pendingMode == "join" ? "dialog.joinTitle" : "dialog.onlineTitle"))
+        }.navigationTitle(L(mode == "training" ? "dialog.trainingTitle" : mode == "host" ? "dialog.createTitle" : mode == "join" ? "dialog.joinTitle" : "dialog.onlineTitle"))
+            .onAppear { invalidJoinCode = false }
     }
     private var settings: some View {
         Form {
@@ -363,6 +400,31 @@ struct ContentView: View {
     private var privacy: some View {
         ScrollView { Text(L("native.privacyText")).frame(maxWidth:.infinity,alignment:.leading).padding(28).textSelection(.enabled) }
             .navigationTitle(L("native.privacy"))
+    }
+}
+
+private struct InvitationCodeField: View {
+    @Binding var code: String
+    @Binding var invalid: Bool
+    @FocusState private var focused: Bool
+
+    var body: some View {
+        TextField(L("native.codeHint"),text:$code)
+            .textInputAutocapitalization(.characters).autocorrectionDisabled()
+            .focused($focused)
+            .padding(10)
+            .background(invalid ? coral.opacity(0.10) : .clear,in:RoundedRectangle(cornerRadius:8))
+            .overlay { RoundedRectangle(cornerRadius:8).strokeBorder(invalid ? coral : .clear,lineWidth:2) }
+            .onChange(of:code) { _,_ in invalid = false }
+            .task(id:invalid) {
+                if invalid {
+                    await Task.yield()
+                    guard !Task.isCancelled else { return }
+                    focused = true
+                }
+            }
+            .accessibilityHint(invalid ? L("native.invalidCode") : "")
+            .accessibilityIdentifier("setup.code")
     }
 }
 

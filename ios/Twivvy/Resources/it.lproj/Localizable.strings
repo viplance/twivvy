@@ -10,7 +10,7 @@
 "menu.training" = "Allenamento";
 "menu.how" = "Come si gioca";
 "rules.board" = "Il campo ha nove piattaforme girevoli (3×3).";
-"rules.goal" = "Raccogli più palline possibile nel tuo ricevitore.";
+"rules.goal" = "Raccogli più palline possibile nel tuo ricevitore. Il tuo ricevitore è sempre in basso.";
 "rules.turn" = "Puoi ruotare una piattaforma per turno.";
 "rules.spawn" = "Le nuove palline appaiono da due caselle segnate al centro.";
 "rules.combine" = "Dopo l'attesa viene rivelata la mossa avversaria e le rotazioni si combinano.";
@@ -90,7 +90,7 @@
 "native.east" = "Destra";
 "native.south" = "Giù";
 "native.west" = "Sinistra";
-"native.selectHint" = "Scegli una piattaforma e il senso di rotazione.";
+"native.selectHint" = "Trascina una piattaforma per ruotarla. Tocca una piattaforma per annullare la rotazione.";
 "native.selected" = "Piattaforma {platform} · la tua mossa è segreta";
 "native.left" = "A sinistra";
 "native.right" = "A destra";
@@ -108,5 +108,7 @@
 "native.support" = "Assistenza";
 "native.language" = "Lingua dell’app";
 "native.winRule" = "Sette punti danno la vittoria anticipata. Altrimenti vince il punteggio più alto dopo 30 turni. A parità di punti è pareggio.";
-"native.gestureRule" = "Tocca una piattaforma e i pulsanti di rotazione, oppure scorri attorno al centro. Puoi cambiare mossa durante i 30 secondi del timer. Il tuo ricevitore è sempre in basso.";
+"native.gestureRule" = "Trascina una piattaforma per ruotarla. Tocca una piattaforma per annullare la rotazione. Puoi cambiare mossa durante i 30 secondi del timer.";
 "native.privacyText" = "Twivvy does not use advertising, analytics, tracking, accounts, or in-app purchases.\n\nYour nickname and preferences stay on your device. Online play sends your nickname, a random room credential and connection details to the Twivvy signaling service. Your opponent sees your nickname and can receive your IP address through the direct WebRTC connection. Moves travel directly between the two players.\n\nWaiting rooms and matches with an absent player expire after 30 minutes. Active rooms remain available. Infrastructure providers may retain technical request logs, including IP addresses, for security and service operation.\n\nRecovery credentials and hidden moves are stored in the iOS Keychain on this device. Leaving an online game clears its recovery data. Sound and haptics can be disabled in Settings. Training works without an internet connection; an optional online-presence check may contact the signaling service.\n\nNo camera, microphone, contacts or location access is requested.\n\nPublisher: Dzmitry Sharko. Support and privacy requests: https://twivvy.e-notix.com/support.html\n\nUpdated: 17 September 2026.";
+
+"native.turnLimitHint" = "Puoi ruotare una piattaforma solo una volta per turno.";

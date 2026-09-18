@@ -10,7 +10,7 @@
 "menu.training" = "Antrenman";
 "menu.how" = "Nasıl oynanır";
 "rules.board" = "Oyun alanı dokuz döner platformdan oluşur (3×3).";
-"rules.goal" = "Haznende mümkün olduğunca çok top topla.";
+"rules.goal" = "Haznende mümkün olduğunca çok top topla. Alıcın her zaman alttadır.";
 "rules.turn" = "Her turda bir platformu döndürebilirsin.";
 "rules.spawn" = "Yeni toplar merkezdeki iki işaretli hücreden çıkar.";
 "rules.combine" = "Bekleme sonunda rakibin hamlesi açılır ve dönüşler birleştirilir.";
@@ -90,7 +90,7 @@
 "native.east" = "Sağ";
 "native.south" = "Aşağı";
 "native.west" = "Sol";
-"native.selectHint" = "Bir platform ve dönüş yönü seç.";
+"native.selectHint" = "Döndürmek için platformu sürükle. Dönüşü iptal etmek için herhangi bir platforma dokun.";
 "native.selected" = "Platform {platform} · hamlen gizli";
 "native.left" = "Sola çevir";
 "native.right" = "Sağa çevir";
@@ -108,5 +108,7 @@
 "native.support" = "Destek";
 "native.language" = "Uygulama dili";
 "native.winRule" = "Yedi puan erken galibiyet getirir. Aksi halde 30 tur sonunda en yüksek puan kazanır. Eşit puanlar beraberliktir.";
-"native.gestureRule" = "Platforma ve dönüş düğmelerine dokun veya merkezinin etrafında kaydır. 30 saniyelik süre bitene kadar hamleni değiştirebilirsin. Alıcın her zaman alttadır.";
+"native.gestureRule" = "Döndürmek için platformu sürükle. Dönüşü iptal etmek için herhangi bir platforma dokun. 30 saniyelik süre bitene kadar hamleni değiştirebilirsin.";
 "native.privacyText" = "Twivvy does not use advertising, analytics, tracking, accounts, or in-app purchases.\n\nYour nickname and preferences stay on your device. Online play sends your nickname, a random room credential and connection details to the Twivvy signaling service. Your opponent sees your nickname and can receive your IP address through the direct WebRTC connection. Moves travel directly between the two players.\n\nWaiting rooms and matches with an absent player expire after 30 minutes. Active rooms remain available. Infrastructure providers may retain technical request logs, including IP addresses, for security and service operation.\n\nRecovery credentials and hidden moves are stored in the iOS Keychain on this device. Leaving an online game clears its recovery data. Sound and haptics can be disabled in Settings. Training works without an internet connection; an optional online-presence check may contact the signaling service.\n\nNo camera, microphone, contacts or location access is requested.\n\nPublisher: Dzmitry Sharko. Support and privacy requests: https://twivvy.e-notix.com/support.html\n\nUpdated: 17 September 2026.";
+
+"native.turnLimitHint" = "Bir platformu her turda yalnızca bir kez döndürebilirsin.";

@@ -10,7 +10,7 @@
 "menu.training" = "Entrenamiento";
 "menu.how" = "Cómo jugar";
 "rules.board" = "El tablero tiene nueve plataformas giratorias (3×3).";
-"rules.goal" = "Recoge tantas bolas como puedas en tu receptor.";
+"rules.goal" = "Recoge tantas bolas como puedas en tu receptor. Tu receptor siempre está abajo.";
 "rules.turn" = "Puedes girar una plataforma por turno.";
 "rules.spawn" = "Las bolas nuevas aparecen en dos casillas marcadas del centro.";
 "rules.combine" = "Tras la espera se revela la jugada del rival y los giros se combinan.";
@@ -90,7 +90,7 @@
 "native.east" = "Derecha";
 "native.south" = "Abajo";
 "native.west" = "Izquierda";
-"native.selectHint" = "Elige una plataforma y un sentido de giro.";
+"native.selectHint" = "Arrastra una plataforma para girarla. Toca cualquier plataforma para cancelar el giro.";
 "native.selected" = "Plataforma {platform} · tu jugada es secreta";
 "native.left" = "A la izquierda";
 "native.right" = "A la derecha";
@@ -108,5 +108,7 @@
 "native.support" = "Soporte";
 "native.language" = "Idioma de la app";
 "native.winRule" = "Siete puntos dan la victoria anticipada. Si no, gana la mayor puntuación tras 30 rondas. Con puntos iguales hay empate.";
-"native.gestureRule" = "Toca una plataforma y los botones de giro, o desliza alrededor de su centro. Puedes cambiar tu jugada durante los 30 segundos del temporizador. Tu receptor siempre está abajo.";
+"native.gestureRule" = "Arrastra una plataforma para girarla. Toca cualquier plataforma para cancelar el giro. Puedes cambiar tu jugada durante los 30 segundos del temporizador.";
 "native.privacyText" = "Twivvy does not use advertising, analytics, tracking, accounts, or in-app purchases.\n\nYour nickname and preferences stay on your device. Online play sends your nickname, a random room credential and connection details to the Twivvy signaling service. Your opponent sees your nickname and can receive your IP address through the direct WebRTC connection. Moves travel directly between the two players.\n\nWaiting rooms and matches with an absent player expire after 30 minutes. Active rooms remain available. Infrastructure providers may retain technical request logs, including IP addresses, for security and service operation.\n\nRecovery credentials and hidden moves are stored in the iOS Keychain on this device. Leaving an online game clears its recovery data. Sound and haptics can be disabled in Settings. Training works without an internet connection; an optional online-presence check may contact the signaling service.\n\nNo camera, microphone, contacts or location access is requested.\n\nPublisher: Dzmitry Sharko. Support and privacy requests: https://twivvy.e-notix.com/support.html\n\nUpdated: 17 September 2026.";
+
+"native.turnLimitHint" = "Solo puedes girar una plataforma una vez por ronda.";
