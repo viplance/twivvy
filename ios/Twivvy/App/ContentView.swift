@@ -196,14 +196,25 @@ struct ContentView: View {
                 ScrollView { VStack(spacing:22) { scoreboard; turnControls; if game.screen == .result { resultCard } }.padding(20) }.frame(width:320)
             }.padding(.horizontal,24).padding(.bottom,16)
         } else {
-            ScrollView {
-                VStack(spacing:12) {
-                    scoreboard.padding(.horizontal,24)
-                    boardView.frame(height:min(max(size.height*0.46,260),600))
-                    if game.screen == .result { resultCard.padding(.horizontal,24) }
-                    else { turnControls.padding(.horizontal,24) }
-                }.padding(.bottom,24).frame(maxWidth:700).frame(maxWidth:.infinity)
-            }.scrollIndicators(.hidden)
+            GeometryReader { viewport in
+                ScrollView {
+                    VStack(spacing:12) {
+                        scoreboard.padding(.horizontal,24)
+                        Spacer(minLength:0)
+                        VStack(spacing:12) {
+                            boardView.frame(height:min(max(size.height*0.46,260),600))
+                            if game.screen == .result { resultCard.padding(.horizontal,24) }
+                            else { turnControls.padding(.horizontal,24) }
+                        }
+                        Spacer(minLength:0)
+                    }
+                    .padding(.bottom,24)
+                    // Share spare height above and below the play area, while
+                    // allowing compact screens and larger text to scroll.
+                    .frame(minHeight:viewport.size.height)
+                    .frame(maxWidth:700).frame(maxWidth:.infinity)
+                }.scrollIndicators(.hidden)
+            }
         }
     }
     private var scoreboard: some View {
