@@ -1,5 +1,6 @@
 import XCTest
 import SpriteKit
+import SwiftUI
 @testable import Twivvy
 
 final class TrackGeometryTests: XCTestCase {
@@ -167,6 +168,44 @@ final class TrackGeometryTests: XCTestCase {
         } }
     }
 
+    @MainActor func testViewDragsRotateTheVisiblePlatformFromEitherPerspective() throws {
+        for viewSize in [CGSize(width:360,height:414),CGSize(width:414,height:700)] {
+            let scene = BoardScene()
+            let view = SKView(frame:CGRect(origin:.zero,size:viewSize))
+            view.presentScene(scene)
+            defer { view.presentScene(nil) }
+            for side in [Side.bottom,.top] { for index in 0..<9 { for direction in [-1,1] {
+                scene.render(BoardState(),side:side)
+                scene.setSelection(nil,highlighted:nil,enabled:true,animated:false)
+                var commands: [Command?] = []
+                scene.onSelect = { p,dir in commands.append(dir.map { Command(platform:p,dir:$0) }) }
+                // Start on the platform at this visual row/column, as a UIKit finger would.
+                let center = CGPoint(x:CGFloat(index % 3 - 1)*216,y:CGFloat(1 - index / 3)*216)
+                let angle = -CGFloat(direction) * .pi/6
+                let start = scene.convertPoint(toView:CGPoint(x:center.x+80,y:center.y))
+                let end = scene.convertPoint(toView:CGPoint(x:center.x+80*cos(angle),y:center.y+80*sin(angle)))
+                let expectedPlatform = side == .bottom ? index : 8-index
+                scene.dragChanged(start:start,location:end)
+                XCTAssertTrue(commands.isEmpty)
+                for p in 0..<9 {
+                    let tile = try XCTUnwrap(scene.childNode(withName:"//platform-\(p)"))
+                    XCTAssertEqual(tile.zRotation,p == expectedPlatform ? angle : 0,accuracy:0.0001,
+                                   "Only the platform beneath the finger should follow the drag (\(side), visual \(index))")
+                }
+                scene.dragEnded(at:end)
+                let command = Command(platform:expectedPlatform,dir:direction)
+                XCTAssertEqual(commands,[command],"The network command must use canonical board coordinates")
+
+                // Reversing the same visible platform must also use its rotated perspective.
+                scene.setSelection(command,highlighted:expectedPlatform,enabled:true,animated:false)
+                scene.dragChanged(start:end,location:start)
+                scene.dragEnded(at:start)
+                XCTAssertEqual(commands.count,2)
+                XCTAssertNil(commands.last!)
+            } } }
+        }
+    }
+
     @MainActor func testShortAndCancelledDragsDoNotChooseAMove() throws {
         for cancelled in [false,true] {
             let scene = BoardScene()
@@ -323,6 +362,44 @@ final class TrackGeometryTests: XCTestCase {
             XCTAssertFalse(game.turnLimitHint)
             try await Task.sleep(for:.milliseconds(400))
             XCTAssertEqual(tile.zRotation,0,accuracy:0.001)
+        }
+    }
+
+    @MainActor func testSceneRemainsPresentedAcrossMenuGameAndResultTransitions() async throws {
+        let game = GameModel()
+        let window = UIWindow(frame:CGRect(x:0,y:0,width:375,height:667))
+        let controller = UIHostingController(rootView:ContentView(game:game))
+        window.rootViewController = controller
+        window.isHidden = false
+        defer { window.isHidden = true; window.rootViewController = nil }
+
+        func checkPresentation(_ step: String) async throws {
+            controller.view.setNeedsLayout()
+            controller.view.layoutIfNeeded()
+            try await Task.sleep(for:.milliseconds(350))
+            func spriteViews(in parent: UIView) -> [SKView] {
+                (parent as? SKView).map { [$0] } ?? parent.subviews.flatMap { spriteViews(in:$0) }
+            }
+            let views = spriteViews(in:controller.view)
+            XCTAssertEqual(views.count,1,"Exactly one visible board after \(step)")
+            let view = try XCTUnwrap(views.first)
+            let scene = try XCTUnwrap(view.scene,"Visible view lost its scene after \(step)")
+            XCTAssertTrue(scene.view === view,"Scene attached to a discarded view after \(step)")
+            XCTAssertGreaterThan(view.bounds.width,0)
+            XCTAssertGreaterThan(view.bounds.height,0)
+        }
+
+        try await checkPresentation("initial menu")
+        for round in 0..<3 {
+            // Local screen transitions only: no server or matchmaking traffic.
+            game.training = true; game.active = true; game.screen = .game
+            game.boardScene.render(game.board,side:.bottom)
+            game.refreshScene()
+            try await checkPresentation("entering game \(round)")
+            game.screen = .result
+            try await checkPresentation("result \(round)")
+            game.leave()
+            try await checkPresentation("returning to menu \(round)")
         }
     }
 

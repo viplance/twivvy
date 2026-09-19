@@ -15,6 +15,7 @@ import SwiftUI
     var paused = false
     var remaining = 30.0
     var roomCode = ""
+    private(set) var isHostingPrivateRoom = false
     var status = ""
     var error: String?
     var onlineCount = 0
@@ -43,6 +44,7 @@ import SwiftUI
         return L(ownScore == opponentScore ? "result.draw" : ownScore > opponentScore ? "result.win" : "result.loss")
     }
     var inviteURL: URL { URL(string: "https://twivvy.e-notix.com/\(roomCode)")! }
+    var showsRoomInvitation: Bool { isHostingPrivateRoom && !roomCode.isEmpty }
 
     init() {
         boardScene.onDragStart = { [weak self] in self?.turnLimitHint = false }
@@ -146,12 +148,14 @@ import SwiftUI
         guard rememberName() else { return }
         leave(); ensureBridge()
         training = false; screen = .lobby; roomCode = code
+        isHostingPrivateRoom = action == "host"
         status = L(action == "online" ? "status.finding" : "status.connecting")
         bridge?.send(["action":action,"name":name,"code":code])
     }
     func resume() {
         guard let data = SessionVault.read(), let savedJSON = String(data:data,encoding:.utf8) else { hasSavedGame = false; return }
         ensureBridge(); screen = .lobby; training = false; status = L("native.recovering")
+        isHostingPrivateRoom = false
         bridge?.send(["action":"resume","savedJSON":savedJSON])
     }
     func requestRematch() {
@@ -164,6 +168,7 @@ import SwiftUI
         if !training, screen != .menu { bridge?.send(["action":"leave"]); SessionVault.clear(); hasSavedGame = false }
         training = false; active = false; paused = false; suspendedTraining = false
         selection = nil; turnLimitHint = false; roomCode = ""; resultReason = nil
+        isHostingPrivateRoom = false
         rematchRequested = false; peerRematch = false; status = ""; screen = .menu
         board = BoardState(); side = .bottom; boardScene.render(board, side: side)
     }
@@ -212,7 +217,7 @@ import SwiftUI
         case "clearSave": SessionVault.clear(); lastSaved = nil; hasSavedGame = false
         case "room":
             roomCode = data["code"] as? String ?? roomCode
-            if screen == .lobby { status = L("lobby.waiting") }
+            if screen == .lobby { status = L(isHostingPrivateRoom ? "lobby.waiting" : "status.connecting") }
         case "count": onlineCount = data["online"] as? Int ?? 0
         case "status": status = L(data["key"] as? String ?? "status.connecting")
         case "peer": peerName = data["name"] as? String ?? L("player.opponent")

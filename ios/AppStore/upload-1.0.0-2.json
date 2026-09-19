@@ -1,0 +1,13 @@
+{
+  "bundleId": "com.enotix.twivvy",
+  "version": "1.0.0",
+  "build": "2",
+  "uploadedAt": "2026-09-19T12:02:08Z",
+  "buildUploadId": "f7406e57-7c81-4fa3-acb9-1ee30a6d14a0",
+  "uploadStatus": "succeeded",
+  "lastObservedPackageStatus": "processing",
+  "submittedForAppReview": false,
+  "archive": "ios/build/Twivvy-1.0.0-2.xcarchive",
+  "localUploadLog": "/tmp/twivvy-appstore-upload.log",
+  "confirmation": ["Upload succeeded.", "Uploaded Twivvy", "EXPORT SUCCEEDED"]
+}

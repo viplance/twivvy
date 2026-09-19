@@ -15,6 +15,11 @@ struct ContentView: View {
     @State private var invalidJoinCode = false
     @State private var confirmLeave = false
     @State private var incomingCode: String?
+    @State private var menuScene: BoardScene = {
+        let scene = BoardScene()
+        scene.render(BoardState(),side:.bottom)
+        return scene
+    }()
     enum Panel: Identifiable {
         case setup(String), settings, rules, privacy
         var id: String {
@@ -139,7 +144,7 @@ struct ContentView: View {
     private var menuArt: some View {
         ZStack {
             Circle().fill(mint.opacity(0.06)).blur(radius:30).padding(25)
-            SpriteView(scene:game.boardScene,options:[.allowsTransparency])
+            BoardSceneView(scene:menuScene)
                 .aspectRatio(720/828,contentMode:.fit).rotationEffect(.degrees(-7))
                 .shadow(color:mint.opacity(0.10),radius:30).allowsHitTesting(false)
         }.accessibilityHidden(true)
@@ -171,12 +176,12 @@ struct ContentView: View {
     private var lobby: some View {
         ScrollView {
             VStack(spacing:28) {
-                Image(systemName:game.roomCode.isEmpty ? "globe.europe.africa" : "person.2.wave.2.fill")
+                Image(systemName:game.showsRoomInvitation ? "person.2.wave.2.fill" : "globe.europe.africa")
                     .font(.system(size:70)).foregroundStyle(mint).padding(.top,60)
-                Text(L(game.roomCode.isEmpty ? "status.finding" : "lobby.created")).font(.largeTitle.bold()).multilineTextAlignment(.center)
+                Text(L(game.showsRoomInvitation ? "lobby.created" : "status.finding")).font(.largeTitle.bold()).multilineTextAlignment(.center)
                 Text(game.status).foregroundStyle(muted).multilineTextAlignment(.center)
                 ProgressView().tint(mint)
-                if !game.roomCode.isEmpty {
+                if game.showsRoomInvitation {
                     Text(game.roomCode).font(.system(size:44,weight:.heavy,design:.monospaced)).tracking(8)
                         .textSelection(.enabled).accessibilityIdentifier("lobby.code")
                     ShareLink(item:game.inviteURL) { Label(L("native.share"),systemImage:"square.and.arrow.up").frame(maxWidth:.infinity) }
@@ -223,7 +228,7 @@ struct ContentView: View {
                 playerScore(name:game.name,score:game.ownScore,color:mint,icon:"person.fill")
                 Spacer()
                 VStack(spacing:5) {
-                    Text(game.training ? L("menu.training") : "DUEL").font(.caption2.weight(.heavy)).tracking(2).foregroundStyle(muted)
+                    Text(game.training ? L("menu.training") : L("native.duel")).font(.caption2.weight(.heavy)).tracking(2).foregroundStyle(muted)
                     Text("\(game.displayRound) / 30").font(.headline.monospacedDigit())
                 }
                 Spacer()
@@ -254,7 +259,7 @@ struct ContentView: View {
         }
     }
     private var boardView: some View {
-        SpriteView(scene:game.boardScene,options:[.allowsTransparency])
+        BoardSceneView(scene:game.boardScene)
             .aspectRatio(720/828,contentMode:.fit)
             // Claim touches on the board before the surrounding ScrollView.
             .highPriorityGesture(DragGesture(minimumDistance:0)
@@ -313,17 +318,32 @@ struct ContentView: View {
     }
     private var turnControls: some View {
         VStack(spacing:14) {
-            Text(game.turnLimitHint ? L("native.turnLimitHint") : game.selection == nil ? L("native.selectHint") : LF("native.selected",["platform":"\(game.selection!.platform+1)"]))
-                .font(.subheadline.weight(.medium)).foregroundStyle(game.turnLimitHint ? coral : game.selection == nil ? muted : mint).multilineTextAlignment(.center)
-            HStack {
-                Spacer()
-                if game.training {
+            // Reserve the tallest localized hint at the current width and text size.
+            // Changing the visible hint must not recenter the board above it.
+            ZStack(alignment:.top) {
+                Text(L("native.selectHint")).fixedSize(horizontal:false,vertical:true).hidden()
+                Text(L("native.turnLimitHint")).fixedSize(horizontal:false,vertical:true).hidden()
+                ForEach(1...9,id:\.self) { platform in
+                    Text(LF("native.selected",["platform":"\(platform)"]))
+                        .fixedSize(horizontal:false,vertical:true).hidden()
+                }
+            }
+            .overlay(alignment:.top) {
+                Text(game.turnLimitHint ? L("native.turnLimitHint") : game.selection == nil ? L("native.selectHint") : LF("native.selected",["platform":"\(game.selection!.platform+1)"]))
+                    .fixedSize(horizontal:false,vertical:true)
+                    .foregroundStyle(game.turnLimitHint ? coral : game.selection == nil ? muted : mint)
+            }
+            .font(.subheadline.weight(.medium)).multilineTextAlignment(.center)
+            if game.training {
+                HStack {
+                    Spacer()
                     Button { game.resolveTraining() } label: { Label(L("native.next"),systemImage:"forward.end.fill") }
                         .disabled(!game.active).accessibilityIdentifier("game.next")
-                } else { Label(L("native.hidden"),systemImage:"lock.fill").font(.caption).foregroundStyle(muted) }
-            }.font(.subheadline.weight(.semibold)).frame(minHeight:44)
-            if game.training && game.onlineCount % 2 == 1 {
+                }.font(.subheadline.weight(.semibold)).frame(minHeight:44)
                 Button(L("training.humanInvite")) { sheet = .setup("online") }.font(.caption)
+                    .opacity(game.onlineCount % 2 == 1 ? 1 : 0)
+                    .allowsHitTesting(game.onlineCount % 2 == 1)
+                    .accessibilityHidden(game.onlineCount % 2 != 1)
             }
         }
     }
@@ -411,6 +431,31 @@ struct ContentView: View {
     private var privacy: some View {
         ScrollView { Text(L("native.privacyText")).frame(maxWidth:.infinity,alignment:.leading).padding(28).textSelection(.enabled) }
             .navigationTitle(L("native.privacy"))
+    }
+}
+
+private struct BoardSceneView: UIViewRepresentable {
+    let scene: BoardScene
+
+    func makeUIView(context: Context) -> SKView {
+        let view = SKView()
+        view.allowsTransparency = true
+        view.isOpaque = false
+        view.backgroundColor = .clear
+        return view
+    }
+
+    func updateUIView(_ view: SKView, context: Context) {
+        guard view.scene !== scene || scene.view !== view else { return }
+        // A layout change can create the replacement view before removing the old one.
+        // Detach first so the old view cannot later tear down the new presentation.
+        scene.view?.presentScene(nil)
+        view.presentScene(scene)
+    }
+
+    static func dismantleUIView(_ view: SKView, coordinator: ()) {
+        guard let scene = view.scene, scene.view === view else { return }
+        view.presentScene(nil)
     }
 }
 

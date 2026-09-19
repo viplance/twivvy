@@ -1,4 +1,19 @@
-# Release package — Twivvy 1.0.0 (1)
+# Release package — Twivvy 1.0.2 (4)
+
+Build 4 was uploaded to App Store Connect for TestFlight on 19 September 2026 at 13:25 UTC.
+Xcode confirmed `Upload succeeded` and `EXPORT SUCCEEDED`; Apple had started
+processing the package. App Review submission was not performed.
+The uploaded archive is `../build/Twivvy-1.0.2-4.xcarchive`.
+See `upload-1.0.2-4.json` for the upload receipt. Receipts for builds 2 and 3
+are retained alongside it.
+
+This build fixes menu artwork rendering after a game, keeps the board stationary
+when hints change, removes the redundant hidden-move footer, and localizes the
+duel heading and shortened drag hint in all eleven languages. It also includes
+build 3's fixes for top-side platform gestures and private-room invitation visibility.
+All 24 native tests and two UI tests passed on iPhone SE 2020 / iOS 18.6
+(`/tmp/twivvy-scene-lifecycle-fixed.xcresult`). The menu navigation UI test also
+passed on iPhone 16e / iOS 26.1 (`/tmp/twivvy-menu-ios26-fixed.xcresult`).
 
 ## Prepared
 
@@ -27,7 +42,7 @@ Contact address found in the owner's existing website: `privacy@e-notix.com`. Su
 
 ## Review notes (copy into App Store Connect)
 
-Twivvy is a maze puzzle duel. No account, sign-in, purchase, subscription, camera or microphone permission is needed. To test without another player: tap Training, enter a nickname, choose any difficulty and start. Select a platform, then tap either rotation button; the move resolves after 30 seconds, or tap Next round in training. Seven points wins early; otherwise the match ends after 30 rounds. Rematch starts another game.
+Twivvy is a maze puzzle duel. No account, sign-in, purchase, subscription, camera or microphone permission is needed. To test without another player: tap Training, enter a nickname, choose any difficulty and start. Drag a platform to rotate it; tap any platform to reset the planned move. The move resolves after 30 seconds, or tap Next round in training. Seven points wins early; otherwise the match ends after 30 rounds. Rematch starts another game.
 
 To test multiplayer: on one device choose Play with a friend and create a room. On a second device choose Have an invite? and enter the displayed code. The same room can also be joined from the browser game at https://twivvy.e-notix.com/. The host and guest choose hidden moves that are verified with SHA-256 commitments. Both peers need internet access; restrictive networks may block the direct WebRTC connection. Return to the app to recover a suspended game. Waiting rooms and games with an absent player expire after 30 minutes.
 
@@ -39,7 +54,7 @@ Published on 17 September 2026: privacy policy, support page, and the Universal 
 
 ## Remaining account steps
 
-1. Add the App Store Connect app record, owner contact information, privacy questionnaire, age questionnaire, territories and price. Upload the locally exported IPA through Xcode Organizer or Transporter.
+1. After Apple finishes processing build 4, make it available to the intended TestFlight group. For App Store release, select it for version 1.0.2 in App Store Connect. Complete owner contact information, privacy questionnaire, age questionnaire, territories and price.
 2. Check an actual iPhone/iPad for final sound, haptic and adverse-network behavior; simulator checks do not replace physical-device testing. If broad connectivity behind restrictive NAT is required, configure a TURN service; the current web service also has no TURN relay.
 3. Submit for Apple review. Signing and a successful export do not constitute App Store review approval.
 

@@ -90,7 +90,7 @@
 "native.east" = "Sağ";
 "native.south" = "Aşağı";
 "native.west" = "Sol";
-"native.selectHint" = "Döndürmek için platformu sürükle. Dönüşü iptal etmek için herhangi bir platforma dokun.";
+"native.selectHint" = "Döndürmek için platformu sürükle.";
 "native.selected" = "Platform {platform} · hamlen gizli";
 "native.left" = "Sola çevir";
 "native.right" = "Sağa çevir";
@@ -112,3 +112,4 @@
 "native.privacyText" = "Twivvy does not use advertising, analytics, tracking, accounts, or in-app purchases.\n\nYour nickname and preferences stay on your device. Online play sends your nickname, a random room credential and connection details to the Twivvy signaling service. Your opponent sees your nickname and can receive your IP address through the direct WebRTC connection. Moves travel directly between the two players.\n\nWaiting rooms and matches with an absent player expire after 30 minutes. Active rooms remain available. Infrastructure providers may retain technical request logs, including IP addresses, for security and service operation.\n\nRecovery credentials and hidden moves are stored in the iOS Keychain on this device. Leaving an online game clears its recovery data. Sound and haptics can be disabled in Settings. Training works without an internet connection; an optional online-presence check may contact the signaling service.\n\nNo camera, microphone, contacts or location access is requested.\n\nPublisher: Dzmitry Sharko. Support and privacy requests: https://twivvy.e-notix.com/support.html\n\nUpdated: 17 September 2026.";
 
 "native.turnLimitHint" = "Bir platformu her turda yalnızca bir kez döndürebilirsin.";
+"native.duel" = "DÜELLO";

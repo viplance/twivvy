@@ -1,0 +1,25 @@
+{
+  "bundleId": "com.enotix.twivvy",
+  "version": "1.0.1",
+  "build": "3",
+  "uploadedAt": "2026-09-19T12:46:40Z",
+  "buildUploadId": "3a942d87-48b3-4197-ada4-b5e9ea833ee9",
+  "uploadStatus": "succeeded",
+  "lastObservedPackageStatus": "processing",
+  "submittedForAppReview": false,
+  "archive": "ios/build/Twivvy-1.0.1-3.xcarchive",
+  "localUploadLog": "/tmp/twivvy-1.0.1-3-upload.log",
+  "confirmation": [
+    "Upload succeeded.",
+    "Uploaded Twivvy",
+    "EXPORT SUCCEEDED"
+  ],
+  "validation": {
+    "testsPassed": 24,
+    "localResultBundle": "/tmp/twivvy-network-ui-fixes.xcresult"
+  },
+  "changes": [
+    "Correct platform drag coordinates for the top-side player.",
+    "Show room invitations only when hosting a private friend game."
+  ]
+}

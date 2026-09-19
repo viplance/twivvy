@@ -59,4 +59,40 @@ final class RulesTests: XCTestCase {
         XCTAssertNil(GameModel.roomCode("https://evil.example/ACDE7"))
         XCTAssertNil(GameModel.roomCode("<script>"))
     }
+
+    @MainActor func testMatchmakingRoomEventsDoNotExposeInvitations() throws {
+        let game = GameModel()
+        game.name = "Lobby test"
+        game.ensureBridge()
+        let bridge = try XCTUnwrap(game.bridge)
+        // Feed protocol events locally without allowing queued commands to reach a server.
+        bridge.webView.stopLoading()
+        bridge.webView.configuration.userContentController.removeAllScriptMessageHandlers()
+        defer { game.leave() }
+
+        game.startOnline("host")
+        XCTAssertFalse(game.showsRoomInvitation)
+        bridge.onEvent?("room",["code":"FRND1"])
+        XCTAssertTrue(game.showsRoomInvitation)
+        XCTAssertEqual(game.status,L("lobby.waiting"))
+
+        // Switching from a private room must not leak its sharing state into matchmaking.
+        game.startOnline("online")
+        XCTAssertFalse(game.showsRoomInvitation)
+        XCTAssertEqual(game.status,L("status.finding"))
+        bridge.onEvent?("room",["code":"RAND2"])
+        XCTAssertEqual(game.screen,.lobby)
+        XCTAssertEqual(game.roomCode,"RAND2","Keep the protocol's room code for the connection")
+        XCTAssertFalse(game.showsRoomInvitation,"Hide the code and both share/copy actions while connecting")
+        XCTAssertEqual(game.status,L("status.connecting"))
+
+        game.startOnline("join",code:"FRND3")
+        bridge.onEvent?("room",["code":"FRND3"])
+        XCTAssertFalse(game.showsRoomInvitation)
+        game.startOnline("host")
+        bridge.onEvent?("room",["code":"FRND4"])
+        XCTAssertTrue(game.showsRoomInvitation)
+        game.leave()
+        XCTAssertFalse(game.showsRoomInvitation)
+    }
 }

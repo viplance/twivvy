@@ -1,0 +1,30 @@
+{
+  "bundleId": "com.enotix.twivvy",
+  "version": "1.0.2",
+  "build": "4",
+  "uploadedAt": "2026-09-19T13:25:50Z",
+  "buildUploadId": "e4b88943-dfa6-41c7-a822-923a07888d75",
+  "uploadStatus": "succeeded",
+  "lastObservedPackageStatus": "processing",
+  "submittedForAppReview": false,
+  "archive": "ios/build/Twivvy-1.0.2-4.xcarchive",
+  "localUploadLog": "/tmp/twivvy-1.0.2-4-upload.log",
+  "confirmation": [
+    "Upload succeeded.",
+    "Uploaded Twivvy",
+    "EXPORT SUCCEEDED"
+  ],
+  "validation": {
+    "nativeTestsPassed": 24,
+    "uiTestRunsPassed": 3,
+    "localResultBundles": [
+      "/tmp/twivvy-scene-lifecycle-fixed.xcresult",
+      "/tmp/twivvy-menu-ios26-fixed.xcresult"
+    ]
+  },
+  "changes": [
+    "Fix menu artwork rendering after leaving a game with independent menu scene and explicit SKView lifecycle.",
+    "Keep the board stationary when hints change and remove the redundant hidden-move footer.",
+    "Localize the duel heading and shorten the drag hint in all eleven languages."
+  ]
+}

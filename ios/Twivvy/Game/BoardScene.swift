@@ -346,11 +346,15 @@ import UIKit
         onSelect?(gesture.platform,dir)
     }
     func dragChanged(start: CGPoint, location: CGPoint) {
-        if drag == nil { _ = beginDrag(at:convertPoint(fromView:start)) }
-        moveDrag(to:convertPoint(fromView:location))
+        if drag == nil { _ = beginDrag(at:boardPoint(fromView:start)) }
+        moveDrag(to:boardPoint(fromView:location))
     }
     func dragEnded(at location: CGPoint) {
-        moveDrag(to:convertPoint(fromView:location)); finishDrag()
+        moveDrag(to:boardPoint(fromView:location)); finishDrag()
+    }
+    private func boardPoint(fromView point: CGPoint) -> CGPoint {
+        // UIKit -> scene -> board, including the guest's 180-degree perspective.
+        world.convert(convertPoint(fromView:point),from:self)
     }
 }
 
