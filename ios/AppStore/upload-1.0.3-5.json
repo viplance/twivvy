@@ -1,0 +1,34 @@
+{
+  "bundleId": "com.enotix.twivvy",
+  "version": "1.0.3",
+  "build": "5",
+  "uploadedAt": "2026-09-19T13:58:44Z",
+  "buildUploadId": "e44ea111-a321-4ab1-90f6-48e146ab2f14",
+  "uploadStatus": "succeeded",
+  "lastObservedPackageStatus": "processing",
+  "submittedForAppReview": false,
+  "archive": "ios/build/Twivvy-1.0.3-5.xcarchive",
+  "localUploadLog": "/tmp/twivvy-1.0.3-5-upload.log",
+  "confirmation": [
+    "Upload succeeded.",
+    "Uploaded Twivvy",
+    "EXPORT SUCCEEDED"
+  ],
+  "validation": {
+    "debugBuild": "succeeded",
+    "releaseArchive": "succeeded",
+    "localizedStringFilesValidated": 11,
+    "localizationGeneratorSyntax": "passed",
+    "diffWhitespace": "passed",
+    "minimumIOSVersion": "18.0",
+    "deviceFamilies": [
+      "iPhone",
+      "iPad"
+    ]
+  },
+  "changes": [
+    "Localize the small menu title and remove its icon and bottom tagline.",
+    "Use localized Back buttons on Training, Join game and Play with a friend screens.",
+    "Localize the game title in the Settings copyright and display the current app version."
+  ]
+}

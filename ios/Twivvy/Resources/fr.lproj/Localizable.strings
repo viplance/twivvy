@@ -113,3 +113,4 @@
 
 "native.turnLimitHint" = "Tu ne peux tourner une plateforme qu’une fois par manche.";
 "native.duel" = "DUEL";
+"native.back" = "Retour";

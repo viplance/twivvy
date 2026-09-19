@@ -22,6 +22,12 @@ struct ContentView: View {
     }()
     enum Panel: Identifiable {
         case setup(String), settings, rules, privacy
+        var dismissTitleKey: String {
+            switch self {
+            case .setup("training"), .setup("join"), .setup("host"): "native.back"
+            default: "native.done"
+            }
+        }
         var id: String {
             switch self {
             case .setup(let mode): "setup-\(mode)"
@@ -60,7 +66,7 @@ struct ContentView: View {
                     case .privacy: privacy
                     }
                 }
-                .toolbar { ToolbarItem(placement:.confirmationAction) { Button(L("native.done")) { sheet = nil }.accessibilityIdentifier("sheet.done") } }
+                .toolbar { ToolbarItem(placement:.confirmationAction) { Button(L(panel.dismissTitleKey)) { sheet = nil }.accessibilityIdentifier("sheet.done") } }
                 .toolbarBackground(Color(red:0.06,green:0.10,blue:0.19),for:.navigationBar)
             }.presentationDetents([.large]).preferredColorScheme(.dark)
         }
@@ -108,7 +114,9 @@ struct ContentView: View {
                 Button { confirmLeave = true } label: { Image(systemName:"chevron.left").frame(width:44,height:44) }
                     .accessibilityLabel(L("native.leave")).accessibilityIdentifier("game.leave")
             } else {
-                HStack(spacing:7) { Image(systemName:"circle.hexagongrid.fill").foregroundStyle(mint); Text("TWIVVY").tracking(3).font(.caption.weight(.heavy)) }
+                Text(L("meta.title")).textCase(.uppercase)
+                    .tracking(3).font(.caption.weight(.heavy))
+                    .lineLimit(1).minimumScaleFactor(0.7)
             }
             Spacer()
             Button { sheet = .rules } label: { Image(systemName:"questionmark.circle").frame(width:44,height:44) }
@@ -169,8 +177,6 @@ struct ContentView: View {
                 Button { game.resume() } label: { Label(L("native.resume"),systemImage:"arrow.clockwise").frame(maxWidth:.infinity) }
                     .buttonStyle(GameButtonStyle(secondary:true)).accessibilityIdentifier("menu.resume")
             }
-            HStack(spacing:7) { Circle().fill(mint).frame(width:5,height:5); Text(L("native.footer")) }
-                .font(.caption2).foregroundStyle(muted).padding(.top,6)
         }
     }
     private var lobby: some View {
@@ -413,7 +419,10 @@ struct ContentView: View {
                 Link(L("native.support"),destination:URL(string:"https://twivvy.e-notix.com/support.html")!)
                 Button(L("native.language")) { if let url=URL(string:UIApplication.openSettingsURLString) { UIApplication.shared.open(url) } }
             }
-            Section { Text("Twivvy 1.0 · © 2026 Dzmitry Sharko").font(.caption).foregroundStyle(muted) }
+            Section {
+                Text("\(L("meta.title")) \(Bundle.main.object(forInfoDictionaryKey:"CFBundleShortVersionString") as? String ?? "") · © 2026 Dzmitry Sharko")
+                    .font(.caption).foregroundStyle(muted)
+            }
         }.navigationTitle(L("native.settings"))
     }
     private var rules: some View {

@@ -1,19 +1,24 @@
-# Release package — Twivvy 1.0.2 (4)
+# Release package — Twivvy 1.0.3 (5)
 
-Build 4 was uploaded to App Store Connect for TestFlight on 19 September 2026 at 13:25 UTC.
+Build 5 was uploaded to App Store Connect for TestFlight on 19 September 2026 at 13:58 UTC.
 Xcode confirmed `Upload succeeded` and `EXPORT SUCCEEDED`; Apple had started
 processing the package. App Review submission was not performed.
-The uploaded archive is `../build/Twivvy-1.0.2-4.xcarchive`.
-See `upload-1.0.2-4.json` for the upload receipt. Receipts for builds 2 and 3
+The uploaded archive is `../build/Twivvy-1.0.3-5.xcarchive`.
+See `upload-1.0.3-5.json` for the upload receipt. Receipts for builds 2, 3 and 4
 are retained alongside it.
 
-This build fixes menu artwork rendering after a game, keeps the board stationary
-when hints change, removes the redundant hidden-move footer, and localizes the
-duel heading and shortened drag hint in all eleven languages. It also includes
-build 3's fixes for top-side platform gestures and private-room invitation visibility.
-All 24 native tests and two UI tests passed on iPhone SE 2020 / iOS 18.6
-(`/tmp/twivvy-scene-lifecycle-fixed.xcresult`). The menu navigation UI test also
-passed on iPhone 16e / iOS 26.1 (`/tmp/twivvy-menu-ios26-fixed.xcresult`).
+This build localizes the small menu title, removes its icon and the bottom tagline,
+and uses localized Back buttons on Training, Join game and Play with a friend.
+The Settings copyright now shows the localized game title and current app version.
+The Debug build and Release archive succeeded. All eleven localization files passed
+`plutil` validation, the localization generator passed its syntax check, and
+`git diff --check` passed.
+
+Previous build 1.0.2 (4) passed all 24 native tests and two UI tests on
+iPhone SE 2020 / iOS 18.6 (`/tmp/twivvy-scene-lifecycle-fixed.xcresult`), plus
+the menu navigation UI test on iPhone 16e / iOS 26.1
+(`/tmp/twivvy-menu-ios26-fixed.xcresult`). These tests were not rerun for the
+menu and localization changes in this release.
 
 ## Prepared
 
@@ -54,7 +59,7 @@ Published on 17 September 2026: privacy policy, support page, and the Universal 
 
 ## Remaining account steps
 
-1. After Apple finishes processing build 4, make it available to the intended TestFlight group. For App Store release, select it for version 1.0.2 in App Store Connect. Complete owner contact information, privacy questionnaire, age questionnaire, territories and price.
+1. After Apple finishes processing build 5, make it available to the intended TestFlight group. For App Store release, select it for version 1.0.3 in App Store Connect. Complete owner contact information, privacy questionnaire, age questionnaire, territories and price.
 2. Check an actual iPhone/iPad for final sound, haptic and adverse-network behavior; simulator checks do not replace physical-device testing. If broad connectivity behind restrictive NAT is required, configure a TURN service; the current web service also has no TURN relay.
 3. Submit for Apple review. Signing and a successful export do not constitute App Store review approval.
 

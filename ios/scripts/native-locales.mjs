@@ -16,6 +16,19 @@ const selectHint = {
  "tr": "Döndürmek için platformu sürükle.",
  "uk": "Поверни платформу рухом пальця."
 };
+const back = {
+ "en": "Back",
+ "ru": "Назад",
+ "be": "Назад",
+ "uk": "Назад",
+ "de": "Zurück",
+ "fr": "Retour",
+ "es": "Atrás",
+ "it": "Indietro",
+ "pt": "Voltar",
+ "pl": "Wstecz",
+ "tr": "Geri"
+};
 const en = {
  eyebrow:'A LITTLE TWIST. A BIG RIVALRY.',
  done:'Done',notice:'Twivvy',settings:'Settings',leaveQuestion:'Leave this game?',leave:'Leave game',haveCode:'Have an invite? Join a room',resume:'Resume saved game',footer:'9 platforms · 2 players · one clever twist',share:'Share invitation',recovering:'Reconnecting…',yourMove:'Plan your move',board:'Maze board',platform:'Platform',balls:'Balls',north:'Up',east:'Right',south:'Down',west:'Left',selectHint:'Tap a platform, then choose a rotation.',selected:'Platform {platform} · your move is hidden',left:'Turn left',right:'Turn right',skip:'Clear / skip',next:'Next round',hidden:'Hidden until reveal',rematchInvite:'Your opponent wants a rematch!',inviteCode:'Room code or invitation link',codeHint:'ABCD7 or https://…',invalidCode:'Enter a valid room code or Twivvy invitation link.',offline:'Training works offline. Your bot chooses before you make a move.',onlinePrivacy:'Your nickname is shared with your opponent. Online play uses a direct peer connection.',haptics:'Haptic feedback',privacy:'Privacy',support:'Support',language:'App language',winRule:'Seven points wins early. Otherwise, the higher score after 30 rounds wins. Equal scores are a draw.',gestureRule:'Tap a platform and use the turn buttons, or swipe around its centre. You can change your choice until the 30-second timer ends. Your receiver is always at the bottom.',privacyText:'Twivvy does not use advertising, analytics, tracking, accounts, or in-app purchases.\n\nYour nickname and preferences stay on your device. Online play sends your nickname, a random room credential and connection details to the Twivvy signaling service. Your opponent sees your nickname and can receive your IP address through the direct WebRTC connection. Moves travel directly between the two players.\n\nWaiting rooms and matches with an absent player expire after 30 minutes. Active rooms remain available. Infrastructure providers may retain technical request logs, including IP addresses, for security and service operation.\n\nRecovery credentials and hidden moves are stored in the iOS Keychain on this device. Leaving an online game clears its recovery data. Sound and haptics can be disabled in Settings. Training works without an internet connection; an optional online-presence check may contact the signaling service.\n\nNo camera, microphone, contacts or location access is requested.\n\nPublisher: Dzmitry Sharko. Support and privacy requests: https://twivvy.e-notix.com/support.html\n\nUpdated: 17 September 2026.'
@@ -40,7 +53,7 @@ const rows = {
 for(const locale of ['en','ru',...Object.keys(rows)]) {
  const extra = locale==='ru'?ru:rows[locale]?Object.fromEntries(keys.map((key,i)=>[key,rows[locale][i]])):{};
  if(rows[locale]?.length !== undefined && rows[locale].length!==keys.length)throw Error(locale+' key mismatch');
- const strings=Object.entries({...en,...extra,duel:duel[locale],selectHint:selectHint[locale]}).map(([k,v])=>`${JSON.stringify('native.'+k)} = ${JSON.stringify(v)};`).join('\n');
+ const strings=Object.entries({...en,...extra,duel:duel[locale],selectHint:selectHint[locale],back:back[locale]}).map(([k,v])=>`${JSON.stringify('native.'+k)} = ${JSON.stringify(v)};`).join('\n');
  const target = new URL(`../Twivvy/Resources/${locale}.lproj/Localizable.strings`,import.meta.url);
  const base = fs.readFileSync(target,'utf8').split('\n').filter(line=>!line.startsWith('\"native.')).join('\n').trim();
  fs.writeFileSync(target,base+'\n\n'+strings+'\n');

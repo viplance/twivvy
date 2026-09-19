@@ -113,3 +113,4 @@
 
 "native.turnLimitHint" = "Puoi ruotare una piattaforma solo una volta per turno.";
 "native.duel" = "DUELLO";
+"native.back" = "Indietro";
