@@ -1,7 +1,7 @@
 {
   "bundleId": "com.enotix.twivvy",
-  "version": "1.0.3",
-  "build": "5",
+  "version": "1.0.4",
+  "build": "6",
   "primaryCategory": "Games",
   "gameSubcategories": [
     "Puzzle",

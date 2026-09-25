@@ -446,25 +446,59 @@ struct ContentView: View {
 private struct BoardSceneView: UIViewRepresentable {
     let scene: BoardScene
 
-    func makeUIView(context: Context) -> SKView {
+    func makeUIView(context: Context) -> BoardSceneHost {
+        BoardSceneHost(skView:BoardSceneHost.skView(for:scene))
+    }
+
+    func updateUIView(_ host: BoardSceneHost, context: Context) {
+        host.skView = BoardSceneHost.skView(for:scene)
+    }
+}
+
+/// Keeps one SKView per scene for the scene's whole life.
+/// Rotation and the wide layout recreate the SwiftUI view; re-presenting the
+/// scene in a fresh SKView there leaves a blank surface, so the same SKView
+/// is moved into whichever host is currently on screen instead.
+private final class BoardSceneHost: UIView {
+    private static var views: [ObjectIdentifier: SKView] = [:]
+
+    static func skView(for scene: BoardScene) -> SKView {
+        if let view = views[ObjectIdentifier(scene)] { return view }
         let view = SKView()
         view.allowsTransparency = true
         view.isOpaque = false
         view.backgroundColor = .clear
+        view.presentScene(scene)
+        // The scenes live as long as the app, so the entry is never removed.
+        views[ObjectIdentifier(scene)] = view
         return view
     }
 
-    func updateUIView(_ view: SKView, context: Context) {
-        guard view.scene !== scene || scene.view !== view else { return }
-        // A layout change can create the replacement view before removing the old one.
-        // Detach first so the old view cannot later tear down the new presentation.
-        scene.view?.presentScene(nil)
-        view.presentScene(scene)
+    var skView: SKView { didSet { if oldValue !== skView { adopt() } } }
+
+    init(skView: SKView) {
+        self.skView = skView
+        super.init(frame:.zero)
+        backgroundColor = .clear
+        isOpaque = false
+    }
+    required init?(coder: NSCoder) { fatalError("Use init(skView:)") }
+
+    override func didMoveToWindow() {
+        super.didMoveToWindow()
+        // The replacement host enters the window after the old one, so it wins.
+        if window != nil { adopt() }
     }
 
-    static func dismantleUIView(_ view: SKView, coordinator: ()) {
-        guard let scene = view.scene, scene.view === view else { return }
-        view.presentScene(nil)
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        if skView.superview === self { skView.frame = bounds }
+    }
+
+    private func adopt() {
+        guard window != nil, skView.superview !== self else { return }
+        addSubview(skView)
+        skView.frame = bounds
     }
 }
 

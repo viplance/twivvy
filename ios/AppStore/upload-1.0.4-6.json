@@ -1,0 +1,30 @@
+{
+  "bundleId": "com.enotix.twivvy",
+  "version": "1.0.4",
+  "build": "6",
+  "uploadedAt": "2026-09-25T16:58:37Z",
+  "buildUploadId": "fd83bad7-0807-4515-ab85-9ec9b670655e",
+  "uploadStatus": "succeeded",
+  "lastObservedPackageStatus": "processing",
+  "submittedForAppReview": false,
+  "archive": "ios/build/Twivvy-1.0.4-6.xcarchive",
+  "localUploadLog": "/tmp/twivvy-1.0.4-6-upload.log",
+  "confirmation": [
+    "Upload succeeded.",
+    "Uploaded Twivvy",
+    "EXPORT SUCCEEDED"
+  ],
+  "validation": {
+    "releaseArchive": "succeeded",
+    "nativeTests": "24 passed on iPhone 16 Pro Max / iOS 26",
+    "uiTests": "6 passed on iPhone 16 Pro Max / iOS 26",
+    "minimumIOSVersion": "18.0",
+    "deviceFamilies": [
+      "iPhone",
+      "iPad"
+    ]
+  },
+  "changes": [
+    "Keep the game board and menu artwork rendering after a device rotation switches between the wide and narrow layouts."
+  ]
+}

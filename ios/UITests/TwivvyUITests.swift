@@ -149,6 +149,20 @@ final class TwivvyUITests: XCTestCase {
         app.buttons["game.rematch"].tap()
         XCTAssertTrue(app.staticTexts["1 / 30"].waitForExistence(timeout:8))
     }
+    @MainActor func testBoardRendersAfterRotation() throws {
+        let app = XCUIApplication()
+        app.launchArguments = ["--uitesting","--training","-AppleLanguages","(en)"]
+        app.launch()
+        XCTAssertTrue(app.buttons["game.next"].waitForExistence(timeout:8))
+        Thread.sleep(forTimeInterval:1)
+        try assertNoGrayScenePlaceholder()
+        for orientation in [UIDeviceOrientation.landscapeLeft,.portrait,.landscapeRight,.portrait] {
+            XCUIDevice.shared.orientation = orientation
+            Thread.sleep(forTimeInterval:1.5)
+            capture("rotation-\(orientation.rawValue)")
+            try assertNoGrayScenePlaceholder()
+        }
+    }
     @MainActor private func assertNoGrayScenePlaceholder() throws {
         let image = try XCTUnwrap(XCUIScreen.main.screenshot().image.cgImage)
         let width = image.width, height = image.height
@@ -163,9 +177,9 @@ final class TwivvyUITests: XCTestCase {
         // Normal text/controls can have a few gray pixels, but not 1% of the screen.
         let grayPixels = stride(from:0,to:pixels.count,by:4).filter { index in
             let r = Int(pixels[index]), g = Int(pixels[index+1]), b = Int(pixels[index+2])
-            return (170...210).contains(r) && abs(r-g) <= 1 && abs(r-b) <= 1
+            return r >= 170 && abs(r-g) <= 1 && abs(r-b) <= 1
         }.count
-        XCTAssertLessThan(Double(grayPixels)/Double(width*height),0.01,"Menu artwork must render instead of a gray SpriteKit surface")
+        XCTAssertLessThan(Double(grayPixels)/Double(width*height),0.01,"The board must render instead of a blank SpriteKit surface")
     }
 
     @MainActor private func capture(_ name: String) {
