@@ -1,18 +1,15 @@
-# Release package — Twivvy 1.0.4 (6)
+# Release package — Twivvy 1.0.5 (7)
 
-Build 6 was uploaded to App Store Connect for TestFlight on 25 September 2026 at 16:58 UTC.
+Build 7 was uploaded to App Store Connect for TestFlight on 27 September 2026 at 18:11 UTC.
 Xcode confirmed `Upload succeeded` and `EXPORT SUCCEEDED`; Apple had started
 processing the package. App Review submission was not performed.
-The uploaded archive is `../build/Twivvy-1.0.4-6.xcarchive`.
-See `upload-1.0.4-6.json` for the upload receipt. Receipts for builds 2 to 5
+The uploaded archive is `../build/Twivvy-1.0.5-7.xcarchive`.
+See `upload-1.0.5-7.json` for the upload receipt. Receipts for builds 2 to 6
 are retained alongside it.
 
-This build fixes the game board turning into a blank light rectangle after a
-rotation on wide iPhones, where the game switches between the wide and narrow
-layouts. Each SpriteKit scene now keeps one view for its whole life, and that view
-moves between layouts instead of re-presenting the scene. The menu artwork uses
-the same mechanism. All 24 native tests and six UI tests passed on
-iPhone 16 Pro Max / iOS 26, including the new rotation test.
+This build keeps the display awake while Twivvy is active and updates the
+post-rotation status in all eleven interface languages. All 24 native tests and
+six UI tests passed on iPhone 16 Pro Max / iOS 18.6.
 
 ## Prepared
 
@@ -53,7 +50,7 @@ Published on 17 September 2026: privacy policy, support page, and the Universal 
 
 ## Remaining account steps
 
-1. After Apple finishes processing build 6, make it available to the intended TestFlight group. For App Store release, select it for version 1.0.4 in App Store Connect. Complete owner contact information, privacy questionnaire, age questionnaire, territories and price.
+1. After Apple finishes processing build 7, make it available to the intended TestFlight group. For App Store release, select it for version 1.0.5 in App Store Connect. Complete owner contact information, privacy questionnaire, age questionnaire, territories and price.
 2. Check an actual iPhone/iPad for final sound, haptic and adverse-network behavior; simulator checks do not replace physical-device testing. If broad connectivity behind restrictive NAT is required, configure a TURN service; the current web service also has no TURN relay.
 3. Submit for Apple review. Signing and a successful export do not constitute App Store review approval.
 

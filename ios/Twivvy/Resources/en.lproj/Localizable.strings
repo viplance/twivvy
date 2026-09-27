@@ -91,7 +91,7 @@
 "native.south" = "Down";
 "native.west" = "Left";
 "native.selectHint" = "Drag a platform to rotate it.";
-"native.selected" = "Platform {platform} · your move is hidden";
+"native.selected" = "Platform rotated. Waiting for the opponent’s move.";
 "native.left" = "Turn left";
 "native.right" = "Turn right";
 "native.skip" = "Clear / skip";

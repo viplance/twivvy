@@ -1,0 +1,32 @@
+{
+  "bundleId": "com.enotix.twivvy",
+  "version": "1.0.5",
+  "build": "7",
+  "uploadedAt": "2026-09-27T18:11:00Z",
+  "buildUploadId": "b1d2aa3d-88c6-47fc-9c54-2f4adc518657",
+  "uploadStatus": "succeeded",
+  "lastObservedPackageStatus": "processing",
+  "submittedForAppReview": false,
+  "archive": "ios/build/Twivvy-1.0.5-7.xcarchive",
+  "exportedIpa": "ios/build/AppStore-1.0.5-7/Twivvy.ipa",
+  "confirmation": [
+    "Upload succeeded.",
+    "Uploaded Twivvy",
+    "EXPORT SUCCEEDED"
+  ],
+  "validation": {
+    "releaseArchive": "succeeded",
+    "appStoreExport": "succeeded",
+    "nativeTests": "24 passed on iPhone 16 Pro Max / iOS 18.6",
+    "uiTests": "6 passed on iPhone 16 Pro Max / iOS 18.6",
+    "minimumIOSVersion": "18.0",
+    "deviceFamilies": [
+      "iPhone",
+      "iPad"
+    ]
+  },
+  "changes": [
+    "Keep the display awake while Twivvy is active.",
+    "Show the post-rotation waiting status in all eleven interface languages."
+  ]
+}

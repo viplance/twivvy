@@ -40,7 +40,7 @@ final class TwivvyUITests: XCTestCase {
         let idleHint = language == "ru"
             ? "Поверни платформу движением пальца."
             : "Drag a platform to rotate it."
-        let selectedHint = language == "ru" ? "Платформа 5 · твой ход скрыт" : "Platform 5 · your move is hidden"
+        let selectedHint = language == "ru" ? "Платформа повёрнута. Ждём ход соперника." : "Platform rotated. Waiting for the opponent’s move."
         let limitHint = language == "ru" ? "Можно повернуть платформу только один раз за раунд" : "You can rotate a platform only once per round."
         let next = app.buttons["game.next"]
         XCTAssertTrue(next.waitForExistence(timeout:8))
@@ -109,7 +109,7 @@ final class TwivvyUITests: XCTestCase {
         let start = platform.coordinate(withNormalizedOffset:CGVector(dx:0.85,dy:0.5))
         let end = platform.coordinate(withNormalizedOffset:CGVector(dx:0.5,dy:0.85))
         start.press(forDuration:0.05,thenDragTo:end)
-        XCTAssertTrue(app.staticTexts["Platform 1 · your move is hidden"].exists)
+        XCTAssertTrue(app.staticTexts["Platform rotated. Waiting for the opponent’s move."].exists)
         capture("02-game")
         next.tap()
         XCTAssertTrue(app.staticTexts["2 / 30"].waitForExistence(timeout:5))

@@ -91,7 +91,7 @@
 "native.south" = "Вниз";
 "native.west" = "Влево";
 "native.selectHint" = "Поверни платформу движением пальца.";
-"native.selected" = "Платформа {platform} · твой ход скрыт";
+"native.selected" = "Платформа повёрнута. Ждём ход соперника.";
 "native.left" = "Влево";
 "native.right" = "Вправо";
 "native.skip" = "Отменить / пропустить";

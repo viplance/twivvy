@@ -91,7 +91,7 @@
 "native.south" = "Abajo";
 "native.west" = "Izquierda";
 "native.selectHint" = "Arrastra una plataforma para girarla.";
-"native.selected" = "Plataforma {platform} · tu jugada es secreta";
+"native.selected" = "Plataforma girada. Esperando la jugada del rival.";
 "native.left" = "A la izquierda";
 "native.right" = "A la derecha";
 "native.skip" = "Borrar / pasar";

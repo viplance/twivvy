@@ -91,7 +91,7 @@
 "native.south" = "Baixo";
 "native.west" = "Esquerda";
 "native.selectHint" = "Arrasta uma plataforma para a rodar.";
-"native.selected" = "Plataforma {platform} · a tua jogada é secreta";
+"native.selected" = "Plataforma rodada. À espera da jogada do adversário.";
 "native.left" = "Para a esquerda";
 "native.right" = "Para a direita";
 "native.skip" = "Limpar / passar";

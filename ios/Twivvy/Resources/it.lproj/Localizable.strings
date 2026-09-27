@@ -91,7 +91,7 @@
 "native.south" = "Giù";
 "native.west" = "Sinistra";
 "native.selectHint" = "Trascina una piattaforma per ruotarla.";
-"native.selected" = "Piattaforma {platform} · la tua mossa è segreta";
+"native.selected" = "Piattaforma ruotata. In attesa della mossa dell’avversario.";
 "native.left" = "A sinistra";
 "native.right" = "A destra";
 "native.skip" = "Annulla / passa";

@@ -91,7 +91,7 @@
 "native.south" = "Unten";
 "native.west" = "Links";
 "native.selectHint" = "Drehe eine Plattform mit einer Fingerbewegung.";
-"native.selected" = "Plattform {platform} · dein Zug ist geheim";
+"native.selected" = "Plattform gedreht. Warte auf den Zug des Gegners.";
 "native.left" = "Links drehen";
 "native.right" = "Rechts drehen";
 "native.skip" = "Löschen / passen";

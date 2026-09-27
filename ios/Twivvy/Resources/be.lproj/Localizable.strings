@@ -91,7 +91,7 @@
 "native.south" = "Уніз";
 "native.west" = "Улева";
 "native.selectHint" = "Павярні платформу рухам пальца.";
-"native.selected" = "Платформа {platform} · твой ход схаваны";
+"native.selected" = "Платформа павернута. Чакаем ходу саперніка.";
 "native.left" = "Улева";
 "native.right" = "Управа";
 "native.skip" = "Скасаваць / прапусціць";

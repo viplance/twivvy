@@ -91,7 +91,7 @@
 "native.south" = "Dół";
 "native.west" = "Lewo";
 "native.selectHint" = "Przeciągnij platformę, aby ją obrócić.";
-"native.selected" = "Platforma {platform} · twój ruch jest ukryty";
+"native.selected" = "Platforma obrócona. Czekamy na ruch przeciwnika.";
 "native.left" = "W lewo";
 "native.right" = "W prawo";
 "native.skip" = "Wyczyść / pomiń";

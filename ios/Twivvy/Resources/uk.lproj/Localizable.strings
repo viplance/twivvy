@@ -91,7 +91,7 @@
 "native.south" = "Вниз";
 "native.west" = "Ліворуч";
 "native.selectHint" = "Поверни платформу рухом пальця.";
-"native.selected" = "Платформа {platform} · твій хід прихований";
+"native.selected" = "Платформу повернуто. Чекаємо на хід суперника.";
 "native.left" = "Ліворуч";
 "native.right" = "Праворуч";
 "native.skip" = "Скасувати / пропустити";

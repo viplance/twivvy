@@ -80,7 +80,8 @@ struct ContentView: View {
             }
             Button(L("action.cancel"),role:.cancel) { incomingCode = nil }
         }
-        .onChange(of:scenePhase) { _, phase in
+        .onChange(of:scenePhase, initial:true) { _, phase in
+            UIApplication.shared.isIdleTimerDisabled = phase == .active
             if phase == .active { game.foreground() }
             else if phase == .background { game.background() }
         }

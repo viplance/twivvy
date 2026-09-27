@@ -91,7 +91,7 @@
 "native.south" = "Aşağı";
 "native.west" = "Sol";
 "native.selectHint" = "Döndürmek için platformu sürükle.";
-"native.selected" = "Platform {platform} · hamlen gizli";
+"native.selected" = "Platform döndürüldü. Rakibin hamlesi bekleniyor.";
 "native.left" = "Sola çevir";
 "native.right" = "Sağa çevir";
 "native.skip" = "Temizle / pas geç";

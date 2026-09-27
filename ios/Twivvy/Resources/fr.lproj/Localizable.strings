@@ -91,7 +91,7 @@
 "native.south" = "Bas";
 "native.west" = "Gauche";
 "native.selectHint" = "Fais glisser une plateforme pour la tourner.";
-"native.selected" = "Plateforme {platform} · ton coup est secret";
+"native.selected" = "Plateforme tournée. En attente du coup de l’adversaire.";
 "native.left" = "À gauche";
 "native.right" = "À droite";
 "native.skip" = "Effacer / passer";
