@@ -22,7 +22,15 @@
     "ios:generate": "pnpm run ios:sync && xcodegen generate --spec ios/twivvy/project.yml",
     "ios:build": "pnpm run ios:generate && xcodebuild -project ios/twivvy/Twivvy.xcodeproj -scheme Twivvy -configuration Debug -destination 'generic/platform=iOS Simulator' -derivedDataPath ios/twivvy/build/DerivedData CODE_SIGNING_ALLOWED=NO build",
     "ios:release": "bash ios/twivvy/scripts/release.sh",
-    "ios:upload": "bash ios/twivvy/scripts/release.sh --upload"
+    "ios:upload": "bash ios/twivvy/scripts/release.sh --upload",
+    "hamsterlab:sync": "node ios/hamsterlab/scripts/sync-web.mjs",
+    "hamsterlab:generate": "pnpm run hamsterlab:sync && xcodegen generate --spec ios/hamsterlab/project.yml",
+    "hamsterlab:build": "pnpm run hamsterlab:generate && xcodebuild -project ios/hamsterlab/HamsterLab.xcodeproj -scheme HamsterLab -configuration Debug -destination 'generic/platform=iOS Simulator' -derivedDataPath ios/hamsterlab/build/DerivedData CODE_SIGNING_ALLOWED=NO build",
+    "hamsterlab:test": "pnpm run hamsterlab:generate && xcodebuild -project ios/hamsterlab/HamsterLab.xcodeproj -scheme HamsterLab -destination \"${HAMSTERLAB_DESTINATION:-platform=iOS Simulator,name=iPhone 16 Pro Max,OS=18.6}\" -derivedDataPath ios/hamsterlab/build/DerivedData -parallel-testing-enabled NO test",
+    "hamsterlab:release": "bash ios/hamsterlab/scripts/release.sh",
+    "hamsterlab:upload": "bash ios/hamsterlab/scripts/release.sh --upload",
+    "hamsterlab:validate-locales": "node ios/hamsterlab/scripts/validate-locales.mjs",
+    "hamsterlab:narration": "python3 ios/hamsterlab/scripts/generate-narration.py"
   },
   "dependencies": {
     "three": "0.169.0",

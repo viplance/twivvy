@@ -13,6 +13,14 @@ The SwiftUI + SpriteKit iPhone/iPad app (iOS 18+) is in [ios/twivvy/](ios/twivvy
 Open [Twivvy.xcodeproj](ios/twivvy/Twivvy.xcodeproj) in Xcode. Build, signing,
 protocol compatibility and App Store materials are documented there.
 
+## HamsterLab / ХомаЛаб
+
+The new native 3D game is in [ios/hamsterlab/](ios/hamsterlab/README.md).
+It uses RealityKit, original animated hamsters and transparent laboratory tubes,
+with the same deterministic rules, bots and signaling server as Twivvy.
+Open [HamsterLab.xcodeproj](ios/hamsterlab/HamsterLab.xcodeproj), or run
+`pnpm hamsterlab:build`. Build, test and release instructions are in its README.
+
 ## Features
 
 - A 3×3 board of rotating 2×2 platforms rendered with Three.js.

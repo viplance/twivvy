@@ -1,0 +1,938 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		05F230A8467D78961CA71916 /* narration-finish.m4a in Resources */ = {isa = PBXBuildFile; fileRef = 351E0E7680BD0F7A2A5AD567 /* narration-finish.m4a */; };
+		0AA2019542979FA7AAEA490B /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = CA4A5D8410B8102EF36D1C6A /* PrivacyInfo.xcprivacy */; };
+		0E079F42F7C2ECBF30C46043 /* Localization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C7796DBA1BAB37B33E899C0 /* Localization.swift */; };
+		0E61CA37B8354ACE848E1437 /* NarrationCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 373A6FC722489B0D85DC248A /* NarrationCatalog.swift */; };
+		11466255F699EDADB56C2968 /* select.wav in Resources */ = {isa = PBXBuildFile; fileRef = B6F29DF655E5124C90F9B401 /* select.wav */; };
+		199B71718F2850B3EEC2BE16 /* Bot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DAC81275D11BAD09818C41D /* Bot.swift */; };
+		2502DD62B284DC519E8625EB /* BridgeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 181AB47416A2B5C12A8C368D /* BridgeTests.swift */; };
+		26E62D2842341C14FAB8977B /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = A73CEBD6E1732E422684A3BF /* Localizable.strings */; };
+		3AC4C505E820F87F4C3A7B4B /* narration-win.m4a in Resources */ = {isa = PBXBuildFile; fileRef = 4A0B6C281CF32CA2A9EED4F3 /* narration-win.m4a */; };
+		4178D01740B0D8D111DF3E44 /* LaboratoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A7F633FA1ED265295A0F5CC /* LaboratoryTests.swift */; };
+		41F8CFD626DB8F4279D2139A /* web-fixtures.json in Resources */ = {isa = PBXBuildFile; fileRef = 77D1D84F0F65F9F13E194598 /* web-fixtures.json */; };
+		426A9E4E9AE7A7243019E123 /* RenderingPerformanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC66C4327D3B1B89AD8059C7 /* RenderingPerformanceTests.swift */; };
+		49B83F12162DD2E1B3C25BFD /* RulesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 756D0BCD48C15089448924A6 /* RulesTests.swift */; };
+		506B0C976A2C2C4A03AD49EE /* LocalizationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C1F80BEC9071E4D6A5E5B96 /* LocalizationTests.swift */; };
+		661F7D4286391D883E2E478C /* BoardScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 321A75BEA874131BEA395A02 /* BoardScene.swift */; };
+		68FA1D81A338122B44D6962A /* win.wav in Resources */ = {isa = PBXBuildFile; fileRef = C8C5E4E8930A70295CBC4F58 /* win.wav */; };
+		6C994A9C5C28A1AFA4742717 /* GameModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A3D560FBF469C38FB214455 /* GameModel.swift */; };
+		84CB598479C67F709344C916 /* Rules.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE7B0376FD43A4CD086E3E90 /* Rules.swift */; };
+		8DD32D4B7EA1C02A0AAD2025 /* HamsterRig.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC6D879F77520368FADC6721 /* HamsterRig.swift */; };
+		8EBB50B633B63D65026A0E31 /* OnlineBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A07C2307953E456A943466F /* OnlineBridge.swift */; };
+		998C4F69148A75A83860F5F5 /* crawl.wav in Resources */ = {isa = PBXBuildFile; fileRef = 290BBBEDA8A8CC4175B00EA9 /* crawl.wav */; };
+		9BFB0D6985981068A396E6A8 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E16B18C4A3507270F87EA54E /* ContentView.swift */; };
+		9EA5F8858528B27FD3068911 /* delivery.wav in Resources */ = {isa = PBXBuildFile; fileRef = 2EF0CEE5800B0DFF5FB68E4B /* delivery.wav */; };
+		9EE6CE127B3E11129244F9F5 /* HamsterLabApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 214286D6167F91FE0636874C /* HamsterLabApp.swift */; };
+		A061D47531BC70543944B09E /* turn.wav in Resources */ = {isa = PBXBuildFile; fileRef = 7047451ED1B2EA134CDE3AA5 /* turn.wav */; };
+		A384AA217EACCC88B1F44A3E /* narration-manifest.json in Resources */ = {isa = PBXBuildFile; fileRef = 2C7EDFF4ADE4B2539E10F641 /* narration-manifest.json */; };
+		AA3741631EFC33C846E86299 /* Bridge in Resources */ = {isa = PBXBuildFile; fileRef = A3F7070B335FC458AC631072 /* Bridge */; };
+		AC121B18D889469E9A39BD2D /* SessionVault.swift in Sources */ = {isa = PBXBuildFile; fileRef = 184A3A8093DDF77A1A18DDA0 /* SessionVault.swift */; };
+		AF89B46B74CA38818488CFF4 /* countdown.wav in Resources */ = {isa = PBXBuildFile; fileRef = 147FDFE73D253942AEE42F64 /* countdown.wav */; };
+		B07561594FF232AEDFA34992 /* narration-begin.m4a in Resources */ = {isa = PBXBuildFile; fileRef = D4388EC8DBDEF0C17F9C3E2A /* narration-begin.m4a */; };
+		B780D35680FDE7F5E7938142 /* HamsterLabUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86ABE1515B45AA96E32E70BB /* HamsterLabUITests.swift */; };
+		BB9135BBB25CA7968AC0B45C /* chirp.wav in Resources */ = {isa = PBXBuildFile; fileRef = 3DBC67E1812DF93D17701B3A /* chirp.wav */; };
+		BD7EF9BA68247C3D89CCDCDE /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 37F510A23A2C41B99A23BCC5 /* InfoPlist.strings */; };
+		D47B4C5315E6B7263EB79084 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3F6F1EBEA51A257E1279ED0D /* Assets.xcassets */; };
+		E6BA245E72620C64DBFF1C57 /* narration-welcome.m4a in Resources */ = {isa = PBXBuildFile; fileRef = 0A340BC8F11CCC9CF21D9456 /* narration-welcome.m4a */; };
+		EB7036558523ED4985DA56CB /* LabGeometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CBD27E1211885E8E62FE9AC /* LabGeometry.swift */; };
+		EC4E47ADCCB271AC49E1C9CE /* happy.wav in Resources */ = {isa = PBXBuildFile; fileRef = FB2F6C046568C5F59A5F242D /* happy.wav */; };
+		F9D41368AC35871F5A7538BE /* AudioEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B3E24D245C645B8547E6253 /* AudioEngine.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		432630AF470FD797753801EF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 2422A480B01E898C9E7E5937 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F8D152A1B58FF55F08FBCF1D;
+			remoteInfo = HamsterLab;
+		};
+		D5AC979308CB9FB311B99915 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 2422A480B01E898C9E7E5937 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F8D152A1B58FF55F08FBCF1D;
+			remoteInfo = HamsterLab;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		00107333B347258FEE3DE444 /* fr */ = {isa = PBXFileReference; name = fr; path = "fr.lproj/narration-begin.m4a"; sourceTree = "<group>"; };
+		010CAA12F7886B0B5A0453DF /* en */ = {isa = PBXFileReference; name = en; path = "en.lproj/narration-welcome.m4a"; sourceTree = "<group>"; };
+		05E4DD0F6E0DDB7A46CBA753 /* HamsterLabUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = HamsterLabUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		0ECF5E258A612C92ED11E974 /* pl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pl; path = pl.lproj/Localizable.strings; sourceTree = "<group>"; };
+		0F5869E2EFB8C2D98BC8925E /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		147FDFE73D253942AEE42F64 /* countdown.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = countdown.wav; sourceTree = "<group>"; };
+		161879581B6B55DA6613F660 /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = it.lproj/Localizable.strings; sourceTree = "<group>"; };
+		181AB47416A2B5C12A8C368D /* BridgeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BridgeTests.swift; sourceTree = "<group>"; };
+		184A3A8093DDF77A1A18DDA0 /* SessionVault.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionVault.swift; sourceTree = "<group>"; };
+		185261E8F675794E4753E2FD /* de */ = {isa = PBXFileReference; name = de; path = "de.lproj/narration-welcome.m4a"; sourceTree = "<group>"; };
+		1A7F633FA1ED265295A0F5CC /* LaboratoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaboratoryTests.swift; sourceTree = "<group>"; };
+		1B0178BA5D0339A4282AA0E1 /* be */ = {isa = PBXFileReference; name = be; path = "be.lproj/narration-welcome.m4a"; sourceTree = "<group>"; };
+		1C7796DBA1BAB37B33E899C0 /* Localization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Localization.swift; sourceTree = "<group>"; };
+		1D7CD3D0FF11EC55CB57CFB1 /* es */ = {isa = PBXFileReference; name = es; path = "es.lproj/narration-win.m4a"; sourceTree = "<group>"; };
+		1DA0E79332F8BCB72739D349 /* pt */ = {isa = PBXFileReference; name = pt; path = "pt.lproj/narration-welcome.m4a"; sourceTree = "<group>"; };
+		1EDAA413966220F56929EA8E /* es */ = {isa = PBXFileReference; name = es; path = "es.lproj/narration-begin.m4a"; sourceTree = "<group>"; };
+		1EDDB5DE60702911887E672C /* pl */ = {isa = PBXFileReference; name = pl; path = "pl.lproj/narration-welcome.m4a"; sourceTree = "<group>"; };
+		214286D6167F91FE0636874C /* HamsterLabApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HamsterLabApp.swift; sourceTree = "<group>"; };
+		2180FFF4F6B9BC2AE454BF7D /* be */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = be; path = be.lproj/Localizable.strings; sourceTree = "<group>"; };
+		21E60A8A705D69CFDB20684F /* it */ = {isa = PBXFileReference; name = it; path = "it.lproj/narration-win.m4a"; sourceTree = "<group>"; };
+		290BBBEDA8A8CC4175B00EA9 /* crawl.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = crawl.wav; sourceTree = "<group>"; };
+		2AC4A2CBF7509B66A73044EA /* be */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = be; path = be.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		2B3E24D245C645B8547E6253 /* AudioEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioEngine.swift; sourceTree = "<group>"; };
+		2C7EDFF4ADE4B2539E10F641 /* narration-manifest.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "narration-manifest.json"; sourceTree = "<group>"; };
+		2EF0CEE5800B0DFF5FB68E4B /* delivery.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = delivery.wav; sourceTree = "<group>"; };
+		2FBA62BC2FDF532F89345548 /* pt */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pt; path = pt.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		321A75BEA874131BEA395A02 /* BoardScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardScene.swift; sourceTree = "<group>"; };
+		3477A588899330CA9FFD212D /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		3499C1695005B43C75899B34 /* ru */ = {isa = PBXFileReference; name = ru; path = "ru.lproj/narration-win.m4a"; sourceTree = "<group>"; };
+		34C7EB8B7E7DDE4EFD53F6EB /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		373A6FC722489B0D85DC248A /* NarrationCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NarrationCatalog.swift; sourceTree = "<group>"; };
+		3D816BDCEC346173C124ECD9 /* es */ = {isa = PBXFileReference; name = es; path = "es.lproj/narration-finish.m4a"; sourceTree = "<group>"; };
+		3DBC67E1812DF93D17701B3A /* chirp.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = chirp.wav; sourceTree = "<group>"; };
+		3DDC68C21A9138ECE5B538AF /* pt */ = {isa = PBXFileReference; name = pt; path = "pt.lproj/narration-finish.m4a"; sourceTree = "<group>"; };
+		3F6F1EBEA51A257E1279ED0D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		4F48F4297234159E7647C9A8 /* uk */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = uk; path = uk.lproj/Localizable.strings; sourceTree = "<group>"; };
+		51F70AC5C4939A9D2EFF8415 /* uk */ = {isa = PBXFileReference; name = uk; path = "uk.lproj/narration-begin.m4a"; sourceTree = "<group>"; };
+		527A8D807D00C4F31C000C5B /* tr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = tr; path = tr.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		5CBD27E1211885E8E62FE9AC /* LabGeometry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabGeometry.swift; sourceTree = "<group>"; };
+		5EB1A96D93281007CF5DD25E /* es */ = {isa = PBXFileReference; name = es; path = "es.lproj/narration-welcome.m4a"; sourceTree = "<group>"; };
+		60F26607899F2E68B362FBFC /* uk */ = {isa = PBXFileReference; name = uk; path = "uk.lproj/narration-win.m4a"; sourceTree = "<group>"; };
+		672F01B15908D12D7207FE67 /* uk */ = {isa = PBXFileReference; name = uk; path = "uk.lproj/narration-welcome.m4a"; sourceTree = "<group>"; };
+		67AD809853240F1FA04596C0 /* de */ = {isa = PBXFileReference; name = de; path = "de.lproj/narration-win.m4a"; sourceTree = "<group>"; };
+		68E1A9C75181EE2040135609 /* en */ = {isa = PBXFileReference; name = en; path = "en.lproj/narration-begin.m4a"; sourceTree = "<group>"; };
+		6F89086DEFFBCA89FED3F533 /* HamsterLab.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HamsterLab.entitlements; sourceTree = "<group>"; };
+		7047451ED1B2EA134CDE3AA5 /* turn.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = turn.wav; sourceTree = "<group>"; };
+		71C31C4B28D653911E8C73C3 /* be */ = {isa = PBXFileReference; name = be; path = "be.lproj/narration-finish.m4a"; sourceTree = "<group>"; };
+		730B94E0A2EEC427FA093E9F /* be */ = {isa = PBXFileReference; name = be; path = "be.lproj/narration-win.m4a"; sourceTree = "<group>"; };
+		74CD76F8352B62CCFE80B589 /* en */ = {isa = PBXFileReference; name = en; path = "en.lproj/narration-win.m4a"; sourceTree = "<group>"; };
+		751A378B9F22DEAC66BD95FF /* be */ = {isa = PBXFileReference; name = be; path = "be.lproj/narration-begin.m4a"; sourceTree = "<group>"; };
+		756D0BCD48C15089448924A6 /* RulesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RulesTests.swift; sourceTree = "<group>"; };
+		77D1D84F0F65F9F13E194598 /* web-fixtures.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "web-fixtures.json"; sourceTree = "<group>"; };
+		7A07C2307953E456A943466F /* OnlineBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnlineBridge.swift; sourceTree = "<group>"; };
+		7A3D560FBF469C38FB214455 /* GameModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameModel.swift; sourceTree = "<group>"; };
+		86ABE1515B45AA96E32E70BB /* HamsterLabUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HamsterLabUITests.swift; sourceTree = "<group>"; };
+		86D5BB95A2CCC698ADB1456F /* pl */ = {isa = PBXFileReference; name = pl; path = "pl.lproj/narration-finish.m4a"; sourceTree = "<group>"; };
+		8A93F5EB63EA54FA02D6ABAA /* uk */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = uk; path = uk.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		90D044F083FC4644D0758411 /* ru */ = {isa = PBXFileReference; name = ru; path = "ru.lproj/narration-begin.m4a"; sourceTree = "<group>"; };
+		90E1A32D102FED17297A2404 /* tr */ = {isa = PBXFileReference; name = tr; path = "tr.lproj/narration-win.m4a"; sourceTree = "<group>"; };
+		9265FBB309050F7BCC730DD7 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/Localizable.strings; sourceTree = "<group>"; };
+		9555358DC351A69FC8FE9BB4 /* HamsterLabTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = HamsterLabTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		9585A699F71FB0F2BAEF8B19 /* it */ = {isa = PBXFileReference; name = it; path = "it.lproj/narration-welcome.m4a"; sourceTree = "<group>"; };
+		9709B1BB32BC8992D9CB8F5F /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		9882F942075B069F98953BC9 /* pt */ = {isa = PBXFileReference; name = pt; path = "pt.lproj/narration-win.m4a"; sourceTree = "<group>"; };
+		99434DF872D303F109096584 /* en */ = {isa = PBXFileReference; name = en; path = "en.lproj/narration-finish.m4a"; sourceTree = "<group>"; };
+		9C1F80BEC9071E4D6A5E5B96 /* LocalizationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizationTests.swift; sourceTree = "<group>"; };
+		9C31268A49A2C1CE701BEDE7 /* ru */ = {isa = PBXFileReference; name = ru; path = "ru.lproj/narration-welcome.m4a"; sourceTree = "<group>"; };
+		9CA4AB0EEDF27C3CA7647972 /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/Localizable.strings; sourceTree = "<group>"; };
+		9DAC81275D11BAD09818C41D /* Bot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bot.swift; sourceTree = "<group>"; };
+		9E6C5332E5791C9B4DE0546A /* tr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = tr; path = tr.lproj/Localizable.strings; sourceTree = "<group>"; };
+		A2E1BFAADD843209ED548156 /* HamsterLab.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = HamsterLab.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A305A2DE05483EA85E8D745E /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/Localizable.strings; sourceTree = "<group>"; };
+		A3F7070B335FC458AC631072 /* Bridge */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Bridge; path = HamsterLab/Resources/Bridge; sourceTree = SOURCE_ROOT; };
+		A3F971B795200C562C41637A /* fr */ = {isa = PBXFileReference; name = fr; path = "fr.lproj/narration-welcome.m4a"; sourceTree = "<group>"; };
+		AC75BE9A4993651A754C88C0 /* pl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pl; path = pl.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		AD55E68566473485906C305E /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		AE221544736E40D9D68E3C0A /* de */ = {isa = PBXFileReference; name = de; path = "de.lproj/narration-begin.m4a"; sourceTree = "<group>"; };
+		AF105EA64731D8A9907AD19A /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Localizable.strings; sourceTree = "<group>"; };
+		B6F29DF655E5124C90F9B401 /* select.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = select.wav; sourceTree = "<group>"; };
+		BC6D879F77520368FADC6721 /* HamsterRig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HamsterRig.swift; sourceTree = "<group>"; };
+		C095BF3059E97EC9ABE20282 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		C8C5E4E8930A70295CBC4F58 /* win.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = win.wav; sourceTree = "<group>"; };
+		CA4A5D8410B8102EF36D1C6A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		CD24C7DF673D9468ED907856 /* pl */ = {isa = PBXFileReference; name = pl; path = "pl.lproj/narration-win.m4a"; sourceTree = "<group>"; };
+		CDE914989A6F84BE38518482 /* ru */ = {isa = PBXFileReference; name = ru; path = "ru.lproj/narration-finish.m4a"; sourceTree = "<group>"; };
+		CF45130CB256A48725ADFED3 /* it */ = {isa = PBXFileReference; name = it; path = "it.lproj/narration-finish.m4a"; sourceTree = "<group>"; };
+		DA84D38C79A496CEEA7944D2 /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = it.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		DC66C4327D3B1B89AD8059C7 /* RenderingPerformanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RenderingPerformanceTests.swift; sourceTree = "<group>"; };
+		DEAAC2F24CEE09DB48FFA69F /* pt */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pt; path = pt.lproj/Localizable.strings; sourceTree = "<group>"; };
+		DFD165F125C4422BF9583B49 /* pt */ = {isa = PBXFileReference; name = pt; path = "pt.lproj/narration-begin.m4a"; sourceTree = "<group>"; };
+		E16B18C4A3507270F87EA54E /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		E1741D2CE4F9A064A3901B30 /* de */ = {isa = PBXFileReference; name = de; path = "de.lproj/narration-finish.m4a"; sourceTree = "<group>"; };
+		E4BE177E82A4D9212FCCB0FB /* uk */ = {isa = PBXFileReference; name = uk; path = "uk.lproj/narration-finish.m4a"; sourceTree = "<group>"; };
+		E79ACED1C3EEC2A162E55132 /* tr */ = {isa = PBXFileReference; name = tr; path = "tr.lproj/narration-finish.m4a"; sourceTree = "<group>"; };
+		EBB59A1D0A59DDED64605A6B /* pl */ = {isa = PBXFileReference; name = pl; path = "pl.lproj/narration-begin.m4a"; sourceTree = "<group>"; };
+		EE7B0376FD43A4CD086E3E90 /* Rules.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Rules.swift; sourceTree = "<group>"; };
+		F2FB5F39AABB0819F5A94B05 /* it */ = {isa = PBXFileReference; name = it; path = "it.lproj/narration-begin.m4a"; sourceTree = "<group>"; };
+		F4147F95EFE4DBB1C66A4C42 /* tr */ = {isa = PBXFileReference; name = tr; path = "tr.lproj/narration-welcome.m4a"; sourceTree = "<group>"; };
+		F4498F8A88D16D36A58293A0 /* fr */ = {isa = PBXFileReference; name = fr; path = "fr.lproj/narration-win.m4a"; sourceTree = "<group>"; };
+		F9EB12BF219BE3482CCA50FF /* fr */ = {isa = PBXFileReference; name = fr; path = "fr.lproj/narration-finish.m4a"; sourceTree = "<group>"; };
+		FB2F6C046568C5F59A5F242D /* happy.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = happy.wav; sourceTree = "<group>"; };
+		FCE0B3DB6A6B20B208E5E302 /* tr */ = {isa = PBXFileReference; name = tr; path = "tr.lproj/narration-begin.m4a"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		0D2B4DEED9922AE2719E8EE7 /* Rendering */ = {
+			isa = PBXGroup;
+			children = (
+				321A75BEA874131BEA395A02 /* BoardScene.swift */,
+				BC6D879F77520368FADC6721 /* HamsterRig.swift */,
+				5CBD27E1211885E8E62FE9AC /* LabGeometry.swift */,
+			);
+			path = Rendering;
+			sourceTree = "<group>";
+		};
+		2AF3D2183E4EE0554117420F /* Engine */ = {
+			isa = PBXGroup;
+			children = (
+				9DAC81275D11BAD09818C41D /* Bot.swift */,
+				EE7B0376FD43A4CD086E3E90 /* Rules.swift */,
+			);
+			path = Engine;
+			sourceTree = "<group>";
+		};
+		374AEAA9C7AFA2CAE00D002F /* HamsterLab */ = {
+			isa = PBXGroup;
+			children = (
+				6F89086DEFFBCA89FED3F533 /* HamsterLab.entitlements */,
+				541DCB70C6132867A40FE6F0 /* App */,
+				8CABAB308E2B8C333E09D5BB /* Game */,
+				C13151062B60E52C97DC1904 /* Networking */,
+				0D2B4DEED9922AE2719E8EE7 /* Rendering */,
+				B518FCC34CDDC1AA4FC483CF /* Resources */,
+			);
+			path = HamsterLab;
+			sourceTree = "<group>";
+		};
+		3F28B3421FA1EC9C2E98D704 /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				181AB47416A2B5C12A8C368D /* BridgeTests.swift */,
+				1A7F633FA1ED265295A0F5CC /* LaboratoryTests.swift */,
+				9C1F80BEC9071E4D6A5E5B96 /* LocalizationTests.swift */,
+				DC66C4327D3B1B89AD8059C7 /* RenderingPerformanceTests.swift */,
+				756D0BCD48C15089448924A6 /* RulesTests.swift */,
+				77D1D84F0F65F9F13E194598 /* web-fixtures.json */,
+			);
+			path = Tests;
+			sourceTree = "<group>";
+		};
+		4A91BA9C79ABC7F8C38B31D1 = {
+			isa = PBXGroup;
+			children = (
+				374AEAA9C7AFA2CAE00D002F /* HamsterLab */,
+				E545EDA7BF831FDDA4BF3904 /* ios */,
+				3F28B3421FA1EC9C2E98D704 /* Tests */,
+				F47AFA4D0F204A829522C43B /* UITests */,
+				B95BE717A586CC66E627D98C /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		541DCB70C6132867A40FE6F0 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				E16B18C4A3507270F87EA54E /* ContentView.swift */,
+				214286D6167F91FE0636874C /* HamsterLabApp.swift */,
+				1C7796DBA1BAB37B33E899C0 /* Localization.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		61005C82A2721BE4E7AC6E4D /* twivvy */ = {
+			isa = PBXGroup;
+			children = (
+				AE2F7381BF757FAD7C7708F8 /* Twivvy */,
+			);
+			path = twivvy;
+			sourceTree = "<group>";
+		};
+		8CABAB308E2B8C333E09D5BB /* Game */ = {
+			isa = PBXGroup;
+			children = (
+				2B3E24D245C645B8547E6253 /* AudioEngine.swift */,
+				7A3D560FBF469C38FB214455 /* GameModel.swift */,
+				373A6FC722489B0D85DC248A /* NarrationCatalog.swift */,
+			);
+			path = Game;
+			sourceTree = "<group>";
+		};
+		AE2F7381BF757FAD7C7708F8 /* Twivvy */ = {
+			isa = PBXGroup;
+			children = (
+				2AF3D2183E4EE0554117420F /* Engine */,
+				CCD9DB140B9DEE70A8F658C5 /* Networking */,
+			);
+			path = Twivvy;
+			sourceTree = "<group>";
+		};
+		B518FCC34CDDC1AA4FC483CF /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				3F6F1EBEA51A257E1279ED0D /* Assets.xcassets */,
+				A3F7070B335FC458AC631072 /* Bridge */,
+				2C7EDFF4ADE4B2539E10F641 /* narration-manifest.json */,
+				CA4A5D8410B8102EF36D1C6A /* PrivacyInfo.xcprivacy */,
+				BCB920279F646D405632F7C3 /* Audio */,
+				37F510A23A2C41B99A23BCC5 /* InfoPlist.strings */,
+				A73CEBD6E1732E422684A3BF /* Localizable.strings */,
+				D4388EC8DBDEF0C17F9C3E2A /* narration-begin.m4a */,
+				351E0E7680BD0F7A2A5AD567 /* narration-finish.m4a */,
+				0A340BC8F11CCC9CF21D9456 /* narration-welcome.m4a */,
+				4A0B6C281CF32CA2A9EED4F3 /* narration-win.m4a */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		B95BE717A586CC66E627D98C /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A2E1BFAADD843209ED548156 /* HamsterLab.app */,
+				9555358DC351A69FC8FE9BB4 /* HamsterLabTests.xctest */,
+				05E4DD0F6E0DDB7A46CBA753 /* HamsterLabUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		BCB920279F646D405632F7C3 /* Audio */ = {
+			isa = PBXGroup;
+			children = (
+				3DBC67E1812DF93D17701B3A /* chirp.wav */,
+				147FDFE73D253942AEE42F64 /* countdown.wav */,
+				290BBBEDA8A8CC4175B00EA9 /* crawl.wav */,
+				2EF0CEE5800B0DFF5FB68E4B /* delivery.wav */,
+				FB2F6C046568C5F59A5F242D /* happy.wav */,
+				B6F29DF655E5124C90F9B401 /* select.wav */,
+				7047451ED1B2EA134CDE3AA5 /* turn.wav */,
+				C8C5E4E8930A70295CBC4F58 /* win.wav */,
+			);
+			path = Audio;
+			sourceTree = "<group>";
+		};
+		C13151062B60E52C97DC1904 /* Networking */ = {
+			isa = PBXGroup;
+			children = (
+				184A3A8093DDF77A1A18DDA0 /* SessionVault.swift */,
+			);
+			path = Networking;
+			sourceTree = "<group>";
+		};
+		CCD9DB140B9DEE70A8F658C5 /* Networking */ = {
+			isa = PBXGroup;
+			children = (
+				7A07C2307953E456A943466F /* OnlineBridge.swift */,
+			);
+			path = Networking;
+			sourceTree = "<group>";
+		};
+		E545EDA7BF831FDDA4BF3904 /* ios */ = {
+			isa = PBXGroup;
+			children = (
+				61005C82A2721BE4E7AC6E4D /* twivvy */,
+			);
+			name = ios;
+			path = ..;
+			sourceTree = "<group>";
+		};
+		F47AFA4D0F204A829522C43B /* UITests */ = {
+			isa = PBXGroup;
+			children = (
+				86ABE1515B45AA96E32E70BB /* HamsterLabUITests.swift */,
+			);
+			path = UITests;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		71F8DEAAE43F4D95756A110C /* HamsterLabTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D172EC4A6909A931AA9FF04C /* Build configuration list for PBXNativeTarget "HamsterLabTests" */;
+			buildPhases = (
+				63793C4F47FC1D3B592ADE03 /* Sources */,
+				16545E1072350D4F63A72D20 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				780B286A4E69D727BDD434FE /* PBXTargetDependency */,
+			);
+			name = HamsterLabTests;
+			packageProductDependencies = (
+			);
+			productName = HamsterLabTests;
+			productReference = 9555358DC351A69FC8FE9BB4 /* HamsterLabTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		96840B14849E423A52BA9FE8 /* HamsterLabUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E52AE71E780F574821D5524C /* Build configuration list for PBXNativeTarget "HamsterLabUITests" */;
+			buildPhases = (
+				209C6ED060757DDBE81EAB2E /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				9CD87202D27D0AF9FDBC2987 /* PBXTargetDependency */,
+			);
+			name = HamsterLabUITests;
+			packageProductDependencies = (
+			);
+			productName = HamsterLabUITests;
+			productReference = 05E4DD0F6E0DDB7A46CBA753 /* HamsterLabUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		F8D152A1B58FF55F08FBCF1D /* HamsterLab */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 387A633678880BB4B7D77646 /* Build configuration list for PBXNativeTarget "HamsterLab" */;
+			buildPhases = (
+				6C049F84D52B5F58BEB6C962 /* Sources */,
+				71509C942728B900F6CD3599 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = HamsterLab;
+			packageProductDependencies = (
+			);
+			productName = HamsterLab;
+			productReference = A2E1BFAADD843209ED548156 /* HamsterLab.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		2422A480B01E898C9E7E5937 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					71F8DEAAE43F4D95756A110C = {
+						DevelopmentTeam = W37L5728Y6;
+						ProvisioningStyle = Automatic;
+					};
+					96840B14849E423A52BA9FE8 = {
+						DevelopmentTeam = W37L5728Y6;
+						ProvisioningStyle = Automatic;
+						TestTargetID = F8D152A1B58FF55F08FBCF1D;
+					};
+					F8D152A1B58FF55F08FBCF1D = {
+						DevelopmentTeam = W37L5728Y6;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 6D076EC2CEF39D0F1E43E5EC /* Build configuration list for PBXProject "HamsterLab" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				be,
+				de,
+				en,
+				es,
+				fr,
+				it,
+				pl,
+				pt,
+				ru,
+				tr,
+				uk,
+			);
+			mainGroup = 4A91BA9C79ABC7F8C38B31D1;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = B95BE717A586CC66E627D98C /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				F8D152A1B58FF55F08FBCF1D /* HamsterLab */,
+				71F8DEAAE43F4D95756A110C /* HamsterLabTests */,
+				96840B14849E423A52BA9FE8 /* HamsterLabUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		16545E1072350D4F63A72D20 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				41F8CFD626DB8F4279D2139A /* web-fixtures.json in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		71509C942728B900F6CD3599 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D47B4C5315E6B7263EB79084 /* Assets.xcassets in Resources */,
+				AA3741631EFC33C846E86299 /* Bridge in Resources */,
+				BD7EF9BA68247C3D89CCDCDE /* InfoPlist.strings in Resources */,
+				26E62D2842341C14FAB8977B /* Localizable.strings in Resources */,
+				0AA2019542979FA7AAEA490B /* PrivacyInfo.xcprivacy in Resources */,
+				BB9135BBB25CA7968AC0B45C /* chirp.wav in Resources */,
+				AF89B46B74CA38818488CFF4 /* countdown.wav in Resources */,
+				998C4F69148A75A83860F5F5 /* crawl.wav in Resources */,
+				9EA5F8858528B27FD3068911 /* delivery.wav in Resources */,
+				EC4E47ADCCB271AC49E1C9CE /* happy.wav in Resources */,
+				B07561594FF232AEDFA34992 /* narration-begin.m4a in Resources */,
+				05F230A8467D78961CA71916 /* narration-finish.m4a in Resources */,
+				A384AA217EACCC88B1F44A3E /* narration-manifest.json in Resources */,
+				E6BA245E72620C64DBFF1C57 /* narration-welcome.m4a in Resources */,
+				3AC4C505E820F87F4C3A7B4B /* narration-win.m4a in Resources */,
+				11466255F699EDADB56C2968 /* select.wav in Resources */,
+				A061D47531BC70543944B09E /* turn.wav in Resources */,
+				68FA1D81A338122B44D6962A /* win.wav in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		209C6ED060757DDBE81EAB2E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B780D35680FDE7F5E7938142 /* HamsterLabUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		63793C4F47FC1D3B592ADE03 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2502DD62B284DC519E8625EB /* BridgeTests.swift in Sources */,
+				4178D01740B0D8D111DF3E44 /* LaboratoryTests.swift in Sources */,
+				506B0C976A2C2C4A03AD49EE /* LocalizationTests.swift in Sources */,
+				426A9E4E9AE7A7243019E123 /* RenderingPerformanceTests.swift in Sources */,
+				49B83F12162DD2E1B3C25BFD /* RulesTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6C049F84D52B5F58BEB6C962 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F9D41368AC35871F5A7538BE /* AudioEngine.swift in Sources */,
+				661F7D4286391D883E2E478C /* BoardScene.swift in Sources */,
+				199B71718F2850B3EEC2BE16 /* Bot.swift in Sources */,
+				9BFB0D6985981068A396E6A8 /* ContentView.swift in Sources */,
+				6C994A9C5C28A1AFA4742717 /* GameModel.swift in Sources */,
+				9EE6CE127B3E11129244F9F5 /* HamsterLabApp.swift in Sources */,
+				8DD32D4B7EA1C02A0AAD2025 /* HamsterRig.swift in Sources */,
+				EB7036558523ED4985DA56CB /* LabGeometry.swift in Sources */,
+				0E079F42F7C2ECBF30C46043 /* Localization.swift in Sources */,
+				0E61CA37B8354ACE848E1437 /* NarrationCatalog.swift in Sources */,
+				8EBB50B633B63D65026A0E31 /* OnlineBridge.swift in Sources */,
+				84CB598479C67F709344C916 /* Rules.swift in Sources */,
+				AC121B18D889469E9A39BD2D /* SessionVault.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		780B286A4E69D727BDD434FE /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F8D152A1B58FF55F08FBCF1D /* HamsterLab */;
+			targetProxy = 432630AF470FD797753801EF /* PBXContainerItemProxy */;
+		};
+		9CD87202D27D0AF9FDBC2987 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F8D152A1B58FF55F08FBCF1D /* HamsterLab */;
+			targetProxy = D5AC979308CB9FB311B99915 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		0A340BC8F11CCC9CF21D9456 /* narration-welcome.m4a */ = {
+			isa = PBXVariantGroup;
+			children = (
+				1B0178BA5D0339A4282AA0E1 /* be */,
+				185261E8F675794E4753E2FD /* de */,
+				010CAA12F7886B0B5A0453DF /* en */,
+				5EB1A96D93281007CF5DD25E /* es */,
+				A3F971B795200C562C41637A /* fr */,
+				9585A699F71FB0F2BAEF8B19 /* it */,
+				1EDDB5DE60702911887E672C /* pl */,
+				1DA0E79332F8BCB72739D349 /* pt */,
+				9C31268A49A2C1CE701BEDE7 /* ru */,
+				F4147F95EFE4DBB1C66A4C42 /* tr */,
+				672F01B15908D12D7207FE67 /* uk */,
+			);
+			name = "narration-welcome.m4a";
+			sourceTree = "<group>";
+		};
+		351E0E7680BD0F7A2A5AD567 /* narration-finish.m4a */ = {
+			isa = PBXVariantGroup;
+			children = (
+				71C31C4B28D653911E8C73C3 /* be */,
+				E1741D2CE4F9A064A3901B30 /* de */,
+				99434DF872D303F109096584 /* en */,
+				3D816BDCEC346173C124ECD9 /* es */,
+				F9EB12BF219BE3482CCA50FF /* fr */,
+				CF45130CB256A48725ADFED3 /* it */,
+				86D5BB95A2CCC698ADB1456F /* pl */,
+				3DDC68C21A9138ECE5B538AF /* pt */,
+				CDE914989A6F84BE38518482 /* ru */,
+				E79ACED1C3EEC2A162E55132 /* tr */,
+				E4BE177E82A4D9212FCCB0FB /* uk */,
+			);
+			name = "narration-finish.m4a";
+			sourceTree = "<group>";
+		};
+		37F510A23A2C41B99A23BCC5 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				2AC4A2CBF7509B66A73044EA /* be */,
+				C095BF3059E97EC9ABE20282 /* de */,
+				34C7EB8B7E7DDE4EFD53F6EB /* en */,
+				0F5869E2EFB8C2D98BC8925E /* es */,
+				9709B1BB32BC8992D9CB8F5F /* fr */,
+				DA84D38C79A496CEEA7944D2 /* it */,
+				AC75BE9A4993651A754C88C0 /* pl */,
+				2FBA62BC2FDF532F89345548 /* pt */,
+				3477A588899330CA9FFD212D /* ru */,
+				527A8D807D00C4F31C000C5B /* tr */,
+				8A93F5EB63EA54FA02D6ABAA /* uk */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		4A0B6C281CF32CA2A9EED4F3 /* narration-win.m4a */ = {
+			isa = PBXVariantGroup;
+			children = (
+				730B94E0A2EEC427FA093E9F /* be */,
+				67AD809853240F1FA04596C0 /* de */,
+				74CD76F8352B62CCFE80B589 /* en */,
+				1D7CD3D0FF11EC55CB57CFB1 /* es */,
+				F4498F8A88D16D36A58293A0 /* fr */,
+				21E60A8A705D69CFDB20684F /* it */,
+				CD24C7DF673D9468ED907856 /* pl */,
+				9882F942075B069F98953BC9 /* pt */,
+				3499C1695005B43C75899B34 /* ru */,
+				90E1A32D102FED17297A2404 /* tr */,
+				60F26607899F2E68B362FBFC /* uk */,
+			);
+			name = "narration-win.m4a";
+			sourceTree = "<group>";
+		};
+		A73CEBD6E1732E422684A3BF /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				2180FFF4F6B9BC2AE454BF7D /* be */,
+				AF105EA64731D8A9907AD19A /* de */,
+				AD55E68566473485906C305E /* en */,
+				A305A2DE05483EA85E8D745E /* es */,
+				9CA4AB0EEDF27C3CA7647972 /* fr */,
+				161879581B6B55DA6613F660 /* it */,
+				0ECF5E258A612C92ED11E974 /* pl */,
+				DEAAC2F24CEE09DB48FFA69F /* pt */,
+				9265FBB309050F7BCC730DD7 /* ru */,
+				9E6C5332E5791C9B4DE0546A /* tr */,
+				4F48F4297234159E7647C9A8 /* uk */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+		D4388EC8DBDEF0C17F9C3E2A /* narration-begin.m4a */ = {
+			isa = PBXVariantGroup;
+			children = (
+				751A378B9F22DEAC66BD95FF /* be */,
+				AE221544736E40D9D68E3C0A /* de */,
+				68E1A9C75181EE2040135609 /* en */,
+				1EDAA413966220F56929EA8E /* es */,
+				00107333B347258FEE3DE444 /* fr */,
+				F2FB5F39AABB0819F5A94B05 /* it */,
+				EBB59A1D0A59DDED64605A6B /* pl */,
+				DFD165F125C4422BF9583B49 /* pt */,
+				90D044F083FC4644D0758411 /* ru */,
+				FCE0B3DB6A6B20B208E5E302 /* tr */,
+				51F70AC5C4939A9D2EFF8415 /* uk */,
+			);
+			name = "narration-begin.m4a";
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		25FD93018F3C7AF8B5254660 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = HamsterLab/HamsterLab.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = HamsterLab/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.enotix.hamsterlab;
+				SDKROOT = iphoneos;
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		44801040E726C69FF198C80E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.enotix.HamsterLabUITests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = HamsterLab;
+			};
+			name = Debug;
+		};
+		48B10B270464CB15CA53E1CD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = HamsterLab/HamsterLab.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = HamsterLab/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.enotix.hamsterlab;
+				SDKROOT = iphoneos;
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		5060F6EC03DDE762414C06FE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = W37L5728Y6;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				MARKETING_VERSION = 1.0.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		6B079AC6A57D56AC5BA9BD04 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.enotix.HamsterLabTests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/HamsterLab.app/HamsterLab";
+			};
+			name = Release;
+		};
+		7E97257621066797868B36AD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = W37L5728Y6;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				MARKETING_VERSION = 1.0.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		896885659C8B642FFD6750CB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.enotix.HamsterLabUITests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = HamsterLab;
+			};
+			name = Release;
+		};
+		F5730D03A4D2D683921238B3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.enotix.HamsterLabTests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/HamsterLab.app/HamsterLab";
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		387A633678880BB4B7D77646 /* Build configuration list for PBXNativeTarget "HamsterLab" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				25FD93018F3C7AF8B5254660 /* Debug */,
+				48B10B270464CB15CA53E1CD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		6D076EC2CEF39D0F1E43E5EC /* Build configuration list for PBXProject "HamsterLab" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5060F6EC03DDE762414C06FE /* Debug */,
+				7E97257621066797868B36AD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		D172EC4A6909A931AA9FF04C /* Build configuration list for PBXNativeTarget "HamsterLabTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F5730D03A4D2D683921238B3 /* Debug */,
+				6B079AC6A57D56AC5BA9BD04 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		E52AE71E780F574821D5524C /* Build configuration list for PBXNativeTarget "HamsterLabUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				44801040E726C69FF198C80E /* Debug */,
+				896885659C8B642FFD6750CB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 2422A480B01E898C9E7E5937 /* Project object */;
+}

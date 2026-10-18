@@ -1,0 +1,65 @@
+name: HamsterLab
+options:
+  bundleIdPrefix: com.enotix
+  deploymentTarget:
+    iOS: '18.0'
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: '6.0'
+    DEVELOPMENT_TEAM: W37L5728Y6
+    CODE_SIGN_STYLE: Automatic
+    MARKETING_VERSION: 1.0.0
+    CURRENT_PROJECT_VERSION: 1
+    TARGETED_DEVICE_FAMILY: '1,2'
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+targets:
+  HamsterLab:
+    type: application
+    platform: iOS
+    sources:
+      - path: HamsterLab
+        excludes: [Resources, Info.plist]
+      - path: ../twivvy/Twivvy/Engine
+      - path: ../twivvy/Twivvy/Networking/OnlineBridge.swift
+      - path: HamsterLab/Resources
+        excludes: [Bridge]
+      - path: HamsterLab/Resources/Bridge
+        type: folder
+        buildPhase: resources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.enotix.hamsterlab
+        INFOPLIST_FILE: HamsterLab/Info.plist
+        CODE_SIGN_ENTITLEMENTS: HamsterLab/HamsterLab.entitlements
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        SUPPORTS_MACCATALYST: NO
+        SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD: NO
+  HamsterLabTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources: [Tests]
+    dependencies:
+      - target: HamsterLab
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+  HamsterLabUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources: [UITests]
+    dependencies:
+      - target: HamsterLab
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: YES
+schemes:
+  HamsterLab:
+    build:
+      targets:
+        HamsterLab: all
+    test:
+      targets: [HamsterLabTests, HamsterLabUITests]
+      gatherCoverageData: true
+    archive:
+      config: Release

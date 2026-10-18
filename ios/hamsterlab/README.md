@@ -1,0 +1,139 @@
+# HamsterLab / ХомаЛаб
+
+A standalone iOS 18+ SwiftUI / RealityKit game: small, expressive hamsters crawl
+through transparent tubes on a miniature laboratory workbench. Russian display
+name: **ХомаЛаб**. Bundle ID: `com.enotix.hamsterlab`; version 1.0.0, build 1.
+Open `HamsterLab.xcodeproj` and choose the **HamsterLab** scheme.
+
+## Build and run
+
+Requires Xcode 26+, XcodeGen, Node.js and pnpm. From the repository root:
+
+```sh
+pnpm hamsterlab:generate # sync protocol, fixtures, locales; generate Xcode project
+pnpm hamsterlab:build    # unsigned simulator build
+pnpm hamsterlab:test     # native and UI tests on iPhone 16 Pro Max / iOS 18.6
+pnpm hamsterlab:release  # signed archive and locally exported IPA
+pnpm hamsterlab:upload   # archive, export, then upload to App Store Connect
+```
+
+Set `HAMSTERLAB_DESTINATION` to test another installed simulator, for example
+`HAMSTERLAB_DESTINATION='platform=iOS Simulator,name=iPad Pro 13-inch (M4),OS=18.6' pnpm hamsterlab:test`.
+Tests run sequentially so multiple rendering simulators do not compete for resources.
+
+Build output is in `ios/hamsterlab/build/` and is excluded from Git. Release
+commands need the owner's Xcode signing account for team `W37L5728Y6`, a registered
+bundle ID and an App Store Connect app record. Upload is separate from App Review.
+Increase `CURRENT_PROJECT_VERSION` before uploading another build. No HamsterLab
+build has been uploaded by the implementation task.
+
+## Gameplay and interoperability
+
+The rules and bots compile **directly from `../twivvy/Twivvy/Engine/`**. There is no
+second rules implementation to drift. All three maps, thirty rounds, one secret
+quarter-turn, cooldown, simultaneous rotation combination, spawns, collisions,
+seven-point early victory, training, private rooms, matchmaking, recovery and
+rematches retain the original behavior. Internal protocol objects still use the
+word `ball`; the presentation shows hamsters.
+
+The native `OnlineBridge.swift` is also shared with Twivvy. The bundled bridge
+adapter is unchanged; `scripts/sync-web.mjs` regenerates `protocol.js` from the
+same `js/rules.js`, `js/net.js` and `js/session.js`. HTTPS signaling uses
+`https://us-central1-enotix.cloudfunctions.net/twivvy-signal`; gameplay remains a
+peer WebRTC connection with native SHA-256 commit/reveal verification. HamsterLab
+players can play Twivvy and browser players using the existing server.
+
+Saved matches use a separate Keychain service, `com.enotix.hamsterlab.session`.
+Existing `https://twivvy.e-notix.com/ABCDE` invitations and `twivvy://` invitations
+can be pasted, alongside `hamsterlab://join?code=ABCDE`. HamsterLab registers only
+its own URL scheme so it does not take over Twivvy's scheme. Universal Links use
+the same domain; the repository's AASA now includes both app IDs. Publishing that
+file with `pnpm deploy:app-pages` and Apple's cache refresh are required before
+HTTPS links can launch the new app. This task does not publish website changes.
+
+## Original models and animation
+
+`Rendering/HamsterRig.swift` builds an original pear-shaped body mesh with a
+named articulation hierarchy: body, head, four paws, two ears, eyes, eyebrows,
+cheek pouches, teeth, whiskers and tail. Five coat colors identify residents.
+The models are authored in source; there are no downloaded models, asset-store
+licenses, remote assets or third-party native dependencies.
+
+RealityKit's `AnimationResource` / `FromToByAnimation` handles breathing, ear
+movement and idle loops; `Entity.move` handles platform rotation. Exact quadratic
+routes drive traversal. Paws alternate, heads lead turns, cheeks puff and the
+body squashes and stretches at couplings. Eye blinks and eyebrow movements make
+faces expressive. Crossing the small platform seam adds a gentle climbing arc.
+Visual interpolation never changes the integer game state.
+
+`Rendering/LabGeometry.swift` generates hollow, open-ended tube meshes with inner
+walls, translucent PBR glass, highlights and colored coupling rings. All tubes
+and hamster resting points use `TubePath`; rotations carry the whole rig and
+spawn markers on the platform. A perspective camera, soft shadows, colored
+lights, specimen vials and a flask create a toy laboratory. Shared mesh resources
+and cached tube assemblies reduce repeated geometry allocation.
+
+Collars and highlights are batched meshes; unchanged platforms and hamster rigs
+are retained between rounds. Offscreen renderers are paused, and countdown
+updates are isolated from the board UI. See [AppStore/PERFORMANCE.md](AppStore/PERFORMANCE.md)
+for the simulator comparison and repeatable benchmark.
+
+Reduce Motion disables nonessential animation and resolves directly to the final
+state. VoiceOver exposes platform descriptions and adjustable rotation actions.
+Sound respects Silent Mode; sound, haptics and hamster voices can be switched off.
+
+## Sound and localization
+
+Eight original PCM effects are generated by `scripts/generate-audio.py`: hamster
+chatter, crawling, glass ticks, rotation, countdown, delivery and victory.
+All eleven Twivvy languages have translated HamsterLab interface copy, rules,
+privacy text and four spoken prompts: English, Belarusian, Spanish, Russian,
+Ukrainian, Italian, Portuguese, Polish, French, German and Turkish.
+
+Narration uses an installed system voice matching the app language, preferring
+the European Portuguese voice for `pt`. If no matching voice is installed, it
+plays the corresponding bundled AAC clip. All 44 fallback clips are included and
+work offline, including Belarusian. Fallback clips use eSpeak NG and have a
+synthetic timbre; system voice quality depends on the device. Narration respects
+sound/voice toggles and yields to VoiceOver. No microphone access is required.
+
+`scripts/locales/*.json` contains the HamsterLab-specific translations.
+`scripts/hamster-locales.mjs` applies them after syncing shared controls.
+Every sync validates complete key sets, nonempty strings, placeholders, display
+names and narration text/audio fingerprints. Changing spoken text requires
+regenerating its audio before building. See [scripts/NARRATION.md](scripts/NARRATION.md).
+
+```sh
+pnpm hamsterlab:validate-locales
+ESPEAK_NG=/path/to/espeak-ng pnpm hamsterlab:narration
+pnpm hamsterlab:generate
+```
+
+The icon is original vector artwork from `scripts/draw-icon.swift`, rendered into
+the asset catalog. Regenerate local artwork/audio with:
+
+```sh
+python3 ios/hamsterlab/scripts/generate-audio.py
+swift ios/hamsterlab/scripts/draw-icon.swift \
+  ios/hamsterlab/HamsterLab/Resources/Assets.xcassets/AppIcon.appiconset/AppIcon.png
+```
+
+## Verification and release preparation
+
+See [AppStore/VALIDATION.md](AppStore/VALIDATION.md) for the implementation checks.
+The fixture suite compares 45 browser games / 1,337 resolved rounds. Additional
+checks cover every compatible tube pair, rotation geometry, face/limb rig,
+private previews, immediate online state events, invitation parsing and the
+bundled WebKit hashing/data-channel bridge. UI tests cover Russian branding,
+settings, local training, gesture input, landscape/portrait, local invitation
+validation and a complete game/rematch. UI tests suppress network presence calls.
+
+For deterministic screenshots, launch with `--uitesting --lab-preview`; this
+creates four local example hamsters without contacting the server.
+`--uitesting --autoplay` runs a complete real training match at animation speed
+for UI verification or video capture.
+
+App Store metadata is a draft in `AppStore/metadata.json`. HamsterLab needs its
+own app record and store screenshots. Shared signaling has no TURN relay, so
+restrictive NAT can still prevent direct peer connections. Real-device render
+performance, sound/haptics and adverse-network behavior need device checks.

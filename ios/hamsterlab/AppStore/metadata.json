@@ -1,0 +1,26 @@
+{
+  "status": "draft",
+  "bundleId": "com.enotix.hamsterlab",
+  "version": "1.0.0",
+  "build": "1",
+  "localizations": {
+    "en-US": {
+      "name": "HamsterLab",
+      "subtitle": "Tiny paws. Twisty tubes.",
+      "promotionalText": "A little twist, a fluffy discovery! Guide expressive 3D hamsters through a miniature laboratory of transparent tubes.",
+      "description": "Welcome to HamsterLab! Twist nine platforms of transparent tubes to guide tiny hamsters into your home. Watch their paws scamper, cheeks puff and bodies squeeze through the couplings.\n\nPractice offline against three bot levels, invite a friend, or find an online opponent. Both players plan one secret twist per round, then reveal their moves together. Bring seven hamsters home to win early, or collect the most after thirty rounds.\n\nOriginal 3D characters, a playful laboratory, cheerful hamster sounds, optional spoken hints, and interface and narration in eleven languages. Includes VoiceOver controls, Reduce Motion support and adjustable sound/haptics. No account, advertising or in-app purchases.",
+      "keywords": "hamster,puzzle,lab,maze,tubes,3d,duel,strategy,animals",
+      "supportURL": "https://twivvy.e-notix.com/support.html",
+      "privacyURL": "https://twivvy.e-notix.com/privacy.html"
+    },
+    "ru": {
+      "name": "ХомаЛаб",
+      "subtitle": "Маленькие лапки. Большой опыт.",
+      "promotionalText": "Крути прозрачные трубки и провожай хомяков домой! Пушистая дуэль в объёмной лаборатории с забавной мимикой и озвучкой.",
+      "description": "Добро пожаловать в ХомаЛаб! Поворачивай девять платформ с прозрачными трубами, чтобы проводить хомяков в свой домик. Следи, как они перебирают лапками, надувают щёчки и протискиваются на стыках.\n\nТренируйся без интернета с ботами трёх уровней, пригласи друга или найди соперника онлайн. Каждый игрок выбирает один секретный поворот за раунд, а затем ходы раскрываются вместе. Собери семь хомяков для досрочной победы или победи по счёту за тридцать раундов.\n\nАвторские 3D-персонажи, уютная лаборатория, хомячьи голоса и отключаемые речевые подсказки. Интерфейс и озвучка на одиннадцати языках. Есть управление VoiceOver, поддержка уменьшения движения и настройки звука и вибрации. Без аккаунтов, рекламы и встроенных покупок.",
+      "keywords": "хомяк,лабиринт,головоломка,лаборатория,трубы,3d,дуэль,животные",
+      "supportURL": "https://twivvy.e-notix.com/support.html",
+      "privacyURL": "https://twivvy.e-notix.com/privacy.html"
+    }
+  }
+}
