@@ -50,11 +50,70 @@ const rows = {
  pl:['Gotowe','Ustawienia','Opuścić tę grę?','Opuść grę','Masz zaproszenie? Dołącz','Wznów grę','Udostępnij zaproszenie','Ponowne łączenie…','Zaplanuj ruch','Labirynt','Platforma','Kule','Góra','Prawo','Dół','Lewo','Wybierz platformę i kierunek obrotu.','Platforma obrócona. Czekamy na ruch przeciwnika.','W lewo','W prawo','Wyczyść / pomiń','Następna runda','Ukryte do ujawnienia','Przeciwnik chce rewanżu!','Kod pokoju lub link zaproszenia','Wpisz poprawny kod lub link Twivvy.','Trening działa offline. Bot wybiera ruch wcześniej.','Przeciwnik widzi twoje imię. Gracze łączą się bezpośrednio.','Wibracje','Prywatność','Pomoc','Język aplikacji','MAŁY OBRÓT. WIELKI POJEDYNEK.','9 platform · 2 graczy · jeden sprytny ruch','Siedem punktów daje natychmiastowe zwycięstwo. W innym przypadku wygrywa wyższy wynik po 30 rundach. Równe wyniki oznaczają remis.','Dotknij platformy i przycisków obrotu lub przesuń wokół jej środka. Możesz zmieniać ruch przez 30 sekund. Twój odbiornik zawsze jest na dole.'],
  tr:['Bitti','Ayarlar','Bu oyundan çıkılsın mı?','Oyundan çık','Davetin var mı? Katıl','Oyuna devam et','Daveti paylaş','Yeniden bağlanıyor…','Hamleni planla','Labirent','Platform','Toplar','Yukarı','Sağ','Aşağı','Sol','Bir platform ve dönüş yönü seç.','Platform döndürüldü. Rakibin hamlesi bekleniyor.','Sola çevir','Sağa çevir','Temizle / pas geç','Sonraki tur','Açıklanana kadar gizli','Rakibin rövanş istiyor!','Oda kodu veya davet bağlantısı','Geçerli bir kod veya Twivvy bağlantısı gir.','Antrenman çevrimdışı çalışır. Bot hamlesini önceden seçer.','Rakibin adını görür. Oyuncular doğrudan bağlanır.','Dokunsal geri bildirim','Gizlilik','Destek','Uygulama dili','KÜÇÜK BİR DÖNÜŞ. BÜYÜK BİR DÜELLO.','9 platform · 2 oyuncu · akıllıca bir hamle','Yedi puan erken galibiyet getirir. Aksi halde 30 tur sonunda en yüksek puan kazanır. Eşit puanlar beraberliktir.','Platforma ve dönüş düğmelerine dokun veya merkezinin etrafında kaydır. 30 saniyelik süre bitene kadar hamleni değiştirebilirsin. Alıcın her zaman alttadır.']
 };
+// Keep the native gameplay copy when regenerating browser translations.
+const gameplay = {
+  "be": {
+    "goal": "Збяры ў свой прыёмнік як мага больш шарыкаў. Твой прыёмнік заўсёды ўнізе.",
+    "gestureRule": "Павярні платформу рухам пальца. Краніся любой платформы, каб скасаваць паварот. Ход можна змяняць на працягу 30 секунд.",
+    "turnLimitHint": "Платформу можна павярнуць толькі адзін раз за раўнд."
+  },
+  "de": {
+    "goal": "Sammle so viele Kugeln wie möglich in deinem Auffangbehälter. Dein Empfänger ist immer unten.",
+    "gestureRule": "Drehe eine Plattform mit einer Fingerbewegung. Tippe auf eine beliebige Plattform, um deinen Zug zurückzusetzen. Du kannst deinen Zug bis zum Ende des 30-Sekunden-Timers ändern.",
+    "turnLimitHint": "Du kannst eine Plattform nur einmal pro Runde drehen."
+  },
+  "en": {
+    "goal": "Collect as many balls as possible in your receiver. Your receiver is always at the bottom.",
+    "gestureRule": "Drag a platform to rotate it. Tap any platform to reset your move. You can change your choice until the 30-second timer ends.",
+    "turnLimitHint": "You can rotate a platform only once per round."
+  },
+  "es": {
+    "goal": "Recoge tantas bolas como puedas en tu receptor. Tu receptor siempre está abajo.",
+    "gestureRule": "Arrastra una plataforma para girarla. Toca cualquier plataforma para cancelar el giro. Puedes cambiar tu jugada durante los 30 segundos del temporizador.",
+    "turnLimitHint": "Solo puedes girar una plataforma una vez por ronda."
+  },
+  "fr": {
+    "goal": "Récupérez autant de billes que possible dans votre récepteur. Ton récepteur est toujours en bas.",
+    "gestureRule": "Fais glisser une plateforme pour la tourner. Touche une plateforme pour annuler la rotation. Tu peux modifier ton coup pendant les 30 secondes du minuteur.",
+    "turnLimitHint": "Tu ne peux tourner une plateforme qu’une fois par manche."
+  },
+  "it": {
+    "goal": "Raccogli più palline possibile nel tuo ricevitore. Il tuo ricevitore è sempre in basso.",
+    "gestureRule": "Trascina una piattaforma per ruotarla. Tocca una piattaforma per annullare la rotazione. Puoi cambiare mossa durante i 30 secondi del timer.",
+    "turnLimitHint": "Puoi ruotare una piattaforma solo una volta per turno."
+  },
+  "pl": {
+    "goal": "Zbierz jak najwięcej kulek w swoim odbiorniku. Twój odbiornik zawsze jest na dole.",
+    "gestureRule": "Przeciągnij platformę, aby ją obrócić. Dotknij dowolnej platformy, aby anulować obrót. Możesz zmieniać ruch przez 30 sekund.",
+    "turnLimitHint": "Platformę można obrócić tylko raz na rundę."
+  },
+  "pt": {
+    "goal": "Recolha o máximo de bolas possível no seu recetor. O teu recetor está sempre em baixo.",
+    "gestureRule": "Arrasta uma plataforma para a rodar. Toca em qualquer plataforma para cancelar a rotação. Podes mudar a jogada durante os 30 segundos do temporizador.",
+    "turnLimitHint": "Só podes rodar uma plataforma uma vez por ronda."
+  },
+  "ru": {
+    "goal": "Цель игры — собрать в свой приёмник как можно больше шариков. Твой приёмник всегда снизу.",
+    "gestureRule": "Поверни платформу движением пальца. Коснись любой платформы, чтобы отменить поворот. Ход можно менять до конца 30-секундного таймера.",
+    "turnLimitHint": "Можно повернуть платформу только один раз за раунд"
+  },
+  "tr": {
+    "goal": "Haznende mümkün olduğunca çok top topla. Alıcın her zaman alttadır.",
+    "gestureRule": "Döndürmek için platformu sürükle. Dönüşü iptal etmek için herhangi bir platforma dokun. 30 saniyelik süre bitene kadar hamleni değiştirebilirsin.",
+    "turnLimitHint": "Bir platformu her turda yalnızca bir kez döndürebilirsin."
+  },
+  "uk": {
+    "goal": "Збери у свій приймач якомога більше кульок. Твій приймач завжди внизу.",
+    "gestureRule": "Поверни платформу рухом пальця. Торкнися будь-якої платформи, щоб скасувати поворот. Хід можна змінювати протягом 30 секунд.",
+    "turnLimitHint": "Платформу можна повернути лише один раз за раунд."
+  }
+};
 for(const locale of ['en','ru',...Object.keys(rows)]) {
+ const {goal,...nativeGameplay} = gameplay[locale];
  const extra = locale==='ru'?ru:rows[locale]?Object.fromEntries(keys.map((key,i)=>[key,rows[locale][i]])):{};
  if(rows[locale]?.length !== undefined && rows[locale].length!==keys.length)throw Error(locale+' key mismatch');
- const strings=Object.entries({...en,...extra,duel:duel[locale],selectHint:selectHint[locale],back:back[locale]}).map(([k,v])=>`${JSON.stringify('native.'+k)} = ${JSON.stringify(v)};`).join('\n');
+ const strings=Object.entries({...en,...extra,...nativeGameplay,duel:duel[locale],selectHint:selectHint[locale],back:back[locale]}).map(([k,v])=>`${k==='turnLimitHint'?'\n':''}${JSON.stringify('native.'+k)} = ${JSON.stringify(v)};`).join('\n');
  const target = new URL(`../Twivvy/Resources/${locale}.lproj/Localizable.strings`,import.meta.url);
- const base = fs.readFileSync(target,'utf8').split('\n').filter(line=>!line.startsWith('\"native.')).join('\n').trim();
+ const base = fs.readFileSync(target,'utf8').split('\n').filter(line=>!line.startsWith('\"native.')).join('\n').trim().replace(/^"rules\.goal" = .*;$/m, () => `"rules.goal" = ${JSON.stringify(goal)};`);
  fs.writeFileSync(target,base+'\n\n'+strings+'\n');
 }

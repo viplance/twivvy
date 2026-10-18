@@ -8,16 +8,39 @@ Requires Xcode 26 or newer. The deployment target remains iOS 18.0. Apple requir
 
 ```sh
 # From the repository root; generated project is already checked in.
-node ios/scripts/sync-web.mjs
-xcodegen generate --spec ios/project.yml
-xcodebuild -project ios/Twivvy.xcodeproj -scheme Twivvy \
+node ios/twivvy/scripts/sync-web.mjs
+xcodegen generate --spec ios/twivvy/project.yml
+xcodebuild -project ios/twivvy/Twivvy.xcodeproj -scheme Twivvy \
   -destination 'platform=iOS Simulator,name=iPhone 16 Pro Max,OS=18.6' test
 
-# Signed local archive and App Store IPA. Does not upload.
-ios/scripts/release.sh
+# Unsigned simulator build.
+pnpm run ios:build
+
+# Signed local archive and App Store IPA.
+pnpm run ios:release
+
+# Build and upload to App Store Connect / TestFlight.
+pnpm run ios:upload
 ```
 
-Automatic signing uses team **W37L5728Y6**, matching the owner's neighbouring projects. Bundle ID: **com.enotix.twivvy**. Version 1.0.0, build 1. Certificates and private keys are not copied into the repository. Change the build number before uploading a subsequent build.
+Automatic signing uses team **W37L5728Y6**, matching the owner's neighbouring projects. Bundle ID: **com.enotix.twivvy**. Version 1.0.5, build 7 (see `project.yml`). Certificates and private keys are not copied into the repository. Change the build number before uploading a subsequent build.
+
+The iOS project root is `ios/twivvy/`; source code, tests, scripts, signing options,
+App Store materials and local build products all live there. Paths in `project.yml`
+and the generated Xcode project are relative to this directory.
+
+From the repository root, `pnpm run ios:sync` regenerates web resources and fixtures,
+and `pnpm run ios:generate` also regenerates the Xcode project. The build and release
+commands perform both steps automatically. You can also run `./scripts/release.sh`
+or `./scripts/release.sh --upload` directly from `ios/twivvy/`.
+
+Local archives are written to `ios/twivvy/build/Twivvy.xcarchive`, exported IPAs to
+`ios/twivvy/build/AppStore/`, and simulator build products to
+`ios/twivvy/build/DerivedData/`. Upload uses a temporary copy of `ExportOptions.plist`
+with `destination=upload`; the checked-in options continue to export locally.
+Xcode must have the team's signing credentials and an Apple account authorized
+for App Store Connect. Increase `CURRENT_PROJECT_VERSION` in `project.yml` before
+uploading another build. Upload does not submit the app for App Review.
 
 ## Feature map
 
@@ -51,7 +74,7 @@ The separate **TwivvyLive** scheme is opt-in. It creates two synthetic clients i
 
 See `AppStore/RELEASE.md` for metadata, privacy disclosures, screenshots and release status. `ExportOptions.plist` exports locally using App Store distribution signing. `AppStore/Screenshots` contains actual simulator captures, not mockups.
 
-Website files are in `../public/privacy.html`, `../public/support.html` and `../public/.well-known/apple-app-site-association`; all three were published on `twivvy.e-notix.com` on 17 September 2026. Run `pnpm run deploy:app-pages` from the repository root to publish updates. The script sets explicit HTML/JSON content types and disables response transformation for these files. Apple may cache the Universal Link association independently; opening links on an installed physical device still needs a release check. Code/link paste and the custom URL scheme work independently of AASA.
+Website files are in `../../public/privacy.html`, `../../public/support.html` and `../../public/.well-known/apple-app-site-association`; all three were published on `twivvy.e-notix.com` on 17 September 2026. Run `pnpm run deploy:app-pages` from the repository root to publish updates. The script sets explicit HTML/JSON content types and disables response transformation for these files. Apple may cache the Universal Link association independently; opening links on an installed physical device still needs a release check. Code/link paste and the custom URL scheme work independently of AASA.
 
 ## Practical limits
 

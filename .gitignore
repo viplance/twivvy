@@ -17,8 +17,8 @@ ios-pvp-market-perekrut.md
 *.key
 
 # Native build products and personal Xcode state.
-ios/build/
-ios/DerivedData/
+ios/**/build/
+ios/**/DerivedData/
 *.xcuserstate
 xcuserdata/
 *.xcarchive/

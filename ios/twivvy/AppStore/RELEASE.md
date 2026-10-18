@@ -21,8 +21,24 @@ six UI tests passed on iPhone 16 Pro Max / iOS 18.6.
 - Automatic signing: team `W37L5728Y6`; bundle ID `com.enotix.twivvy`.
 - App Store metadata in `metadata.json` (English and Russian). All field lengths checked.
 - Privacy manifest, required-reason UserDefaults declaration (`CA92.1`), and encryption declaration in the app.
-- Support and privacy HTML pages plus Universal Link association file in `../../public/`.
+- Support and privacy HTML pages plus Universal Link association file in `../../../public/`.
 - Local archive / export automation, with no upload step: `../scripts/release.sh`.
+
+## Build and upload from the repository root
+
+```sh
+pnpm run ios:release # archive and export IPA locally
+pnpm run ios:upload # archive and upload to App Store Connect / TestFlight
+```
+
+The project and release scripts now live in `ios/twivvy/`. Build output is in
+`ios/twivvy/build/`. Increase `CURRENT_PROJECT_VERSION` in `../project.yml`
+before the next upload; version 1.0.5 build 7 has already been uploaded.
+Use an authorized Apple account in Xcode with the team's signing credentials.
+The upload command does not submit the app for App Review.
+
+Historical upload receipts preserve paths as recorded at upload time; their
+`ios/build/` artifacts have moved to `ios/twivvy/build/` with the project.
 
 ## App Store Connect entries
 

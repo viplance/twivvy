@@ -9,8 +9,8 @@ The product specification is in
 
 ## Native iOS game
 
-The SwiftUI + SpriteKit iPhone/iPad app (iOS 18+) is in [ios/](ios/README.md).
-Open [Twivvy.xcodeproj](ios/Twivvy.xcodeproj) in Xcode. Build, signing,
+The SwiftUI + SpriteKit iPhone/iPad app (iOS 18+) is in [ios/twivvy/](ios/twivvy/README.md).
+Open [Twivvy.xcodeproj](ios/twivvy/Twivvy.xcodeproj) in Xcode. Build, signing,
 protocol compatibility and App Store materials are documented there.
 
 ## Features

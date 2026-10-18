@@ -17,7 +17,12 @@
     "test:ui": "vitest run",
     "validate-maps": "node tools/validate-maps.mjs",
     "deploy": "pnpm run build && gsutil -m rsync -r -x '^index\\.html$' dist gs://twivvy.e-notix.com/ && gsutil -h 'Cache-Control:no-cache' cp dist/index.html gs://twivvy.e-notix.com/index.html && pnpm run deploy:app-pages",
-    "deploy:app-pages": "bash tools/deploy-app-pages.sh"
+    "deploy:app-pages": "bash tools/deploy-app-pages.sh",
+    "ios:sync": "node ios/twivvy/scripts/sync-web.mjs",
+    "ios:generate": "pnpm run ios:sync && xcodegen generate --spec ios/twivvy/project.yml",
+    "ios:build": "pnpm run ios:generate && xcodebuild -project ios/twivvy/Twivvy.xcodeproj -scheme Twivvy -configuration Debug -destination 'generic/platform=iOS Simulator' -derivedDataPath ios/twivvy/build/DerivedData CODE_SIGNING_ALLOWED=NO build",
+    "ios:release": "bash ios/twivvy/scripts/release.sh",
+    "ios:upload": "bash ios/twivvy/scripts/release.sh --upload"
   },
   "dependencies": {
     "three": "0.169.0",
