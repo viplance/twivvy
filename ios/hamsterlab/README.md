@@ -122,7 +122,7 @@ for the simulator comparison and repeatable benchmark.
 
 Reduce Motion disables nonessential animation and resolves directly to the final
 state. VoiceOver exposes platform descriptions and adjustable rotation actions.
-Sound respects Silent Mode; sound, haptics and hamster voices can be switched off.
+Audio respects Silent Mode. Music, hamster voices/effects and haptics have independent switches; both audio switches default to on.
 
 ## Sound and localization
 
@@ -142,8 +142,9 @@ is needed. `Game/GameSounds.swift` discovers numbered variants by event prefix:
 Each event chooses a random variant without immediately repeating the previous
 one. Simultaneous receiver events play in sequence; the result cue takes priority.
 Thinking cues occur at a random time with 3–25 seconds remaining and are cancelled
-when thinking ends. Pause, backgrounding, leaving and sound/voice settings stop
-pending playback. Samples respect Silent Mode and yield to VoiceOver.
+when thinking ends. Pause, backgrounding and leaving stop pending playback.
+The Hamster voices switch controls all MP3 event samples and WAV effects; muting
+music does not mute these sounds. Samples respect Silent Mode and yield to VoiceOver.
 The existing generated PCM effects remain for rotation, crawling, selection,
 countdown and spawn chatter; `scripts/generate-audio.py` does not modify MP3s.
 
@@ -152,10 +153,11 @@ During a match, `Game/GameMusic.swift` randomly plays
 When a track finishes, another random track starts without immediately repeating
 the previous one. Music gain is `0.7 × 10^(-6/20)` (approximately 0.351),
 6 dB below the MP3 event sample gain. Music stops with a 0.3-second fade at
-match end, on exit, pause or backgrounding, and when Sound is disabled.
+match end, on exit, pause or backgrounding, and when Music is disabled.
 Victory/defeat playback waits until that fade completes; draws also stop music.
-Returning to an active game or re-enabling Sound resumes music. The voice toggle
-controls vocal samples independently of background music.
+Returning to an active game or re-enabling Music resumes music. The Music switch
+controls only the three HamsterLab_ tracks; disabling Hamster voices leaves music
+playing. The former Sound preference is retained as the Music preference.
 
 All eleven Twivvy languages have translated HamsterLab interface copy, rules
 and privacy text: English, Belarusian, Spanish, Russian, Ukrainian, Italian,

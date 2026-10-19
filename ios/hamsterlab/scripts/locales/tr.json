@@ -30,5 +30,6 @@
   "error.oldVersion": "Oyun eski bir sürümle oluşturulmuş. Oyunu iki cihazda da güncelle ve yeni bir oda oluştur.",
   "error.occupied": "Bu oyun başka bir cihazda zaten açık. O cihazda oynamaya devam et.",
   "error.connectFailed": "Bağlantı kurulamadı. Oyuna katılmayı tekrar dene.",
-  "native.invalidCode": "Geçerli bir oda kodu veya HamsterLab davet bağlantısı gir."
+  "native.invalidCode": "Geçerli bir oda kodu veya HamsterLab davet bağlantısı gir.",
+  "sound.label": "Müzik"
 }

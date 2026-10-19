@@ -30,5 +30,6 @@
   "error.oldVersion": "La partita è stata creata con una versione precedente. Aggiorna il gioco su entrambi i dispositivi e crea una nuova stanza.",
   "error.occupied": "Questa partita è già aperta su un altro dispositivo. Continua a giocare lì.",
   "error.connectFailed": "Connessione non riuscita. Prova a unirti di nuovo alla partita.",
-  "native.invalidCode": "Inserisci un codice stanza o un link di invito HamsterLab valido."
+  "native.invalidCode": "Inserisci un codice stanza o un link di invito HamsterLab valido.",
+  "sound.label": "Musica"
 }

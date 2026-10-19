@@ -459,7 +459,7 @@ struct ContentView: View {
     private var settings: some View {
         Form {
             Section {
-                Toggle(L("sound.label"),isOn:Binding(get:{AudioEngine.shared.enabled},set:{AudioEngine.shared.enabled=$0})).accessibilityIdentifier("settings.sound")
+                Toggle(L("sound.label"),isOn:Binding(get:{AudioEngine.shared.musicEnabled},set:{AudioEngine.shared.musicEnabled=$0})).accessibilityIdentifier("settings.sound")
                 Toggle(L("lab.voices"),isOn:Binding(get:{AudioEngine.shared.voices},set:{AudioEngine.shared.voices=$0})).accessibilityIdentifier("settings.voices")
                 Toggle(L("native.haptics"),isOn:Binding(get:{AudioEngine.shared.haptics},set:{AudioEngine.shared.haptics=$0}))
             }

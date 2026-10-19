@@ -30,5 +30,6 @@
   "error.oldVersion": "Gra została utworzona w starszej wersji. Zaktualizuj grę na obu urządzeniach i utwórz nowy pokój.",
   "error.occupied": "Ta gra jest już otwarta na innym urządzeniu. Kontynuuj grę na nim.",
   "error.connectFailed": "Nie udało się połączyć. Spróbuj dołączyć ponownie.",
-  "native.invalidCode": "Wpisz prawidłowy kod pokoju lub link zaproszenia do HamsterLab."
+  "native.invalidCode": "Wpisz prawidłowy kod pokoju lub link zaproszenia do HamsterLab.",
+  "sound.label": "Muzyka"
 }

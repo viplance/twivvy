@@ -30,5 +30,6 @@
   "error.oldVersion": "This game uses an older version. Update the game on both devices and create a new room.",
   "error.occupied": "This game is already open on another device. Continue playing there.",
   "error.connectFailed": "Could not connect. Please try joining again.",
-  "native.invalidCode": "Enter a valid room code or HamsterLab invitation link."
+  "native.invalidCode": "Enter a valid room code or HamsterLab invitation link.",
+  "sound.label": "Music"
 }

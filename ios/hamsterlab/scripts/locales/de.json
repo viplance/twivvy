@@ -30,5 +30,6 @@
   "error.oldVersion": "Das Spiel wurde mit einer älteren Version erstellt. Aktualisiere das Spiel auf beiden Geräten und erstelle einen neuen Raum.",
   "error.occupied": "Dieses Spiel ist bereits auf einem anderen Gerät geöffnet. Spiele dort weiter.",
   "error.connectFailed": "Verbindung fehlgeschlagen. Versuche erneut, dem Spiel beizutreten.",
-  "native.invalidCode": "Gib einen gültigen Raumcode oder HamsterLab-Einladungslink ein."
+  "native.invalidCode": "Gib einen gültigen Raumcode oder HamsterLab-Einladungslink ein.",
+  "sound.label": "Musik"
 }

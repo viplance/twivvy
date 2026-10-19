@@ -104,6 +104,13 @@ The built app contains all 21 supplied MP3s and zero synthesized narration
 recordings. Locale validation passes 116 keys in each of eleven languages.
 Earlier narration test reports below describe the former implementation.
 
+`/tmp/hamsterlab-audio-switches.xcresult` passed seven audio tests, complete-text
+localization and the Music-label UI scenario in all eleven languages. Real
+players verify that muting music leaves WAV/MP3 effects playing, muting hamster
+voices stops all effects while music continues, and both can be disabled
+together. The former Sound preference is retained for Music; the switches
+default independently to enabled.
+
 `/tmp/hamsterlab-result-scroll.xcresult` passed the complete-match/rematch UI
 scenario with an explicit visibility check: the result heading, rematch button
 and new-game button are all on screen without a manual swipe. The result card

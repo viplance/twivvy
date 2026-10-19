@@ -3,6 +3,71 @@ import XCTest
 @testable import HamsterLab
 
 final class AudioTests: XCTestCase {
+    @MainActor func testFirstLaunchEnablesMusicAndVoicesAndPreservesSavedChoices() throws {
+        let suite="HamsterLab.FirstLaunch." + UUID().uuidString
+        let preferences=try XCTUnwrap(UserDefaults(suiteName:suite))
+        defer { preferences.removePersistentDomain(forName:suite) }
+        XCTAssertNil(preferences.object(forKey:"sound"))
+        XCTAssertNil(preferences.object(forKey:"hamsterVoices"))
+        let firstLaunch=AudioEngine(preferences:preferences)
+        XCTAssertTrue(firstLaunch.musicEnabled)
+        XCTAssertTrue(firstLaunch.voices)
+        firstLaunch.musicEnabled=false; firstLaunch.voices=false
+        let nextLaunch=AudioEngine(preferences:preferences)
+        XCTAssertFalse(nextLaunch.musicEnabled)
+        XCTAssertFalse(nextLaunch.voices)
+        preferences.removePersistentDomain(forName:suite)
+        let cleanInstall=AudioEngine(preferences:preferences)
+        XCTAssertTrue(cleanInstall.musicEnabled)
+        XCTAssertTrue(cleanInstall.voices)
+    }
+    @MainActor func testMusicAndAllEffectsHaveIndependentSwitches() async throws {
+        let suite="HamsterLab.AudioTests." + UUID().uuidString
+        let preferences=try XCTUnwrap(UserDefaults(suiteName:suite))
+        defer { preferences.removePersistentDomain(forName:suite) }
+        // A saved Sound=false now mutes only music; voices default to enabled.
+        preferences.set(false,forKey:"sound")
+        let audio=AudioEngine(preferences:preferences)
+        audio.haptics=false
+        XCTAssertFalse(audio.musicEnabled)
+        XCTAssertTrue(audio.voices)
+        audio.startGameMusic()
+        XCTAssertNil(audio.music.player)
+        for playerName in audio.players.keys {
+            audio.play(playerName)
+            XCTAssertTrue(try XCTUnwrap(audio.players[playerName]).isPlaying,playerName)
+        }
+        audio.playSample(.turnaround)
+        try await Task.sleep(for:.milliseconds(30))
+        XCTAssertTrue(try XCTUnwrap(audio.currentSample).isPlaying)
+        audio.musicEnabled=true
+        XCTAssertTrue(try XCTUnwrap(audio.music.player).isPlaying)
+        audio.voices=false
+        XCTAssertNil(audio.currentSample)
+        XCTAssertTrue(audio.players.values.allSatisfy { !$0.isPlaying })
+        XCTAssertTrue(try XCTUnwrap(audio.music.player).isPlaying,"Disabling effects must leave music playing")
+        audio.play("select"); audio.playSample(.oops)
+        try await Task.sleep(for:.milliseconds(30))
+        XCTAssertNil(audio.currentSample)
+        XCTAssertTrue(audio.players.values.allSatisfy { !$0.isPlaying })
+        audio.voices=true
+        audio.play("select"); audio.playSample(.turnaround)
+        try await Task.sleep(for:.milliseconds(30))
+        let sample=try XCTUnwrap(audio.currentSample)
+        XCTAssertTrue(sample.isPlaying)
+        audio.musicEnabled=false
+        XCTAssertTrue(sample.isPlaying,"Disabling music must leave vocal samples playing")
+        XCTAssertTrue(try XCTUnwrap(audio.players["select"]).isPlaying,"Disabling music must leave WAV effects playing")
+        await audio.music.fadeTask?.value
+        XCTAssertNil(audio.music.player)
+        audio.voices=false
+        audio.play("select"); audio.playSample(.oops)
+        try await Task.sleep(for:.milliseconds(30))
+        XCTAssertNil(audio.currentSample)
+        XCTAssertTrue(audio.players.values.allSatisfy { !$0.isPlaying })
+        XCTAssertNil(audio.music.player)
+        audio.stop()
+    }
     func testAllThreeMusicTracksDecode() throws {
         let tracks=GameMusic.files()
         XCTAssertEqual(tracks.count,3)

@@ -2,6 +2,23 @@ import XCTest
 import UIKit
 
 final class HamsterLabUITests: XCTestCase {
+    @MainActor func testMusicLabelInEveryLanguage() {
+        let labels=[("en","Music"),("be","Музыка"),("es","Música"),("ru","Музыка"),
+                    ("uk","Музика"),("it","Musica"),("pt","Música"),("pl","Muzyka"),
+                    ("fr","Musique"),("de","Musik"),("tr","Müzik")]
+        for (language,label) in labels {
+            let app=XCUIApplication()
+            app.launchArguments=["--uitesting","-AppleLanguages","(\(language))"]
+            app.launch()
+            XCTAssertTrue(app.buttons["menu.settings"].waitForExistence(timeout:20),language)
+            app.buttons["menu.settings"].tap()
+            let toggle=app.switches["settings.sound"]
+            XCTAssertTrue(toggle.waitForExistence(timeout:5),language)
+            XCTAssertEqual(toggle.label,label,language)
+            XCTAssertTrue(app.switches["settings.voices"].exists,language)
+            app.terminate()
+        }
+    }
     @MainActor func testIllustratedDifficultySelection() {
         let app=XCUIApplication()
         app.launchArguments=["--uitesting","-AppleLanguages","(ru)","-AppleLocale","ru_RU"]

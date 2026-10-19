@@ -3,32 +3,35 @@ import UIKit
 
 @MainActor final class AudioEngine: NSObject {
     static let shared = AudioEngine()
-    var enabled: Bool {
-        get { UserDefaults.standard.object(forKey:"sound") as? Bool ?? true }
+    private let preferences: UserDefaults
+    var musicEnabled: Bool {
+        // Retain the saved preference from the former Sound toggle.
+        get { preferences.object(forKey:"sound") as? Bool ?? true }
         set {
-            UserDefaults.standard.set(newValue,forKey:"sound")
+            preferences.set(newValue,forKey:"sound")
             if newValue { if musicRequested { startGameMusic() } }
-            else { stop() }
+            else { music.fadeOut() }
         }
     }
     var voices: Bool {
-        get { UserDefaults.standard.object(forKey:"hamsterVoices") as? Bool ?? true }
-        set { UserDefaults.standard.set(newValue,forKey:"hamsterVoices"); if !newValue { stopSamples() } }
+        get { preferences.object(forKey:"hamsterVoices") as? Bool ?? true }
+        set { preferences.set(newValue,forKey:"hamsterVoices"); if !newValue { stopEffects() } }
     }
     var haptics: Bool {
-        get { UserDefaults.standard.object(forKey:"haptics") as? Bool ?? true }
-        set { UserDefaults.standard.set(newValue,forKey:"haptics") }
+        get { preferences.object(forKey:"haptics") as? Bool ?? true }
+        set { preferences.set(newValue,forKey:"haptics") }
     }
-    private var players: [String:AVAudioPlayer] = [:]
+    private(set) var players: [String:AVAudioPlayer] = [:]
     private var samplePlayers: [HamsterSound:[AVAudioPlayer]] = [:]
     private var lastSample: [HamsterSound:Int] = [:]
     private var sampleQueue: [HamsterSound] = []
     private var sampleTask: Task<Void,Never>?
-    private var currentSample: AVAudioPlayer?
+    private(set) var currentSample: AVAudioPlayer?
     private var currentSound: HamsterSound?
-    private let music=GameMusic()
+    let music=GameMusic()
     private var musicRequested=false
-    private override init() {
+    init(preferences: UserDefaults = .standard) {
+        self.preferences=preferences
         super.init()
         try? AVAudioSession.sharedInstance().setCategory(.ambient,mode:.default,options:[.mixWithOthers])
         for name in ["turn","delivery","select","countdown","crawl","chirp","happy"] {
@@ -51,8 +54,7 @@ import UIKit
             else if name == "turn" { UIImpactFeedbackGenerator(style:.soft).impactOccurred() }
             else if name == "select" { UISelectionFeedbackGenerator().selectionChanged() }
         }
-        guard enabled,!UIAccessibility.isVoiceOverRunning,!ProcessInfo.processInfo.arguments.contains("--uitesting") else { return }
-        if ["chirp","happy"].contains(name),!voices { return }
+        guard voices,!UIAccessibility.isVoiceOverRunning,!ProcessInfo.processInfo.arguments.contains("--uitesting") else { return }
         try? AVAudioSession.sharedInstance().setActive(true)
         if let player=players[name] { player.currentTime=0; player.play() }
     }
@@ -63,7 +65,7 @@ import UIKit
         if haptics,!ProcessInfo.processInfo.arguments.contains("--uitesting"),sound == .win {
             UINotificationFeedbackGenerator().notificationOccurred(.success)
         }
-        guard enabled,voices,!UIAccessibility.isVoiceOverRunning,!ProcessInfo.processInfo.arguments.contains("--uitesting") else { return }
+        guard voices,!UIAccessibility.isVoiceOverRunning,!ProcessInfo.processInfo.arguments.contains("--uitesting") else { return }
         guard samplePlayers[sound]?.isEmpty == false else { return }
         if sound.isResult {
             sampleTask?.cancel(); sampleTask=nil
@@ -107,9 +109,13 @@ import UIKit
         sampleTask?.cancel(); sampleTask=nil
         sampleQueue.removeAll(); currentSample?.stop(); currentSample=nil; currentSound=nil
     }
+    private func stopEffects() {
+        stopSamples()
+        players.values.forEach { $0.stop() }
+    }
     func startGameMusic() {
         musicRequested=true
-        guard enabled,!UIAccessibility.isVoiceOverRunning,!ProcessInfo.processInfo.arguments.contains("--uitesting") else { return }
+        guard musicEnabled,!UIAccessibility.isVoiceOverRunning,!ProcessInfo.processInfo.arguments.contains("--uitesting") else { return }
         music.start()
     }
     func endGameMusic() {
@@ -118,7 +124,6 @@ import UIKit
     }
     func stop() {
         music.fadeOut()
-        stopSamples()
-        players.values.forEach { $0.stop() }
+        stopEffects()
     }
 }

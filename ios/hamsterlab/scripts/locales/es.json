@@ -30,5 +30,6 @@
   "error.oldVersion": "La partida se creó con una versión anterior. Actualiza el juego en ambos dispositivos y crea una sala nueva.",
   "error.occupied": "Esta partida ya está abierta en otro dispositivo. Sigue jugando allí.",
   "error.connectFailed": "No se pudo conectar. Intenta unirte de nuevo.",
-  "native.invalidCode": "Introduce un código de sala o un enlace de invitación de HamsterLab válido."
+  "native.invalidCode": "Introduce un código de sala o un enlace de invitación de HamsterLab válido.",
+  "sound.label": "Música"
 }
