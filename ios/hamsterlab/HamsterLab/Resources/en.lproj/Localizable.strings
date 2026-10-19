@@ -114,10 +114,6 @@
 "native.back" = "Back";
 
 "lab.tagline" = "Help the hamsters find their way home!";
-"lab.voices" = "Hamster chatter & narration";
-"lab.welcome" = "Welcome to HamsterLab! Let’s bring our tiny friends home.";
-"lab.begin" = "Paws ready? Let’s explore!";
-"lab.win" = "Squeak hooray! What a clever scientist!";
-"lab.finish" = "A lovely experiment! Shall we try again?";
+"lab.voices" = "Hamster voices";
 "lab.experiment" = "EXPERIMENT 01";
 "lab.collection" = "Hamsters home";

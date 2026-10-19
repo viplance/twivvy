@@ -30,8 +30,7 @@
     "hamsterlab:test": "pnpm run hamsterlab:generate && xcodebuild -project ios/hamsterlab/HamsterLab.xcodeproj -scheme HamsterLab -destination \"${HAMSTERLAB_DESTINATION:-platform=iOS Simulator,name=iPhone 16 Pro Max,OS=18.6}\" -derivedDataPath ios/hamsterlab/build/DerivedData -parallel-testing-enabled NO test",
     "hamsterlab:release": "bash ios/hamsterlab/scripts/release.sh",
     "hamsterlab:upload": "bash ios/hamsterlab/scripts/release.sh --upload",
-    "hamsterlab:validate-locales": "node ios/hamsterlab/scripts/validate-locales.mjs",
-    "hamsterlab:narration": "python3 ios/hamsterlab/scripts/generate-narration.py"
+    "hamsterlab:validate-locales": "node ios/hamsterlab/scripts/validate-locales.mjs"
   },
   "dependencies": {
     "three": "0.169.0",

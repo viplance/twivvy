@@ -114,10 +114,6 @@
 "native.back" = "Geri";
 
 "lab.tagline" = "Hamsterların evlerinin yolunu bulmasına yardım et!";
-"lab.voices" = "Hamster sesleri ve sesli ipuçları";
-"lab.welcome" = "HamsterLab’e hoş geldin! Minik dostlarımızı evlerine götürelim!";
-"lab.begin" = "Patiler hazır mı? Keşfe çıkalım!";
-"lab.win" = "Cik cik, yaşasın! Ne akıllıca bir fikir!";
-"lab.finish" = "Harika bir deneydi! Bir daha deneyelim mi?";
+"lab.voices" = "Hamster sesleri";
 "lab.experiment" = "DENEY 01";
 "lab.collection" = "Eve ulaşan hamsterlar";

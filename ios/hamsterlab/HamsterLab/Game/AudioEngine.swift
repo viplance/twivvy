@@ -1,7 +1,7 @@
 import AVFoundation
 import UIKit
 
-@MainActor final class AudioEngine: NSObject, AVSpeechSynthesizerDelegate {
+@MainActor final class AudioEngine: NSObject {
     static let shared = AudioEngine()
     var enabled: Bool {
         get { UserDefaults.standard.object(forKey:"sound") as? Bool ?? true }
@@ -13,15 +13,13 @@ import UIKit
     }
     var voices: Bool {
         get { UserDefaults.standard.object(forKey:"hamsterVoices") as? Bool ?? true }
-        set { UserDefaults.standard.set(newValue,forKey:"hamsterVoices"); if !newValue { speech.stopSpeaking(at:.immediate); narrationPlayer?.stop(); stopSamples() } }
+        set { UserDefaults.standard.set(newValue,forKey:"hamsterVoices"); if !newValue { stopSamples() } }
     }
     var haptics: Bool {
         get { UserDefaults.standard.object(forKey:"haptics") as? Bool ?? true }
         set { UserDefaults.standard.set(newValue,forKey:"haptics") }
     }
     private var players: [String:AVAudioPlayer] = [:]
-    private let speech=AVSpeechSynthesizer()
-    private var narrationPlayer: AVAudioPlayer?
     private var samplePlayers: [HamsterSound:[AVAudioPlayer]] = [:]
     private var lastSample: [HamsterSound:Int] = [:]
     private var sampleQueue: [HamsterSound] = []
@@ -71,7 +69,6 @@ import UIKit
             sampleTask?.cancel(); sampleTask=nil
             currentSample?.stop(); currentSample=nil; currentSound=nil
             sampleQueue.removeAll()
-            speech.stopSpeaking(at:.immediate); narrationPlayer?.stop()
         }
         if sampleQueue.last != sound { sampleQueue.append(sound) }
         startSampleQueue()
@@ -106,21 +103,6 @@ import UIKit
         currentSample?.stop(); currentSample=nil; currentSound=nil
         startSampleQueue()
     }
-    func say(_ prompt: NarrationPrompt) {
-        guard enabled,voices,!UIAccessibility.isVoiceOverRunning,!ProcessInfo.processInfo.arguments.contains("--uitesting") else { return }
-        speech.stopSpeaking(at:.immediate); narrationPlayer?.stop()
-        let language=NarrationCatalog.language(for:Bundle.main.preferredLocalizations.first ?? "en")
-        let available=AVSpeechSynthesisVoice.speechVoices()
-        let voiceLanguage=NarrationCatalog.preferredVoiceLanguage(for:language,available:available.map(\.language))
-        if let voiceLanguage,let voice=available.filter({ $0.language==voiceLanguage }).max(by:{ $0.quality.rawValue < $1.quality.rawValue }) {
-            let line=AVSpeechUtterance(string:NarrationCatalog.text(for:prompt,language:language))
-            line.voice=voice; line.rate=0.48; line.pitchMultiplier=1.28; line.volume=0.68
-            speech.speak(line)
-        } else if let url=NarrationCatalog.audioURL(for:prompt,language:language),let player=try? AVAudioPlayer(contentsOf:url) {
-            try? AVAudioSession.sharedInstance().setActive(true)
-            narrationPlayer=player; player.volume=0.68; player.play()
-        }
-    }
     private func stopSamples() {
         sampleTask?.cancel(); sampleTask=nil
         sampleQueue.removeAll(); currentSample?.stop(); currentSample=nil; currentSound=nil
@@ -138,6 +120,5 @@ import UIKit
         music.fadeOut()
         stopSamples()
         players.values.forEach { $0.stop() }
-        speech.stopSpeaking(at:.immediate); narrationPlayer?.stop()
     }
 }

@@ -26,10 +26,10 @@ The static menu no longer creates or subscribes an animated 3D showcase.
 | iPhone UI | All four scenarios passed: local code validation, Russian menu/settings, training/gesture/reveal/rotation/exit, complete training match and rematch |
 | iPad UI | Three scenarios passed: local code validation, Russian menu/settings, training/gesture/reveal/rotation/exit |
 | Rematch | Final targeted run passes; simulator autopilot is limited to its original match generation |
-| Resource package | Eight original WAV effects, 44 localized AAC narration clips, bridge, privacy manifest, eleven locale folders and original opaque 1024px icon included |
-| Complete localization | All eleven languages have 120 UI keys each, including the single-phrase homecoming slogan; HamsterLab-specific copy, rules and privacy translated; placeholders and localized display names validated; connection errors use app/device wording instead of browser tabs/pages |
-| Narration resources | All 44 clips decode from the compiled app; source text/audio SHA-256 fingerprints match; same-language voice selection and regional normalization pass |
-| Localization tests | Two native tests passed; Russian menu/settings and Belarusian/German/Turkish training/voice-settings UI scenarios passed on iPhone |
+| Resource package | WAV effects, eighteen MP3 event samples, three MP3 music tracks, bridge, privacy manifest, eleven locale folders and original opaque 1024px icon included |
+| Complete localization | All eleven languages have 116 UI keys each, including the single-phrase homecoming slogan; HamsterLab-specific copy, rules and privacy translated; placeholders and localized display names validated; connection errors use app/device wording instead of browser tabs/pages |
+| Speech removal | System speech synthesis, all 44 synthesized recordings and their generation tooling removed; vocal audio uses supplied MP3 samples |
+| Localization tests | Complete bundled text checked for all eleven languages; Belarusian/German/Turkish training/voice-settings UI scenarios cover the sample-only voice labels |
 | Optimized rendering | Twelve-hamster workload reduced from 3,334 to 805 models; approximately 60 scene updates/second; full state refresh approximately 24 ms |
 | Final performance UI checks | All five scenarios passed, including complete game/rematch; final host-lifecycle run also passed Russian menu and training/gesture/orientation/exit |
 | Metadata / scripts | Draft field lengths, unique localization keys, plist syntax and release script syntax checked |
@@ -96,6 +96,13 @@ A real-player test verifies the 0.3-second fade, silence after completion,
 cancelling an old fade on resume, and choosing a different track on restart.
 Result sample playback awaits the music fade; all match endings, including
 draws, fade the music even when vocal samples are disabled.
+
+Speech synthesis was subsequently removed entirely.
+`/tmp/hamsterlab-no-speech.xcresult` passed six audio tests, one complete-text
+localization test and the Belarusian/German/Turkish voice-settings UI scenario.
+The built app contains all 21 supplied MP3s and zero synthesized narration
+recordings. Locale validation passes 116 keys in each of eleven languages.
+Earlier narration test reports below describe the former implementation.
 
 `/tmp/hamsterlab-result-scroll.xcresult` passed the complete-match/rematch UI
 scenario with an explicit visibility check: the result heading, rematch button

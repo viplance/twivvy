@@ -114,10 +114,6 @@
 "native.back" = "Wstecz";
 
 "lab.tagline" = "Pomóż chomikom znaleźć drogę do domu!";
-"lab.voices" = "Głosy chomików i wskazówki głosowe";
-"lab.welcome" = "Witaj w HamsterLab! Zaprowadźmy naszych małych przyjaciół do domu!";
-"lab.begin" = "Łapki gotowe? Ruszamy na odkrycia!";
-"lab.win" = "Pisk, hurra! Ale sprytny pomysł!";
-"lab.finish" = "Świetny eksperyment! Spróbujemy jeszcze raz?";
+"lab.voices" = "Głosy chomików";
 "lab.experiment" = "EKSPERYMENT 01";
 "lab.collection" = "Chomiki w domku";

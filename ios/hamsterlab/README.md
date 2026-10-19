@@ -155,28 +155,21 @@ the previous one. Music gain is `0.7 × 10^(-6/20)` (approximately 0.351),
 match end, on exit, pause or backgrounding, and when Sound is disabled.
 Victory/defeat playback waits until that fade completes; draws also stop music.
 Returning to an active game or re-enabling Sound resumes music. The voice toggle
-controls vocal samples and narration independently of background music.
+controls vocal samples independently of background music.
 
-All eleven Twivvy languages have translated HamsterLab interface copy, rules,
-privacy text and four spoken prompts: English, Belarusian, Spanish, Russian,
-Ukrainian, Italian, Portuguese, Polish, French, German and Turkish.
-
-Narration uses an installed system voice matching the app language, preferring
-the European Portuguese voice for `pt`. If no matching voice is installed, it
-plays the corresponding bundled AAC clip. All 44 fallback clips are included and
-work offline, including Belarusian. Fallback clips use eSpeak NG and have a
-synthetic timbre; system voice quality depends on the device. Narration respects
-sound/voice toggles and yields to VoiceOver. No microphone access is required.
+All eleven Twivvy languages have translated HamsterLab interface copy, rules
+and privacy text: English, Belarusian, Spanish, Russian, Ukrainian, Italian,
+Portuguese, Polish, French, German and Turkish. There is no speech synthesis or
+pre-generated spoken narration. Character voices use only the supplied MP3
+samples; no microphone access is required.
 
 `scripts/locales/*.json` contains the HamsterLab-specific translations.
 `scripts/hamster-locales.mjs` applies them after syncing shared controls.
-Every sync validates complete key sets, nonempty strings, placeholders, display
-names and narration text/audio fingerprints. Changing spoken text requires
-regenerating its audio before building. See [scripts/NARRATION.md](scripts/NARRATION.md).
+Every sync validates complete key sets, nonempty strings, placeholders and display
+names.
 
 ```sh
 pnpm hamsterlab:validate-locales
-ESPEAK_NG=/path/to/espeak-ng pnpm hamsterlab:narration
 pnpm hamsterlab:generate
 ```
 

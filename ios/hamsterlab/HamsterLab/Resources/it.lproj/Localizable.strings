@@ -114,10 +114,6 @@
 "native.back" = "Indietro";
 
 "lab.tagline" = "Aiuta i criceti a trovare la strada di casa!";
-"lab.voices" = "Vocine dei criceti e suggerimenti vocali";
-"lab.welcome" = "Benvenuti in HamsterLab! Accompagniamo a casa i nostri piccoli amici!";
-"lab.begin" = "Zampette pronte? Esploriamo!";
-"lab.win" = "Squitt, evviva! Che bella trovata!";
-"lab.finish" = "Un bell’esperimento! Ci riproviamo?";
+"lab.voices" = "Vocine dei criceti";
 "lab.experiment" = "ESPERIMENTO 01";
 "lab.collection" = "Criceti a casa";

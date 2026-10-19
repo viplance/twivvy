@@ -114,10 +114,6 @@
 "native.back" = "Retour";
 
 "lab.tagline" = "Aide les hamsters à retrouver le chemin de leur maison !";
-"lab.voices" = "Petits cris et conseils vocaux";
-"lab.welcome" = "Bienvenue dans HamsterLab ! Ramenons nos petits amis chez eux !";
-"lab.begin" = "Les pattes sont prêtes ? Explorons !";
-"lab.win" = "Couic, hourra ! Quelle belle idée !";
-"lab.finish" = "Une belle expérience ! On réessaie ?";
+"lab.voices" = "Petits cris des hamsters";
 "lab.experiment" = "EXPÉRIENCE 01";
 "lab.collection" = "Hamsters à la maison";

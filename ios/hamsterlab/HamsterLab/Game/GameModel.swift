@@ -82,7 +82,6 @@ import SwiftUI
         board = BoardState(map: Int.random(in: 0..<3)); screen = .game
         boardScene.render(board, side: side)
         beginTrainingRound()
-        AudioEngine.shared.say(.welcome)
         // Advisory presence only. Offline training never depends on this request.
         guard !ProcessInfo.processInfo.arguments.contains("--uitesting") else { return }
         presenceTask = Task { [weak self] in
@@ -253,7 +252,7 @@ import SwiftUI
             remaining = data["remaining"] as? Double ?? remaining
             if type == "started" {
                 thinkingSound=ThinkingSoundSchedule()
-                AudioEngine.shared.say(.begin); resultReason = nil; rematchRequested = false; peerRematch = false
+                resultReason = nil; rematchRequested = false; peerRematch = false
             }
             screen = .game
             active = type == "active" && (data["active"] as? Bool ?? false)

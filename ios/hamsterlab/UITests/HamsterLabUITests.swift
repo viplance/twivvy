@@ -136,9 +136,9 @@ final class HamsterLabUITests: XCTestCase {
     }
     @MainActor func testTranslatedTrainingAndVoiceSettings() {
         let cases = [
-            ("be", "Павярні платформу рухам пальца. Праводзь хамякоў у свой домік унізе.", "Хамячыныя галасы і падказкі"),
-            ("de", "Ziehe an einer Plattform, um die Röhren zu drehen. Führe die Hamster in dein Häuschen unten.", "Hamsterstimmen und Sprachhinweise"),
-            ("tr", "Boruları döndürmek için bir platformu sürükle. Hamsterları aşağıdaki evine götür.", "Hamster sesleri ve sesli ipuçları")
+            ("be", "Павярні платформу рухам пальца. Праводзь хамякоў у свой домік унізе.", "Хамячыныя галасы"),
+            ("de", "Ziehe an einer Plattform, um die Röhren zu drehen. Führe die Hamster in dein Häuschen unten.", "Hamsterstimmen"),
+            ("tr", "Boruları döndürmek için bir platformu sürükle. Hamsterları aşağıdaki evine götür.", "Hamster sesleri")
         ]
         for (language, hint, voices) in cases {
             let app = XCUIApplication()
