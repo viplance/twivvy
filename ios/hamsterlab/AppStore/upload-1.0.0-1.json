@@ -1,0 +1,17 @@
+{
+  "appStoreConnectId": "6824583582",
+  "bundleId": "com.enotix.hamsterlab",
+  "version": "1.0.0",
+  "build": "1",
+  "uploadedAt": "2026-10-19T16:44:09Z",
+  "uploadStatus": "succeeded",
+  "lastObservedPackageStatus": "processing",
+  "submittedForAppReview": false,
+  "archive": "ios/hamsterlab/build/HamsterLab.xcarchive",
+  "exportedIpa": "ios/hamsterlab/build/AppStore/HamsterLab.ipa",
+  "confirmation": [
+    "Upload succeeded.",
+    "Uploaded HamsterLab",
+    "EXPORT SUCCEEDED"
+  ]
+}
