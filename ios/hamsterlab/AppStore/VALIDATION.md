@@ -73,6 +73,14 @@ a character is now exactly 75% along the route. Arrival, renderer-driven round
 completion, immediate online state updates and portrait/landscape interaction
 remain covered. The offline and bundled bridge round waits are both 1450 ms.
 
+Blocked hamsters now turn over the existing crossing interval, gathering their
+bodies and alternating paw steps. `/tmp/hamsterlab-turnaround.xcresult` passed
+two tests covering frame-to-frame orientation continuity and sampled mesh
+clearance in all six tube shapes, both exits and both turn directions.
+`/tmp/hamsterlab-turnaround-visual.xcresult` passed the rendered elbow/turn
+inspection and the portrait/landscape training UI scenario. Start, midpoint
+and final turn screenshots were inspected; the round duration is unchanged.
+
 `/tmp/hamsterlab-result-scroll.xcresult` passed the complete-match/rematch UI
 scenario with an explicit visibility check: the result heading, rematch button
 and new-game button are all on screen without a manual swipe. The result card

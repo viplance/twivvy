@@ -85,6 +85,18 @@ final class HamsterCharacterTests: XCTestCase {
             let attachment=XCTAttachment(image:try XCTUnwrap(snapshot))
             attachment.name="glass-elbow-\(step)"; attachment.lifetime = .keepAlways; add(attachment)
         }
+        for step in 0...4 {
+            let progress=Float(step)/4
+            rig.turnAround(progress:progress,time:Double(progress),
+                from:{ source.fromMidpoint(toward:1,distance:$0) },
+                to:{ source.fromMidpoint(toward:0,distance:$0) })
+            try await Task.sleep(for:.milliseconds(250))
+            let snapshot: UIImage? = await withCheckedContinuation { continuation in
+                renderer.snapshot(saveToHDR:false) { continuation.resume(returning:$0) }
+            }
+            let attachment=XCTAttachment(image:try XCTUnwrap(snapshot))
+            attachment.name="glass-turn-\(step)"; attachment.lifetime = .keepAlways; add(attachment)
+        }
     }
     @MainActor func testRepeatedSqueezesRestoreEveryArticulationAndKeepValidRotations() throws {
         let rig = HamsterRig(id: 4)

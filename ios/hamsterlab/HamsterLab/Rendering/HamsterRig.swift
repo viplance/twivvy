@@ -203,6 +203,41 @@ enum HamsterMotion {
         head.orientation = simd_quatf(angle:atan2(-localDirection.x,-localDirection.z),axis:[0,1,0]) * headTilt
         for whisker in whiskers { whisker.scale.x = 1-bend*0.18 }
     }
+    /// A blocked hamster gathers its body, takes small alternating steps and
+    /// turns in the bore. Sample both fitted poses so elbows stay continuous
+    /// with the resting pose before and after the turn.
+    func turnAround(progress: Float, time: Double,
+                    from: (Float) -> SIMD3<Float>, to: (Float) -> SIMD3<Float>) {
+        let t=max(0,min(1,progress))
+        rest(time:time); followTube(from)
+        let startRoot=root.transform, startBody=body.transform, startHead=head.transform
+        rest(time:time); followTube(to)
+        let endBody=body.transform, endHead=head.transform
+        guard !UIAccessibility.isReduceMotionEnabled else { return }
+        clearTubeFit()
+        let turn=max(0,min(1,(t-0.08)/0.84))
+        let ease=turn*turn*(3-2*turn)
+        let tuck=sin(t * .pi)
+        let direction: Float=seed%2 == 0 ? 1 : -1
+        root.position=startRoot.translation
+        root.orientation=startRoot.rotation * simd_quatf(angle:direction * .pi * ease,axis:[0,1,0])
+        body.position=simd_mix(startBody.translation,endBody.translation,.init(repeating:ease))
+        body.orientation=simd_quatf(angle:sin(t * .pi * 4)*0.035*tuck,axis:[0,0,1])
+        body.scale=simd_mix(startBody.scale,endBody.scale,.init(repeating:ease)) * SIMD3<Float>(1-0.08*tuck,1-0.10*tuck,1-0.42*tuck)
+        head.position=simd_mix(startHead.translation,endHead.translation,.init(repeating:ease))
+        head.orientation=simd_slerp(startHead.rotation,endHead.rotation,ease)
+            * simd_quatf(angle:direction*sin(t * .pi * 2)*0.18,axis:[0,1,0])
+        for (i,paw) in paws.enumerated() {
+            let phase=t * .pi * 6 + (i%2 == 0 ? 0 : .pi)
+            paw.position.y = -0.091 + max(0,sin(phase))*0.018*tuck
+            paw.position.z = (i<2 ? -0.107 : 0.137) + cos(phase)*0.012*tuck
+            paw.orientation=simd_quatf(angle:sin(phase)*0.28*tuck,axis:[1,0,0])
+        }
+        for whisker in whiskers { whisker.scale.x *= 1-0.2*tuck }
+        expression(time:time,effort:tuck*0.35)
+        // Restore the neutral limbs on the next rest/crawl frame.
+        isCrawling=true
+    }
     private func clearTubeFit() {
         body.scale /= tubeScaleApplied
         tubeScaleApplied = .one

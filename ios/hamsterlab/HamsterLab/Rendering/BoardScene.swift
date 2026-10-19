@@ -434,6 +434,10 @@ import simd
                     let squeeze=max(0,1-abs(t-0.5)*4)
                     hamster.crawl(progress:t,time:clock,squeeze:squeeze)
                     hamster.followTube { source.travel(to:destination,exit:origin.exit,progress:t,offset:$0) }
+                } else if origin.exit != ball.exit {
+                    hamster.turnAround(progress:t,time:clock,
+                        from:{ source.fromMidpoint(toward:origin.exit,distance:$0) },
+                        to:{ source.fromMidpoint(toward:ball.exit,distance:$0) })
                 } else {
                     hamster.rest(time:clock); pose(hamster,ball:ball,state:transition.after)
                 }

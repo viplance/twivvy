@@ -5,6 +5,66 @@ import simd
 @testable import HamsterLab
 
 final class LaboratoryTests: XCTestCase {
+    @MainActor func testBlockedHamsterTurnsContinuouslyBeforeSettling() throws {
+        var before=BoardState(); before.tick=2
+        before.cells[2][2]=10; before.cells[2][3]=5
+        before.balls=[Ball(id:1,row:2,col:2,exit:1)]
+        var after=before
+        let turn=Rules.resolve(&after,top:nil,bottom:nil)
+        XCTAssertEqual(after.balls.first?.exit,3)
+        let scene=BoardScene(); scene.render(before,side:.bottom)
+        let rig=try XCTUnwrap(scene.hamsters[1])
+        let start=rig.root.orientation(relativeTo:scene.world)
+        scene.animate(before:before,after:after,turn:turn,side:.bottom)
+        scene.update(delta:HamsterMotion.rotationDuration)
+        XCTAssertGreaterThan(abs(simd_dot(start.vector,rig.root.orientation.vector)),0.9999)
+        var previous=rig.root.orientation
+        for _ in 0..<60 {
+            scene.update(delta:HamsterMotion.crossingDuration/60)
+            let current=rig.root.orientation(relativeTo:scene.world)
+            XCTAssertGreaterThan(abs(simd_dot(previous.vector,current.vector)),0.998,"No frame may snap to the opposite direction")
+            previous=current
+        }
+        XCTAssertLessThan(abs(simd_dot(start.vector,previous.vector)),0.001)
+        scene.update(delta:0.03)
+        XCTAssertFalse(scene.isAnimating)
+        XCTAssertGreaterThan(abs(simd_dot(previous.vector,rig.root.orientation(relativeTo:scene.world).vector)),0.9999)
+    }
+    @MainActor func testTurningCharacterFitsStraightAndCurvedTubes() {
+        for id in [0,1] {
+            let rig=HamsterRig(id:id)
+            func surfaces(_ entity: Entity) -> [(Entity,[SIMD3<Float>])] {
+                var result: [(Entity,[SIMD3<Float>])] = []
+                if let model=entity as? ModelEntity,let mesh=model.model?.mesh {
+                    let points=mesh.contents.models.flatMap { $0.parts.flatMap { Array($0.positions) } }
+                    result.append((entity,stride(from:0,to:points.count,by:4).map { points[$0] }))
+                }
+                return result+entity.children.flatMap { surfaces($0) }
+            }
+            let vertices=surfaces(rig.root)
+            for mask in [3,5,6,9,10,12] {
+                let path=TubePath(center:[0,TubePath.height,0],mask:mask), distance=boreDistance(path)
+                for exit in path.ports {
+                    let other=path.ports.first { $0 != exit }!
+                    for step in 0...30 {
+                        let t=Float(step)/30
+                        rig.turnAround(progress:t,time:Double(t),
+                            from:{ path.fromMidpoint(toward:exit,distance:$0) },
+                            to:{ path.fromMidpoint(toward:other,distance:$0) })
+                        var worst: Float=0
+                        for (entity,points) in vertices {
+                            let transform=entity.transformMatrix(relativeTo:nil)
+                            for point in points {
+                                let p=transform*SIMD4<Float>(point,1)
+                                worst=max(worst,distance([p.x,p.y,p.z]))
+                            }
+                        }
+                        XCTAssertLessThanOrEqual(worst,TubePath.radius-TubePath.wall,"Turn id \(id), mask \(mask), exit \(exit), t \(t)")
+                    }
+                }
+            }
+        }
+    }
     @MainActor func testTraversalRunsAtThreeQuartersOfTheOriginalSpeed() throws {
         var before=BoardState(); before.tick=2
         before.cells[2][2]=10; before.cells[2][3]=10
