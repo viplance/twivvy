@@ -81,6 +81,22 @@ clearance in all six tube shapes, both exits and both turn directions.
 inspection and the portrait/landscape training UI scenario. Start, midpoint
 and final turn screenshots were inspected; the round duration is unchanged.
 
+The supplied MP3 event bank is covered by `/tmp/hamsterlab-mp3-final.xcresult`:
+six native tests and a complete-match/rematch UI test passed. All eighteen
+bundled files decode and prepare for playback. Receiver cues are checked for
+both player sides, draws emit neither victory nor defeat, thinking reactions
+have 7–15-round intervals with one cue per selected round, and tube/home
+reversals emit one event rather than repeating it each frame. UI tests mute
+playback without changing the user's sound preference.
+
+`/tmp/hamsterlab-music-checked.xcresult` passed all six audio tests after
+adding background music. All three music tracks decode and prepare for playback.
+The player gain is checked against the event gain for an exact -6 dB difference.
+A real-player test verifies the 0.3-second fade, silence after completion,
+cancelling an old fade on resume, and choosing a different track on restart.
+Result sample playback awaits the music fade; all match endings, including
+draws, fade the music even when vocal samples are disabled.
+
 `/tmp/hamsterlab-result-scroll.xcresult` passed the complete-match/rematch UI
 scenario with an explicit visibility check: the result heading, rematch button
 and new-game button are all on screen without a manual swipe. The result card

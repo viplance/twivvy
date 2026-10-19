@@ -17,6 +17,7 @@
 		1CAB467F9D3F2B2B8F9F56F8 /* hamster-head-0.png in Resources */ = {isa = PBXBuildFile; fileRef = 5C536D1A45BBA9C2683CCD44 /* hamster-head-0.png */; };
 		2502DD62B284DC519E8625EB /* BridgeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 181AB47416A2B5C12A8C368D /* BridgeTests.swift */; };
 		26E62D2842341C14FAB8977B /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = A73CEBD6E1732E422684A3BF /* Localizable.strings */; };
+		3097B29D65366E40D94DBAFE /* AudioTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DB7A03492AD0177D3801269 /* AudioTests.swift */; };
 		38D173777B2E8D65CFD35780 /* HamsterCharacterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A86E186BB11EDF4DB9027BB /* HamsterCharacterTests.swift */; };
 		3AC4C505E820F87F4C3A7B4B /* narration-win.m4a in Resources */ = {isa = PBXBuildFile; fileRef = 4A0B6C281CF32CA2A9EED4F3 /* narration-win.m4a */; };
 		3AF5A086385D5FE793371479 /* hamster-torso-2.png in Resources */ = {isa = PBXBuildFile; fileRef = 6CED551FE12670AB21A1B659 /* hamster-torso-2.png */; };
@@ -28,14 +29,17 @@
 		49B83F12162DD2E1B3C25BFD /* RulesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 756D0BCD48C15089448924A6 /* RulesTests.swift */; };
 		506B0C976A2C2C4A03AD49EE /* LocalizationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C1F80BEC9071E4D6A5E5B96 /* LocalizationTests.swift */; };
 		551172C07277A1B70DF215E7 /* hamster-torso-4.png in Resources */ = {isa = PBXBuildFile; fileRef = A1D10F6BF39E69D883F75564 /* hamster-torso-4.png */; };
+		5E3F0C49028905E259CCF15D /* sound in Resources */ = {isa = PBXBuildFile; fileRef = 27DC56285872AEAC634314EC /* sound */; };
 		6452F69B45C99DDA2743E8BC /* hamster-head-3.png in Resources */ = {isa = PBXBuildFile; fileRef = DB8FF60FD7D751901E88AA37 /* hamster-head-3.png */; };
 		648888100EA347B20C6991B0 /* hamster-torso-3.png in Resources */ = {isa = PBXBuildFile; fileRef = 8ECEDAB375EA3BB3235FDD6D /* hamster-torso-3.png */; };
 		661F7D4286391D883E2E478C /* BoardScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 321A75BEA874131BEA395A02 /* BoardScene.swift */; };
 		68FA1D81A338122B44D6962A /* win.wav in Resources */ = {isa = PBXBuildFile; fileRef = C8C5E4E8930A70295CBC4F58 /* win.wav */; };
 		6C994A9C5C28A1AFA4742717 /* GameModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A3D560FBF469C38FB214455 /* GameModel.swift */; };
+		77ECD42225014E5EA3DF9601 /* GameSounds.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24637164277B793E5E070DC5 /* GameSounds.swift */; };
 		84CB598479C67F709344C916 /* Rules.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE7B0376FD43A4CD086E3E90 /* Rules.swift */; };
 		8DD32D4B7EA1C02A0AAD2025 /* HamsterRig.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC6D879F77520368FADC6721 /* HamsterRig.swift */; };
 		8EBB50B633B63D65026A0E31 /* OnlineBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A07C2307953E456A943466F /* OnlineBridge.swift */; };
+		9901710C8840CD2C9D1EE371 /* GameMusic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5884C236A4B1E2447FB49FA3 /* GameMusic.swift */; };
 		998C4F69148A75A83860F5F5 /* crawl.wav in Resources */ = {isa = PBXBuildFile; fileRef = 290BBBEDA8A8CC4175B00EA9 /* crawl.wav */; };
 		9BFB0D6985981068A396E6A8 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E16B18C4A3507270F87EA54E /* ContentView.swift */; };
 		9EA5F8858528B27FD3068911 /* delivery.wav in Resources */ = {isa = PBXBuildFile; fileRef = 2EF0CEE5800B0DFF5FB68E4B /* delivery.wav */; };
@@ -102,6 +106,8 @@
 		214286D6167F91FE0636874C /* HamsterLabApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HamsterLabApp.swift; sourceTree = "<group>"; };
 		2180FFF4F6B9BC2AE454BF7D /* be */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = be; path = be.lproj/Localizable.strings; sourceTree = "<group>"; };
 		21E60A8A705D69CFDB20684F /* it */ = {isa = PBXFileReference; name = it; path = "it.lproj/narration-win.m4a"; sourceTree = "<group>"; };
+		24637164277B793E5E070DC5 /* GameSounds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameSounds.swift; sourceTree = "<group>"; };
+		27DC56285872AEAC634314EC /* sound */ = {isa = PBXFileReference; lastKnownFileType = folder; path = sound; sourceTree = SOURCE_ROOT; };
 		290BBBEDA8A8CC4175B00EA9 /* crawl.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = crawl.wav; sourceTree = "<group>"; };
 		2AC4A2CBF7509B66A73044EA /* be */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = be; path = be.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		2B3E24D245C645B8547E6253 /* AudioEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioEngine.swift; sourceTree = "<group>"; };
@@ -121,6 +127,7 @@
 		4F48F4297234159E7647C9A8 /* uk */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = uk; path = uk.lproj/Localizable.strings; sourceTree = "<group>"; };
 		51F70AC5C4939A9D2EFF8415 /* uk */ = {isa = PBXFileReference; name = uk; path = "uk.lproj/narration-begin.m4a"; sourceTree = "<group>"; };
 		527A8D807D00C4F31C000C5B /* tr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = tr; path = tr.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		5884C236A4B1E2447FB49FA3 /* GameMusic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameMusic.swift; sourceTree = "<group>"; };
 		5B6CF7EF66158E3DF9DAD992 /* hamster-head-4.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "hamster-head-4.png"; sourceTree = "<group>"; };
 		5C536D1A45BBA9C2683CCD44 /* hamster-head-0.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "hamster-head-0.png"; sourceTree = "<group>"; };
 		5CBD27E1211885E8E62FE9AC /* LabGeometry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabGeometry.swift; sourceTree = "<group>"; };
@@ -146,6 +153,7 @@
 		86ABE1515B45AA96E32E70BB /* HamsterLabUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HamsterLabUITests.swift; sourceTree = "<group>"; };
 		86D5BB95A2CCC698ADB1456F /* pl */ = {isa = PBXFileReference; name = pl; path = "pl.lproj/narration-finish.m4a"; sourceTree = "<group>"; };
 		8A93F5EB63EA54FA02D6ABAA /* uk */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = uk; path = uk.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		8DB7A03492AD0177D3801269 /* AudioTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioTests.swift; sourceTree = "<group>"; };
 		8ECEDAB375EA3BB3235FDD6D /* hamster-torso-3.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "hamster-torso-3.png"; sourceTree = "<group>"; };
 		90D044F083FC4644D0758411 /* ru */ = {isa = PBXFileReference; name = ru; path = "ru.lproj/narration-begin.m4a"; sourceTree = "<group>"; };
 		90E1A32D102FED17297A2404 /* tr */ = {isa = PBXFileReference; name = tr; path = "tr.lproj/narration-win.m4a"; sourceTree = "<group>"; };
@@ -236,6 +244,7 @@
 		3F28B3421FA1EC9C2E98D704 /* Tests */ = {
 			isa = PBXGroup;
 			children = (
+				8DB7A03492AD0177D3801269 /* AudioTests.swift */,
 				181AB47416A2B5C12A8C368D /* BridgeTests.swift */,
 				0A86E186BB11EDF4DB9027BB /* HamsterCharacterTests.swift */,
 				1A7F633FA1ED265295A0F5CC /* LaboratoryTests.swift */,
@@ -250,6 +259,7 @@
 		4A91BA9C79ABC7F8C38B31D1 = {
 			isa = PBXGroup;
 			children = (
+				27DC56285872AEAC634314EC /* sound */,
 				374AEAA9C7AFA2CAE00D002F /* HamsterLab */,
 				E545EDA7BF831FDDA4BF3904 /* ios */,
 				3F28B3421FA1EC9C2E98D704 /* Tests */,
@@ -301,6 +311,8 @@
 			children = (
 				2B3E24D245C645B8547E6253 /* AudioEngine.swift */,
 				7A3D560FBF469C38FB214455 /* GameModel.swift */,
+				5884C236A4B1E2447FB49FA3 /* GameMusic.swift */,
+				24637164277B793E5E070DC5 /* GameSounds.swift */,
 				373A6FC722489B0D85DC248A /* NarrationCatalog.swift */,
 			);
 			path = Game;
@@ -546,6 +558,7 @@
 				E6BA245E72620C64DBFF1C57 /* narration-welcome.m4a in Resources */,
 				3AC4C505E820F87F4C3A7B4B /* narration-win.m4a in Resources */,
 				11466255F699EDADB56C2968 /* select.wav in Resources */,
+				5E3F0C49028905E259CCF15D /* sound in Resources */,
 				A061D47531BC70543944B09E /* turn.wav in Resources */,
 				68FA1D81A338122B44D6962A /* win.wav in Resources */,
 			);
@@ -566,6 +579,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3097B29D65366E40D94DBAFE /* AudioTests.swift in Sources */,
 				2502DD62B284DC519E8625EB /* BridgeTests.swift in Sources */,
 				38D173777B2E8D65CFD35780 /* HamsterCharacterTests.swift in Sources */,
 				4178D01740B0D8D111DF3E44 /* LaboratoryTests.swift in Sources */,
@@ -584,6 +598,8 @@
 				199B71718F2850B3EEC2BE16 /* Bot.swift in Sources */,
 				9BFB0D6985981068A396E6A8 /* ContentView.swift in Sources */,
 				6C994A9C5C28A1AFA4742717 /* GameModel.swift in Sources */,
+				9901710C8840CD2C9D1EE371 /* GameMusic.swift in Sources */,
+				77ECD42225014E5EA3DF9601 /* GameSounds.swift in Sources */,
 				9EE6CE127B3E11129244F9F5 /* HamsterLabApp.swift in Sources */,
 				8DD32D4B7EA1C02A0AAD2025 /* HamsterRig.swift in Sources */,
 				442AA19978A9DACA75ABBE8C /* HamsterSculpt.swift in Sources */,

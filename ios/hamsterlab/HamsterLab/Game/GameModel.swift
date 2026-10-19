@@ -34,6 +34,8 @@ import SwiftUI
     private var presenceTask: Task<Void, Never>?
     private var suspendedTraining = false
     private var awaitingRecovery = false
+    private var thinkingSound=ThinkingSoundSchedule()
+    private var audioSuspended=false
 
     var ownScore: Int { board.score[side] }
     var opponentScore: Int { board.score[side.opposite] }
@@ -47,6 +49,10 @@ import SwiftUI
     var showsRoomInvitation: Bool { isHostingPrivateRoom && !roomCode.isEmpty }
 
     init() {
+        boardScene.onTurnaround = { [weak self] in
+            guard let self, self.screen == .game, !self.paused, !self.audioSuspended else { return }
+            AudioEngine.shared.playSample(.turnaround)
+        }
         boardScene.onDragStart = { [weak self] in self?.turnLimitHint = false }
         boardScene.onTurnLimit = { [weak self] in
             guard let self, self.active, !self.paused else { return }
@@ -113,6 +119,7 @@ import SwiftUI
     private func tickClock() {
         guard training, active, !paused else { return }
         remaining = max(0, deadline.timeIntervalSinceNow)
+        playThinkingCue()
         let second = Int(ceil(remaining))
         if (1...3).contains(second), second < countdown { countdown = second; AudioEngine.shared.play("countdown") }
         if remaining == 0 { resolveTraining() }
@@ -180,6 +187,9 @@ import SwiftUI
         rematchRequested = true; bridge?.send(["action":"rematch"])
     }
     func leave() {
+        AudioEngine.shared.endGameMusic()
+        thinkingSound=ThinkingSoundSchedule()
+        AudioEngine.shared.stop()
         generation += 1; timer?.invalidate(); presenceTask?.cancel(); presenceTask = nil
         if !training, screen != .menu { bridge?.send(["action":"leave"]); SessionVault.clear(); hasSavedGame = false }
         training = false; active = false; paused = false; suspendedTraining = false
@@ -189,6 +199,8 @@ import SwiftUI
         board = BoardState(); side = .bottom; boardScene.render(board, side: side)
     }
     func background() {
+        AudioEngine.shared.endGameMusic()
+        audioSuspended=true
         AudioEngine.shared.stop()
         if training, screen == .game {
             remaining = active ? max(0,deadline.timeIntervalSinceNow) : remaining
@@ -196,6 +208,7 @@ import SwiftUI
         } else if screen == .game || screen == .lobby { bridge?.send(["action":"suspend"]) }
     }
     func foreground() {
+        audioSuspended=false
         if training, suspendedTraining {
             suspendedTraining = false; paused = false
             if active { deadline = Date().addingTimeInterval(remaining); startClock(); refreshScene() }
@@ -238,14 +251,19 @@ import SwiftUI
             if let value = data["peerName"] as? String { peerName = value }
             selection = decode(data["selection"], as: Command.self); turnLimitHint = false
             remaining = data["remaining"] as? Double ?? remaining
-            if type == "started" { AudioEngine.shared.say(.begin); resultReason = nil; rematchRequested = false; peerRematch = false }
+            if type == "started" {
+                thinkingSound=ThinkingSoundSchedule()
+                AudioEngine.shared.say(.begin); resultReason = nil; rematchRequested = false; peerRematch = false
+            }
             screen = .game
             active = type == "active" && (data["active"] as? Bool ?? false)
             paused = type != "active"
             boardScene.render(board, side: side); refreshScene()
-        case "timer": remaining = data["remaining"] as? Double ?? remaining
-        case "lock": active = false; refreshScene()
-        case "paused": paused = true; active = false; status = L("native.recovering"); refreshScene()
+        case "timer":
+            remaining = data["remaining"] as? Double ?? remaining
+            playThinkingCue()
+        case "lock": active = false; AudioEngine.shared.stopThinkingSample(); refreshScene()
+        case "paused": paused = true; active = false; AudioEngine.shared.endGameMusic(); AudioEngine.shared.stop(); status = L("native.recovering"); refreshScene()
         case "resolved":
             guard let before = decode(data["before"], as: BoardState.self), let after = decode(data["match"], as: BoardState.self),
                   let event = data["event"] as? [String:Any], let commands = event["commands"] as? [String:Any] else { return }
@@ -260,23 +278,44 @@ import SwiftUI
             finish()
         case "rematch": peerRematch = true
         case "error": error = L(data["key"] as? String ?? "error.connectFailed"); rematchRequested = false
-        case "terminated": paused = true; active = false; awaitingRecovery = true
+        case "terminated": paused = true; active = false; AudioEngine.shared.endGameMusic(); AudioEngine.shared.stop(); awaitingRecovery = true
         case "ready": if awaitingRecovery { awaitingRecovery = false; resume() }
         default: break
         }
     }
     private func animate(before: BoardState, turn: Turn) {
+        AudioEngine.shared.stopThinkingSample()
         if !turn.rotations.isEmpty { AudioEngine.shared.play("turn") }
         boardScene.animate(before: before, after: board, turn: turn, side: side)
         if !turn.delivered.isEmpty {
             let token = generation
-            Task { try? await Task.sleep(for: .milliseconds(HamsterMotion.deliveryCueMilliseconds)); if token == generation { AudioEngine.shared.play("delivery") } }
+            let sounds=HamsterSound.deliveries(turn,side:side)
+            Task {
+                try? await Task.sleep(for:.milliseconds(HamsterMotion.deliveryCueMilliseconds))
+                guard token == generation, screen == .game, !paused, !audioSuspended else { return }
+                for sound in sounds { AudioEngine.shared.playSample(sound) }
+            }
         }
     }
     private func finish() {
+        AudioEngine.shared.endGameMusic()
+        AudioEngine.shared.stopThinkingSample()
         timer?.invalidate(); active = false; paused = false; screen = .result
-        refreshScene(); AudioEngine.shared.play(ownScore > opponentScore ? "win" : "delivery")
-        AudioEngine.shared.say(ownScore > opponentScore ? .win : .finish)
+        refreshScene()
+        if !audioSuspended,let sound=HamsterSound.result(own:ownScore,opponent:opponentScore) {
+            AudioEngine.shared.playSample(sound)
+        }
     }
-    func refreshScene() { boardScene.setSelection(selection, highlighted: selection?.platform, enabled: active && !paused) }
+    private func playThinkingCue() {
+        guard screen == .game,active,!paused,!audioSuspended else { return }
+        thinkingSound.begin(round:displayRound,remaining:remaining)
+        if thinkingSound.takeCue(remaining:remaining) { AudioEngine.shared.playSample(.oops) }
+    }
+    func refreshScene() {
+        boardScene.setSelection(selection, highlighted: selection?.platform, enabled: active && !paused)
+        if screen == .game,!paused,!audioSuspended { AudioEngine.shared.startGameMusic() }
+        if screen == .game,active,!paused {
+            thinkingSound.begin(round:displayRound,remaining:remaining)
+        }
+    }
 }

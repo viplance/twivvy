@@ -27,6 +27,9 @@ targets:
       - path: HamsterLab/Resources/Bridge
         type: folder
         buildPhase: resources
+      - path: sound
+        type: folder
+        buildPhase: resources
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.enotix.hamsterlab

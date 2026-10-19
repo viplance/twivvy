@@ -13,6 +13,8 @@ final class LaboratoryTests: XCTestCase {
         let turn=Rules.resolve(&after,top:nil,bottom:nil)
         XCTAssertEqual(after.balls.first?.exit,3)
         let scene=BoardScene(); scene.render(before,side:.bottom)
+        var returnCues=0
+        scene.onTurnaround={ returnCues += 1 }
         let rig=try XCTUnwrap(scene.hamsters[1])
         let start=rig.root.orientation(relativeTo:scene.world)
         scene.animate(before:before,after:after,turn:turn,side:.bottom)
@@ -28,6 +30,7 @@ final class LaboratoryTests: XCTestCase {
         XCTAssertLessThan(abs(simd_dot(start.vector,previous.vector)),0.001)
         scene.update(delta:0.03)
         XCTAssertFalse(scene.isAnimating)
+        XCTAssertEqual(returnCues,1,"A reversal emits one cue, not one per animation frame")
         XCTAssertGreaterThan(abs(simd_dot(previous.vector,rig.root.orientation(relativeTo:scene.world).vector)),0.9999)
     }
     @MainActor func testTurningCharacterFitsStraightAndCurvedTubes() {
@@ -90,6 +93,8 @@ final class LaboratoryTests: XCTestCase {
             before.cells[0][0]=5; before.cells[5][5]=5
             before.balls=[Ball(id:21,row:0,col:0,exit:0),Ball(id:22,row:5,col:5,exit:2)]
             let scene=BoardScene(); scene.render(before,side:viewer)
+            var returnCues=0
+            scene.onTurnaround={ returnCues += 1 }
             let originals=scene.hamsters, seated=scene.homeHamsters
             var after=before
             let turn=Rules.resolve(&after,top:nil,bottom:nil)
@@ -111,6 +116,7 @@ final class LaboratoryTests: XCTestCase {
             for (seat,rig) in seated { XCTAssertTrue(scene.homeHamsters[seat] === rig) }
             for _ in 0..<200 { scene.update(delta:0.02) }
             XCTAssertEqual(scene.homeHamsters.count,4)
+            XCTAssertEqual(returnCues,1,"The home that reverses to face the viewer emits one cue")
             for (seat,rig) in scene.homeHamsters {
                 XCTAssertLessThan(simd_distance(rig.root.position(relativeTo:scene.world),scene.homePosition(seat)),0.00001)
                 let forward=rig.root.orientation(relativeTo:nil).act(SIMD3<Float>(0,0,-1))

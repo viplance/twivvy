@@ -7,6 +7,7 @@ import simd
     var onSelect: ((Int, Int?) -> Void)?
     var onDragStart: (() -> Void)?
     var onTurnLimit: (() -> Void)?
+    var onTurnaround: (() -> Void)?
     let anchor = AnchorEntity(world:.zero)
     let world = Entity()
     let camera = PerspectiveCamera()
@@ -22,6 +23,7 @@ import simd
         let orientation: simd_quatf
         let started: Double
         let duration: Double
+        var turnCuePlayed=false
     }
     private var arrivals: [HomeSeat:Arrival] = [:]
     private(set) var isAnimating = false
@@ -59,6 +61,7 @@ import simd
         let turn: Turn
         var elapsed = 0.0
         var moving = false
+        var turnsAround = false
     }
 
     init(showcase: Bool = false) {
@@ -281,9 +284,10 @@ import simd
         }
     }
     private func updateHomes() {
+        var turnedAround=false
         for (seat,rig) in homeHamsters {
             let destination=homePosition(seat)
-            guard let arrival=arrivals[seat],!UIAccessibility.isReduceMotionEnabled else {
+            guard var arrival=arrivals[seat],!UIAccessibility.isReduceMotionEnabled else {
                 rig.root.position=destination; rig.root.orientation=homeFacing
                 rig.sit(progress:1,time:clock); continue
             }
@@ -305,12 +309,17 @@ import simd
                 // Finish the last bend, turn towards the viewer and lower the
                 // pelvis onto the pad. No pop-in or replacement mascot.
                 let incoming=simd_quatf(angle:atan2(0,arrival.start.z-destination.z),axis:[0,1,0])
+                if !arrival.turnCuePlayed {
+                    arrival.turnCuePlayed=true; arrivals[seat]=arrival
+                    turnedAround = turnedAround || simd_dot(incoming.act([0,0,-1]),homeFacing.act([0,0,-1])) < -0.5
+                }
                 rig.root.position=destination+[0,0.16*(1-ease),0]
                 rig.root.orientation=simd_slerp(incoming,homeFacing,ease)
                 rig.sit(progress:t,time:clock)
                 if t >= 1 { arrivals.removeValue(forKey:seat) }
             }
         }
+        if turnedAround { onTurnaround?() }
     }
     private func rebuildCouplers(_ state: BoardState) {
         couplers.children.removeAll(); couplers.isEnabled=true
@@ -376,7 +385,17 @@ import simd
         selection=nil; enabled=false; transition=nil; drag=nil
         if self.state != before || self.side != side { render(before,side:side) }
         tiles.values.forEach { $0.stopAllAnimations(recursive:false) }
-        guard !UIAccessibility.isReduceMotionEnabled else { render(after,side:side); return }
+        let turnsAround=HamsterSound.hasTurnaround(before:before,after:after,turn:turn)
+        // Two players can combine quarter-turns into a full half-turn.
+        // Include newly spawned residents that ride that platform as well.
+        let platformTurnaround=(before.balls+turn.spawned).contains {
+            abs(turn.rotations[Rules.platform($0.row,$0.col),default:0]) % 4 == 2
+        }
+        if platformTurnaround { onTurnaround?() }
+        guard !UIAccessibility.isReduceMotionEnabled else {
+            if turnsAround { onTurnaround?() }
+            render(after,side:side); return
+        }
         isAnimating=true
         couplers.isEnabled=false
         var rotated=before; rotated.balls.append(contentsOf:turn.spawned)
@@ -398,7 +417,7 @@ import simd
             }
             Rules.rotate(&rotated,platform:p,quarters:q)
         }
-        transition=Transition(after:after,rotated:rotated,turn:turn)
+        transition=Transition(after:after,rotated:rotated,turn:turn,turnsAround:turnsAround)
         AudioEngine.shared.play(turn.spawned.isEmpty ? "crawl" : "chirp")
     }
     func update(delta: Double) {
@@ -423,6 +442,7 @@ import simd
             rebuildTiles(transition.after)
             rebuildCouplers(transition.after)
             transition.moving=true
+            if transition.turnsAround { onTurnaround?() }
         }
         if transition.moving {
             let t=min(1,Float((transition.elapsed-HamsterMotion.rotationDuration)/HamsterMotion.crossingDuration))
@@ -483,9 +503,6 @@ import simd
             }
             rebuildReceivers(final)
             setSelection(selection,highlighted:selection?.platform,enabled:enabled,animated:false)
-            if !transition.turn.delivered.isEmpty {
-                AudioEngine.shared.play("happy")
-            }
         } else { self.transition=transition }
     }
     func accessibilityFrame(platform p: Int, size: CGSize) -> CGRect {
