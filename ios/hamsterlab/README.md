@@ -85,6 +85,18 @@ Matching ports across a platform seam have transparent sleeves; crossing stays
 on the tube axis without a vertical hop. Sleeves retract during private rotation.
 Visual interpolation never changes the integer game state.
 
+Delivered hamsters keep their original rig and coat. After leaving the tube they
+run along the home pad to a stable centre-out seat, turn towards the viewer and
+settle on their haunches with planted paws and a tucked tail. Residents continue
+blinking and breathing; the next round can proceed during an arrival. Both homes
+face the camera for either player. Recovery reconstructs seated residents from
+the authoritative scores; a new game clears all seats. Reduce Motion displays
+the final seated pose without the arrival animation.
+
+`HamsterMotion.speed` is 0.75: tube traversal, running, sitting, spawning and
+idle character motion play 25% slower. The native and online bridge round waits
+are both 1450 ms so the longer traversal completes before another move starts.
+
 Regenerate the twelve original 512×256 coat/normal PNGs from the repository root:
 
 ```sh

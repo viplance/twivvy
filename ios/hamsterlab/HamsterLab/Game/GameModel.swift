@@ -127,7 +127,7 @@ import SwiftUI
         animate(before: before, turn: turn)
         let token = generation
         Task {
-            try? await Task.sleep(for: .milliseconds(1200))
+            try? await Task.sleep(for: .milliseconds(HamsterMotion.roundPauseMilliseconds))
             guard token == generation, !suspendedTraining else { return }
             beginTrainingRound()
         }
@@ -144,7 +144,7 @@ import SwiftUI
             }
             guard !Task.isCancelled,token==generation,active else { break }
             resolveTraining()
-            try? await Task.sleep(for:.milliseconds(1450))
+            try? await Task.sleep(for:.milliseconds(HamsterMotion.roundPauseMilliseconds + 250))
         }
     }
     func chooseTurn(platform: Int, direction: Int?) {
@@ -270,7 +270,7 @@ import SwiftUI
         boardScene.animate(before: before, after: board, turn: turn, side: side)
         if !turn.delivered.isEmpty {
             let token = generation
-            Task { try? await Task.sleep(for: .milliseconds(800)); if token == generation { AudioEngine.shared.play("delivery") } }
+            Task { try? await Task.sleep(for: .milliseconds(HamsterMotion.deliveryCueMilliseconds)); if token == generation { AudioEngine.shared.play("delivery") } }
         }
     }
     private func finish() {

@@ -107,6 +107,21 @@ struct ContentView: View {
                     game.board.balls = [Ball(id:1,row:2,col:2,exit:0),Ball(id:2,row:3,col:3,exit:2),Ball(id:3,row:0,col:1,exit:1),Ball(id:4,row:4,col:4,exit:2)]
                     game.boardScene.render(game.board,side:.bottom)
                 }
+                if ProcessInfo.processInfo.arguments.contains("--home-arrival") {
+                    game.startTraining()
+                    var fixture=BoardState(); fixture.tick=2
+                    fixture.score.top=2; fixture.score.bottom=2
+                    fixture.cells[0][0]=5; fixture.cells[5][5]=5
+                    fixture.balls=[Ball(id:21,row:0,col:0,exit:0),Ball(id:22,row:5,col:5,exit:2)]
+                    fixture.nextBallId=23
+                    game.board=fixture; game.boardScene.render(fixture,side:.bottom)
+                    try? await Task.sleep(for:.milliseconds(700))
+                    guard game.screen == .game else { return }
+                    var after=fixture
+                    let turn=Rules.resolve(&after,top:nil,bottom:nil)
+                    game.board=after
+                    game.boardScene.animate(before:fixture,after:after,turn:turn,side:.bottom)
+                }
                 if ProcessInfo.processInfo.arguments.contains("--autoplay") {
                     await game.autoplayTraining()
                 }
@@ -211,32 +226,46 @@ struct ContentView: View {
             }.padding(28).frame(maxWidth:500).frame(maxWidth:.infinity)
         }
     }
-    @ViewBuilder private func arena(wide: Bool, size: CGSize) -> some View {
-        if wide {
-            HStack(spacing:24) {
-                boardView.frame(maxWidth:.infinity,maxHeight:.infinity)
-                ScrollView { VStack(spacing:22) { scoreboard; turnControls; if game.screen == .result { resultCard } }.padding(20) }.frame(width:320)
-            }.padding(.horizontal,24).padding(.bottom,16)
-        } else {
-            GeometryReader { viewport in
-                ScrollView {
-                    VStack(spacing:12) {
-                        scoreboard.padding(.horizontal,24)
-                        Spacer(minLength:0)
-                        VStack(spacing:12) {
-                            // Fit by width so a short viewport does not narrow the board.
-                            boardView.frame(width:viewport.size.width,height:viewport.size.width*828/720)
-                            if game.screen == .result { resultCard.padding(.horizontal,24).frame(maxWidth:700) }
-                            else { turnControls.padding(.horizontal,24).frame(maxWidth:700) }
-                        }
-                        Spacer(minLength:0)
+    private func arena(wide: Bool, size: CGSize) -> some View {
+        ScrollViewReader { scroll in
+            Group {
+                if wide {
+                    HStack(spacing:24) {
+                        boardView.frame(maxWidth:.infinity,maxHeight:.infinity)
+                        ScrollView { VStack(spacing:22) { scoreboard; turnControls; if game.screen == .result { resultCard } }.padding(20) }.frame(width:320)
+                    }.padding(.horizontal,24).padding(.bottom,16)
+                } else {
+                    GeometryReader { viewport in
+                        ScrollView {
+                            VStack(spacing:12) {
+                                scoreboard.padding(.horizontal,24)
+                                Spacer(minLength:0)
+                                VStack(spacing:12) {
+                                    // Fit by width so a short viewport does not narrow the board.
+                                    boardView.frame(width:viewport.size.width,height:viewport.size.width*828/720)
+                                    if game.screen == .result { resultCard.padding(.horizontal,24).frame(maxWidth:700) }
+                                    else { turnControls.padding(.horizontal,24).frame(maxWidth:700) }
+                                }
+                                Spacer(minLength:0)
+                            }
+                            .padding(.bottom,24)
+                            // Share spare height above and below the play area, while
+                            // allowing compact screens and larger text to scroll.
+                            .frame(minHeight:viewport.size.height)
+                            .frame(maxWidth:.infinity)
+                        }.scrollIndicators(.hidden)
                     }
-                    .padding(.bottom,24)
-                    // Share spare height above and below the play area, while
-                    // allowing compact screens and larger text to scroll.
-                    .frame(minHeight:viewport.size.height)
-                    .frame(maxWidth:.infinity)
-                }.scrollIndicators(.hidden)
+                }
+            }
+            .task(id: game.screen == .result ? (wide ? 2 : 1) : 0) {
+                guard game.screen == .result else { return }
+                // Let the inserted card participate in layout before locating
+                // its bottom edge. Reapply if the result changes orientation.
+                await Task.yield()
+                guard !Task.isCancelled else { return }
+                withAnimation(reduceMotion ? nil : .easeInOut(duration:0.35)) {
+                    scroll.scrollTo("game.result.card",anchor:.bottom)
+                }
             }
         }
     }
@@ -351,8 +380,9 @@ struct ContentView: View {
             Button { game.requestRematch() } label: {
                 Text(L(game.rematchRequested ? "status.waitingOpponent" : "action.rematch")).frame(maxWidth:.infinity)
             }.buttonStyle(GameButtonStyle()).disabled(game.rematchRequested).accessibilityIdentifier("game.rematch")
-            Button(L("action.newGame")) { game.leave() }.frame(minHeight:44)
+            Button(L("action.newGame")) { game.leave() }.frame(minHeight:44).accessibilityIdentifier("game.newGame")
         }.padding(24).background(LabTheme.peach,in:RoundedRectangle(cornerRadius:28))
+            .id("game.result.card")
     }
     private func setup(mode: String) -> some View {
         Form {
@@ -362,7 +392,29 @@ struct ContentView: View {
             } header: { Text(L("name.label")) }
             if mode == "training" {
                 Section(L("name.difficulty")) {
-                    Picker(L("name.difficulty"),selection:$game.difficulty) { ForEach(Difficulty.allCases,id:\.self) { Text(L("name.\($0.rawValue)")).tag($0) } }.pickerStyle(.segmented)
+                    VStack(spacing:12) {
+                        HStack(spacing:6) {
+                            ForEach(Difficulty.allCases,id:\.self) { level in
+                                Button { game.difficulty = level } label: {
+                                    Image("Difficulty" + level.rawValue.capitalized)
+                                        .resizable().scaledToFit()
+                                        .frame(height:level == .medium ? 90 : 104)
+                                        .frame(height:104,alignment:.bottom)
+                                        .frame(maxWidth:.infinity)
+                                        .padding(.vertical,4)
+                                        .background(game.difficulty == level ? LabTheme.mint : Color.clear,in:RoundedRectangle(cornerRadius:18))
+                                        .contentShape(Rectangle())
+                                }
+                                .buttonStyle(.plain)
+                                .accessibilityLabel(L("name.\(level.rawValue)"))
+                                .accessibilityAddTraits(game.difficulty == level ? .isSelected : [])
+                                .accessibilityIdentifier("setup.difficulty.\(level.rawValue)")
+                            }
+                        }
+                        Picker(L("name.difficulty"),selection:$game.difficulty) {
+                            ForEach(Difficulty.allCases,id:\.self) { Text(L("name.\($0.rawValue)")).tag($0) }
+                        }.pickerStyle(.segmented).accessibilityIdentifier("setup.difficulty")
+                    }
                 }
             }
             if mode == "join" {
@@ -398,7 +450,9 @@ struct ContentView: View {
                 .listRowSeparator(.hidden)
                 .accessibilityIdentifier("setup.start")
             } footer: {
-                Text(L(mode == "training" ? "native.offline" : "native.onlinePrivacy"))
+                if mode != "training" {
+                    Text(L("native.onlinePrivacy"))
+                }
             }
         }.navigationTitle(L(mode == "training" ? "dialog.trainingTitle" : mode == "host" ? "dialog.createTitle" : mode == "join" ? "dialog.joinTitle" : "dialog.onlineTitle"))
             .onAppear { invalidJoinCode = false }

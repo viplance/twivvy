@@ -5,6 +5,63 @@ import simd
 @testable import HamsterLab
 
 final class LaboratoryTests: XCTestCase {
+    @MainActor func testTraversalRunsAtThreeQuartersOfTheOriginalSpeed() throws {
+        var before=BoardState(); before.tick=2
+        before.cells[2][2]=10; before.cells[2][3]=10
+        before.balls=[Ball(id:1,row:2,col:2,exit:1)]
+        var after=before
+        let turn=Rules.resolve(&after,top:nil,bottom:nil)
+        let scene=BoardScene(); scene.render(before,side:.bottom)
+        scene.animate(before:before,after:after,turn:turn,side:.bottom)
+        scene.update(delta:0.4+0.68)
+        XCTAssertTrue(scene.isAnimating,"The former crossing time must now leave 25% of the route to go")
+        let source=TubePath(row:2,col:2,state:before), destination=TubePath(row:2,col:3,state:after)
+        let rig=try XCTUnwrap(scene.hamsters[1])
+        XCTAssertLessThan(simd_distance(rig.root.position(relativeTo:scene.world),source.travel(to:destination,exit:1,progress:0.75)),0.00001)
+        scene.update(delta:0.3)
+        XCTAssertFalse(scene.isAnimating)
+        XCTAssertLessThan(simd_distance(rig.root.position(relativeTo:scene.world),destination.midpoint),0.00001)
+        XCTAssertGreaterThan(Double(HamsterMotion.roundPauseMilliseconds)/1000,HamsterMotion.resolveDuration)
+    }
+    @MainActor func testDeliveredCharactersRunToTheirSeatsAndKeepFacingTheViewer() throws {
+        for viewer in [Side.top,.bottom] {
+            var before=BoardState(); before.tick=2
+            before.score.top=1; before.score.bottom=1
+            before.cells[0][0]=5; before.cells[5][5]=5
+            before.balls=[Ball(id:21,row:0,col:0,exit:0),Ball(id:22,row:5,col:5,exit:2)]
+            let scene=BoardScene(); scene.render(before,side:viewer)
+            let originals=scene.hamsters, seated=scene.homeHamsters
+            var after=before
+            let turn=Rules.resolve(&after,top:nil,bottom:nil)
+            XCTAssertEqual(turn.delivered.count,2)
+            scene.animate(before:before,after:after,turn:turn,side:viewer)
+            for _ in 0..<Int(ceil((HamsterMotion.resolveDuration+0.02)/0.02)) { scene.update(delta:0.02) }
+            XCTAssertFalse(scene.isAnimating)
+            for (ball,receiver) in turn.delivered {
+                let seat=BoardScene.HomeSeat(receiver:receiver,index:1)
+                let rig=try XCTUnwrap(scene.homeHamsters[seat])
+                XCTAssertTrue(rig === originals[ball.id],"Delivery must keep the actual character")
+                let start=rig.root.position(relativeTo:scene.world)
+                scene.update(delta:0.12)
+                XCTAssertGreaterThan(simd_distance(start,rig.root.position(relativeTo:scene.world)),0.001)
+            }
+            // The next authoritative update must keep both arrivals and seats.
+            var later=after; later.tick += 1
+            scene.render(later,side:viewer)
+            for (seat,rig) in seated { XCTAssertTrue(scene.homeHamsters[seat] === rig) }
+            for _ in 0..<200 { scene.update(delta:0.02) }
+            XCTAssertEqual(scene.homeHamsters.count,4)
+            for (seat,rig) in scene.homeHamsters {
+                XCTAssertLessThan(simd_distance(rig.root.position(relativeTo:scene.world),scene.homePosition(seat)),0.00001)
+                let forward=rig.root.orientation(relativeTo:nil).act(SIMD3<Float>(0,0,-1))
+                XCTAssertGreaterThan(forward.z,0.99,"Both homes must face the camera for either player")
+                XCTAssertGreaterThan(rig.body.position.y,0.20,"The character must sit upright")
+                XCTAssertEqual(simd_length(rig.head.orientation.vector),1,accuracy:0.0001)
+            }
+            scene.render(BoardState(),side:viewer)
+            XCTAssertTrue(scene.homeHamsters.isEmpty,"A new game must clear the homes")
+        }
+    }
     func testElbowsHaveCircularWallsAndAxialPortTangents() {
         for mask in [3,5,6,9,10,12] {
             let path=TubePath(center:.zero,mask:mask)

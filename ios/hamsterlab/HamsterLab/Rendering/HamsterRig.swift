@@ -2,6 +2,17 @@ import RealityKit
 import UIKit
 import simd
 
+enum HamsterMotion {
+    // 25% less speed means durations are divided by 0.75.
+    static let speed: Double = 0.75
+    static let rotationDuration: Double = 0.4
+    static let crossingDuration: Double = 0.68 / speed
+    static let resolveDuration = rotationDuration + crossingDuration + 0.02
+    // Keep the native round wait and bridge.js resolved callback in sync.
+    static let roundPauseMilliseconds = 1450
+    static let deliveryCueMilliseconds = Int((rotationDuration + 0.4 / speed) * 1000)
+}
+
 /// An original, reusable character rig. Sculpted fur surfaces share resources;
 /// named pivots keep expressions independent of the body's squash and stretch.
 @MainActor final class HamsterRig {
@@ -11,17 +22,20 @@ import simd
     private(set) var eyes: [Entity] = []
     private var pupils: [Entity] = []
     private var paws: [Entity] = []
+    private var sleeves: [Entity] = []
     private var cheeks: [Entity] = []
     private var brows: [Entity] = []
     private var ears: [Entity] = []
     private var whiskers: [Entity] = []
     private let mouth = Entity()
     private let nose = Entity()
+    private let tail = Entity()
     private var idle: [AnimationPlaybackController] = []
     private var neutral: [(Entity, Transform)] = []
     private let seed: Int
     private var isCrawling = false
     private var isInTube = false
+    private var isSitting = false
     private var tubeScaleApplied = SIMD3<Float>.one
     private let headTilt = simd_quatf(angle: 0.18, axis: [1, 0, 0])
 
@@ -85,12 +99,13 @@ import simd
             let paw = Entity(); paw.name = "paw-\(i)"
             paw.position = [sign * 0.118, -0.091, i < 2 ? -0.107 : 0.137]
             let sleeve = part([0.032, 0.044, 0.037], at: [0, 0.005, 0.004], color: HamsterSculpt.cream)
-            paw.addChild(sleeve)
+            paw.addChild(sleeve); sleeves.append(sleeve)
             let hand = HamsterSculpt.paw(); hand.position = [sign * 0.005, -0.034, -0.019]
             paw.addChild(hand); body.addChild(paw); paws.append(paw)
         }
-        body.addChild(part([0.020, 0.022, 0.027], at: [0, -0.073, 0.223], color: HamsterSculpt.skin))
-        neutral = ([body, head, mouth, nose] + eyes + pupils + paws + cheeks + brows + ears + whiskers).map { ($0, $0.transform) }
+        tail.name="tail-pivot"; tail.position=[0,-0.073,0.223]
+        tail.addChild(part([0.020,0.022,0.027],at:.zero,color:HamsterSculpt.skin)); body.addChild(tail)
+        neutral = ([body, head, mouth, nose, tail] + eyes + pupils + paws + sleeves + cheeks + brows + ears + whiskers).map { ($0, $0.transform) }
         startIdle()
     }
 
@@ -111,7 +126,7 @@ import simd
     private func loop(_ entity: Entity, to: Transform, seconds: Double, delay: Double = 0) {
         guard !UIAccessibility.isReduceMotionEnabled else { return }
         let definition = FromToByAnimation<Transform>(name: "hamster-idle", from: entity.transform, to: to,
-            duration: seconds, timing: .easeInOut, bindTarget: .transform, repeatMode: .autoReverse, delay: delay)
+            duration: seconds / HamsterMotion.speed, timing: .easeInOut, bindTarget: .transform, repeatMode: .autoReverse, delay: delay / HamsterMotion.speed)
         if let animation = try? AnimationResource.generate(with: definition) { idle.append(entity.playAnimation(animation.repeat())) }
     }
     private func startIdle() {
@@ -125,6 +140,7 @@ import simd
     /// Two deliberate stride cycles per crossing. Feet lift during recovery and
     /// push backwards during contact; the shoulders counter-rotate the haunches.
     func crawl(progress: Float, time: Double, squeeze: Float) {
+        if isSitting { resetPose(); isSitting=false; isCrawling=false }
         clearTubeFit()
         guard !UIAccessibility.isReduceMotionEnabled else { return }
         if !isCrawling { resetPose(); isCrawling = true }
@@ -191,6 +207,47 @@ import simd
         body.scale /= tubeScaleApplied
         tubeScaleApplied = .one
     }
+    /// Keep the same character when it leaves a tube, releasing the neck fit
+    /// before it runs on the floor of its home.
+    func run(progress: Float, time: Double) {
+        if isInTube || isSitting {
+            resetPose(); isInTube=false; isSitting=false; isCrawling=false
+        }
+        crawl(progress:progress,time:time,squeeze:0)
+    }
+    /// Settle onto the haunches with the hind feet tucked and forepaws in front.
+    /// Counter-rotate the neck so the face stays upright as the spine rises.
+    func sit(progress: Float, time: Double) {
+        if !isSitting {
+            resetPose(); isSitting=true; isInTube=false; isCrawling=false
+        }
+        let t=max(0,min(1,progress)), amount=t*t*(3-2*t)
+        let identity=Transform.identity.rotation
+        let spine=simd_quatf(angle:1.0,axis:[1,0,0])
+        let translation=SIMD3<Float>(0,0.225,0.03)
+        let scale=SIMD3<Float>(1.03,0.98,1)
+        let breath: Float=UIAccessibility.isReduceMotionEnabled ? 0 : sin(Float(time)*2.4)*0.006*amount
+        body.position=translation*amount
+        body.orientation=simd_slerp(identity,spine,amount)
+        body.scale=simd_mix(.one,scale,.init(repeating:amount))+[breath,breath,0]
+        let neck=spine.inverse.act(SIMD3<Float>(0,0.345,-0.065)-translation)/scale
+        head.position=simd_mix([0,0.029,-0.116],neck,.init(repeating:amount))
+        head.orientation=simd_slerp(headTilt,spine.inverse*simd_quatf(angle:0.60,axis:[1,0,0]),amount)
+        let tuckedTail=spine.inverse.act(SIMD3<Float>(0,0.06,0.17)-translation)/scale
+        tail.position=simd_mix([0,-0.073,0.223],tuckedTail,.init(repeating:amount))
+        for (i,paw) in paws.enumerated() {
+            let sign: Float=i%2 == 0 ? -1 : 1
+            let start=SIMD3<Float>(sign*0.118,-0.091,i<2 ? -0.107 : 0.137)
+            let target=SIMD3<Float>(sign*(i<2 ? 0.105 : 0.135),0.075,i<2 ? -0.12 : 0.045)
+            paw.position=simd_mix(start,spine.inverse.act(target-translation)/scale,.init(repeating:amount))
+            paw.orientation=simd_slerp(identity,spine.inverse*simd_quatf(angle:-0.10,axis:[1,0,0]),amount)
+            if i<2 {
+                sleeves[i].scale.y=0.044*(1+amount*0.7)
+                sleeves[i].position.y=0.005+amount*0.02
+            }
+        }
+        expression(time:time,effort:0)
+    }
     private func expression(time: Double, effort: Float) {
         guard !UIAccessibility.isReduceMotionEnabled else { return }
         let local = time + Double(seed) * 0.67
@@ -228,7 +285,7 @@ import simd
         }
         let start = body.transform
         var up = start; up.translation.y += 0.10; up.rotation = simd_quatf(angle: -0.20, axis: [1, 0, 0])
-        if let animation = try? AnimationResource.generate(with: FromToByAnimation<Transform>(from: start, to: up, duration: 0.26, timing: .easeOut, bindTarget: .transform, repeatMode: .autoReverse)) {
+        if let animation = try? AnimationResource.generate(with: FromToByAnimation<Transform>(from: start, to: up, duration: 0.26 / HamsterMotion.speed, timing: .easeOut, bindTarget: .transform, repeatMode: .autoReverse)) {
             body.playAnimation(animation.repeat(count: 2))
         }
     }

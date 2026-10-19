@@ -56,6 +56,29 @@ glass and head articulation. Busy-board results after adding connecting sleeves:
 704 models, 60.0 scene callbacks/second, 16.96 ms p95 interval and 22.53 ms mean
 full state refresh on the same iPhone simulator. Callback rate is not GPU FPS.
 
+Home arrivals were subsequently verified in
+`/tmp/hamsterlab-home-arrivals-release-check.xcresult`: four native tests and the
+arrival UI scenario passed. Live deliveries retain the original rigs, seats
+remain stable across state refreshes, and both homes face the viewer for either
+player. Seated-pose tests check proportions and actual mesh vertices against
+the floor, plus the transition back to running. UI attachments show the real
+game before, during and after an arrival. The complete thirty-round/rematch UI
+scenario also passed in `/tmp/hamsterlab-home-arrivals-complete.xcresult`.
+Twelve seated residents measured 692 models and approximately 60 scene update
+callbacks/second on the same simulator.
+
+`/tmp/hamsterlab-slower-motion.xcresult` passed four native tests and two UI
+scenarios after lowering character speed to 0.75. At the former crossing time,
+a character is now exactly 75% along the route. Arrival, renderer-driven round
+completion, immediate online state updates and portrait/landscape interaction
+remain covered. The offline and bundled bridge round waits are both 1450 ms.
+
+`/tmp/hamsterlab-result-scroll.xcresult` passed the complete-match/rematch UI
+scenario with an explicit visibility check: the result heading, rematch button
+and new-game button are all on screen without a manual swipe. The result card
+automatically scrolls into view after layout, also when switching orientation;
+Reduce Motion uses an immediate scroll.
+
 The iPhone scenarios were verified in the native/UI run and a final targeted
 complete-match/rematch run. The final iPad run passed all 15 native and three UI
 tests. Reports are machine-local artifacts:
@@ -79,8 +102,8 @@ verified that its hamsters remain visible and move to their resolved positions
 across natural timed rounds.
 
 Rules, bots and native networking compile from Twivvy's existing source. The
-bundled bridge adapter is identical to Twivvy's, and the regenerated protocol
-body uses the same web sources. UI tests disable advisory presence calls. No
+bundled bridge adapter uses HamsterLab's 1450 ms visual resolution pause; the
+regenerated protocol body uses the same web sources. UI tests disable advisory presence calls. No
 production multiplayer room was created for this validation; cross-app online
 play was not exercised on physical devices.
 

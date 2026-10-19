@@ -7,6 +7,30 @@ import QuartzCore
 /// Repeatable workload for comparing scene changes on the same simulator/device.
 /// Frame callbacks are diagnostic; timing thresholds would be flaky in shared CI.
 final class RenderingPerformanceTests: XCTestCase {
+    @MainActor func testTwelveSeatedResidentsRemainWithinTheRenderingBudget() async throws {
+        let scene=BoardScene()
+        var board=BoardState(); board.score.top=6; board.score.bottom=6
+        scene.render(board,side:.bottom)
+        XCTAssertEqual(scene.homeHamsters.count,12)
+        let models=countModels(scene.anchor)
+        XCTAssertLessThan(models,1000)
+        let window=UIWindow(frame:UIScreen.main.bounds), controller=UIViewController()
+        window.rootViewController=controller
+        let host=LabSceneHost(scene:scene); host.frame=window.bounds
+        controller.view.addSubview(host); window.makeKeyAndVisible()
+        controller.view.layoutIfNeeded(); host.layoutIfNeeded()
+        let renderer=try XCTUnwrap(scene.view)
+        defer { host.removeFromSuperview(); window.isHidden=true }
+        try await Task.sleep(for:.seconds(1))
+        let probe=FrameProbe()
+        let subscription=renderer.scene.subscribe(to:SceneEvents.Update.self) { _ in
+            Task { @MainActor in probe.record() }
+        }
+        try await Task.sleep(for:.seconds(3)); subscription.cancel()
+        let mean=probe.intervals.reduce(0,+)/Double(max(1,probe.intervals.count))
+        XCTAssertGreaterThan(probe.intervals.count,10)
+        print(String(format:"HOME_RENDER_BENCHMARK models=%d callbacksPerSecond=%.1f",models,1/mean))
+    }
     @MainActor func testBusyBoardRenderingBudget() async throws {
         let scene = BoardScene()
         var board = BoardState()

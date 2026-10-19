@@ -2,6 +2,39 @@ import XCTest
 import UIKit
 
 final class HamsterLabUITests: XCTestCase {
+    @MainActor func testIllustratedDifficultySelection() {
+        let app=XCUIApplication()
+        app.launchArguments=["--uitesting","-AppleLanguages","(ru)","-AppleLocale","ru_RU"]
+        app.launch()
+        XCTAssertTrue(app.buttons["menu.training"].waitForExistence(timeout:20))
+        app.buttons["menu.training"].tap()
+        let easy=app.buttons["setup.difficulty.easy"], hard=app.buttons["setup.difficulty.hard"]
+        XCTAssertTrue(easy.waitForExistence(timeout:5))
+        XCTAssertTrue(app.buttons["setup.difficulty.medium"].isHittable)
+        hard.tap()
+        XCTAssertTrue(hard.isSelected)
+        XCTAssertTrue(app.segmentedControls["setup.difficulty"].buttons["Сложно"].isSelected)
+        capture("difficulty-hard")
+        app.segmentedControls["setup.difficulty"].buttons["Легко"].tap()
+        XCTAssertTrue(easy.isSelected)
+        XCTAssertFalse(hard.isSelected)
+        capture("difficulty-easy")
+        app.buttons["setup.start"].tap()
+        XCTAssertTrue(app.buttons["game.next"].waitForExistence(timeout:20))
+    }
+    @MainActor func testDeliveredHamstersRunAndSitInTheHomes() {
+        let app=XCUIApplication()
+        app.launchArguments=["--uitesting","--home-arrival","-AppleLanguages","(ru)","-AppleLocale","ru_RU"]
+        app.launch()
+        XCTAssertTrue(app.buttons["game.next"].waitForExistence(timeout:20))
+        XCTAssertTrue(app.staticTexts["4 / 30"].waitForExistence(timeout:5))
+        capture("home-arrival-start")
+        Thread.sleep(forTimeInterval:1.3)
+        capture("home-arrival-running")
+        Thread.sleep(forTimeInterval:1.8)
+        assertBoardRendered(app)
+        capture("home-arrival-seated")
+    }
     @MainActor func testMenuSettingsAndRussianBrand() {
         let app=XCUIApplication()
         app.launchArguments=["--uitesting","-AppleLanguages","(ru)","-AppleLocale","ru_RU"]
@@ -91,7 +124,13 @@ final class HamsterLabUITests: XCTestCase {
         app.launchArguments=["--uitesting","--autoplay","-AppleLanguages","(en)"]
         app.launch()
         let rematch=app.buttons["game.rematch"]
-        XCTAssertTrue(rematch.waitForExistence(timeout:180)); capture("06-result")
+        XCTAssertTrue(rematch.waitForExistence(timeout:180))
+        let title=app.staticTexts["game.result"], newGame=app.buttons["game.newGame"]
+        let visible=XCTNSPredicateExpectation(predicate:NSPredicate { _,_ in
+            rematch.isHittable && newGame.isHittable && title.isHittable && app.frame.contains(newGame.frame) && app.frame.contains(title.frame)
+        },object:nil)
+        XCTAssertEqual(XCTWaiter.wait(for:[visible],timeout:5),.completed,"Results and both actions must be visible without a manual swipe")
+        capture("06-result")
         rematch.tap()
         XCTAssertTrue(app.staticTexts["1 / 30"].waitForExistence(timeout:10))
     }

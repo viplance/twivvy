@@ -28,7 +28,8 @@ function begin(saved) {
     paused:()=>emit('paused',state()),
     timer:fraction=>emit('timer',{remaining:fraction*30}),
     restore:()=>emit('restore',state()),
-    resolved:async(event,before,after)=>{emit('resolved',{event,before,match:after});await new Promise(resolve=>setTimeout(resolve,1200));},
+    // Match HamsterMotion.roundPauseMilliseconds so traversal finishes first.
+    resolved:async(event,before,after)=>{emit('resolved',{event,before,match:after});await new Promise(resolve=>setTimeout(resolve,1450));},
     finished:reason=>emit('finished',{...state(),reason})
   });
   emit('started',state());

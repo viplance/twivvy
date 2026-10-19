@@ -12,12 +12,25 @@ import simd
     let camera = PerspectiveCamera()
     private(set) var tiles: [Int: Entity] = [:]
     private(set) var hamsters: [Int: HamsterRig] = [:]
+    struct HomeSeat: Hashable {
+        let receiver: Side
+        let index: Int
+    }
+    private(set) var homeHamsters: [HomeSeat:HamsterRig] = [:]
+    private struct Arrival {
+        let start: SIMD3<Float>
+        let orientation: simd_quatf
+        let started: Double
+        let duration: Double
+    }
+    private var arrivals: [HomeSeat:Arrival] = [:]
     private(set) var isAnimating = false
     private var tileBases: [Int: ModelEntity] = [:]
     private var tileLayouts: [Int:[Int]] = [:]
     private var tileStyles: [Int:Int] = [:]
     private var tileContent = Entity()
     private var residents = Entity()
+    private var homeFurniture = Entity()
     private var couplers = Entity()
     private static var couplerTemplate: Entity?
     private var state = BoardState()
@@ -51,11 +64,15 @@ import simd
     init(showcase: Bool = false) {
         self.showcase=showcase
         anchor.addChild(world); world.addChild(tileContent); world.addChild(residents); world.addChild(couplers)
+        residents.addChild(homeFurniture)
         configureCamera(); configureLighting()
         if showcase { buildShowcase() } else { buildEnvironment(); render(BoardState(),side:.bottom) }
     }
     func refreshMotionPreferences() {
         hero?.refreshMotionPreferences()
+        homeHamsters.values.forEach { $0.refreshMotionPreferences() }
+        if UIAccessibility.isReduceMotionEnabled { arrivals.removeAll() }
+        updateHomes()
         if let transition {
             self.transition=nil; isAnimating=false
             render(transition.after,side:side)
@@ -215,23 +232,83 @@ import simd
             tile.addChild(portal)
         }
     }
+    func homePosition(_ seat: HomeSeat) -> SIMD3<Float> {
+        // Stable, centre-out seats: existing residents never slide sideways when
+        // a new hamster joins them. The full twelve-hamster population fits.
+        let step=Float((seat.index+1)/2), sign: Float=seat.index%2 == 1 ? -1 : 1
+        return [step*sign*0.47,0.09,seat.receiver == .top ? -3.72 : 3.72]
+    }
+    private var homeFacing: simd_quatf {
+        simd_quatf(angle:side == .top ? 0 : .pi,axis:[0,1,0])
+    }
     private func rebuildReceivers(_ state: BoardState) {
-        residents.children.removeAll()
+        homeFurniture.children.removeAll()
+        for seat in Array(homeHamsters.keys) where seat.index >= state.score[seat.receiver] {
+            homeHamsters.removeValue(forKey:seat)?.root.removeFromParent()
+            arrivals.removeValue(forKey:seat)
+        }
         for receiver in [Side.top,.bottom] {
-            let tint=receiver == side ? LabGeometry.mint : LabGeometry.pink
-            let z: Float=receiver == .top ? -3.67 : 3.67
-            residents.addChild(LabGeometry.box([5.9,0.12,0.43],at:[0,0.03,z],color:UIColor(lab:0xB4CEE8),radius:0.12))
-            for i in 0..<max(7,state.score[receiver]) {
-                let x=Float(i)*0.34-Float(max(7,state.score[receiver])-1)*0.17
-                if i < state.score[receiver] {
-                    let head=LabGeometry.ellipsoid([0.12,0.10,0.10],at:[x,0.16,z],color:LabGeometry.cream)
-                    residents.addChild(head)
-                    for sign: Float in [-1,1] {
-                        residents.addChild(LabGeometry.ellipsoid([0.035,0.04,0.025],at:[x+sign*0.08,0.23,z],color:LabGeometry.pink))
+            // The player's home is always shown below, including online games
+            // where the board rotates to the top player's point of view.
+            let tint=UIColor(lab:receiver == side ? 0x63C987 : 0xE87979)
+            let z: Float=receiver == .top ? -3.66 : 3.66
+            homeFurniture.addChild(LabGeometry.box([6.3,0.12,0.82],at:[0,0.03,z],color:tint,radius:0.12))
+            for index in 0..<max(7,state.score[receiver]) {
+                let seat=HomeSeat(receiver:receiver,index:index), point=homePosition(seat)
+                if index < state.score[receiver] {
+                    // A restored game only retains counts, not the delivered IDs.
+                    // Live arrivals always keep the original articulated rig.
+                    if homeHamsters[seat] == nil {
+                        let rig=HamsterRig(id:(receiver == .top ? 1000 : 2000)+index)
+                        residents.addChild(rig.root); homeHamsters[seat]=rig
                     }
                 } else {
-                    let dot=ModelEntity(mesh:.generateSphere(radius:0.035),materials:[LabGeometry.glow(tint.withAlphaComponent(0.45))]); dot.position=[x,0.12,z]; residents.addChild(dot)
+                    let dot=ModelEntity(mesh:.generateSphere(radius:0.025),materials:[LabGeometry.glow(tint.withAlphaComponent(0.45))])
+                    dot.position=point+[0,0.015,0]; homeFurniture.addChild(dot)
                 }
+            }
+        }
+        updateHomes()
+    }
+    private func welcome(_ rig: HamsterRig, to seat: HomeSeat) {
+        let position=rig.root.position(relativeTo:world), orientation=rig.root.orientation(relativeTo:world)
+        rig.root.removeFromParent(); residents.addChild(rig.root)
+        rig.root.position=position; rig.root.orientation=orientation; rig.root.scale = .one
+        homeHamsters[seat]?.root.removeFromParent(); homeHamsters[seat]=rig
+        let target=homePosition(seat), distance=simd_length(SIMD2<Float>(target.x-position.x,target.z-position.z))
+        if !UIAccessibility.isReduceMotionEnabled {
+            arrivals[seat]=Arrival(start:position,orientation:orientation,started:clock,duration:Double(max(0.45,distance/2.5)))
+        }
+    }
+    private func updateHomes() {
+        for (seat,rig) in homeHamsters {
+            let destination=homePosition(seat)
+            guard let arrival=arrivals[seat],!UIAccessibility.isReduceMotionEnabled else {
+                rig.root.position=destination; rig.root.orientation=homeFacing
+                rig.sit(progress:1,time:clock); continue
+            }
+            let elapsed=clock-arrival.started
+            if elapsed < arrival.duration {
+                let t=max(0,min(1,Float(elapsed/arrival.duration)))
+                let end=destination+[0,0.16,0]
+                let control=SIMD3<Float>(destination.x,end.y,arrival.start.z)
+                var point=TubePath.quadratic(arrival.start,control,end,t)
+                point.y=end.y+(arrival.start.y-end.y)*pow(max(0,1-t*4),2)
+                let direction=2*(1-t)*(control-arrival.start)+2*t*(end-control)
+                let forward=SIMD2<Float>(direction.x,direction.z)
+                let facing=simd_length(forward)>0.0001 ? simd_quatf(angle:atan2(-direction.x,-direction.z),axis:[0,1,0]) : homeFacing
+                rig.root.position=point
+                rig.root.orientation=simd_slerp(arrival.orientation,facing,min(1,t*6))
+                rig.run(progress:Float(elapsed)*1.6,time:clock)
+            } else {
+                let t=min(1,Float((elapsed-arrival.duration)/0.38)), ease=t*t*(3-2*t)
+                // Finish the last bend, turn towards the viewer and lower the
+                // pelvis onto the pad. No pop-in or replacement mascot.
+                let incoming=simd_quatf(angle:atan2(0,arrival.start.z-destination.z),axis:[0,1,0])
+                rig.root.position=destination+[0,0.16*(1-ease),0]
+                rig.root.orientation=simd_slerp(incoming,homeFacing,ease)
+                rig.sit(progress:t,time:clock)
+                if t >= 1 { arrivals.removeValue(forKey:seat) }
             }
         }
     }
@@ -308,7 +385,7 @@ import simd
             if let root=hamsters[ball.id]?.root {
                 let destination=root.transform
                 root.scale = .init(repeating:0.1)
-                root.move(to:destination,relativeTo:root.parent,duration:0.24,timingFunction:.easeOut)
+                root.move(to:destination,relativeTo:root.parent,duration:0.24 / HamsterMotion.speed,timingFunction:.easeOut)
             }
         }
         for p in Set(turn.rotations.keys).union(visible.keys) {
@@ -325,8 +402,11 @@ import simd
         AudioEngine.shared.play(turn.spawned.isEmpty ? "crawl" : "chirp")
     }
     func update(delta: Double) {
-        clock += delta
+        // One scaled character clock keeps running, sitting, breathing and
+        // facial movements at the same pace without changing the game timer.
+        clock += delta * HamsterMotion.speed
         if let hero { hero.rest(time:clock) }
+        updateHomes()
         guard var transition else {
             for ball in state.balls {
                 guard let hamster=hamsters[ball.id] else { continue }
@@ -335,7 +415,7 @@ import simd
             return
         }
         transition.elapsed += delta
-        if transition.elapsed >= 0.4 && !transition.moving {
+        if transition.elapsed >= HamsterMotion.rotationDuration && !transition.moving {
             for hamster in hamsters.values {
                 let t=hamster.root.transformMatrix(relativeTo:world)
                 hamster.root.removeFromParent(); world.addChild(hamster.root); hamster.root.setTransformMatrix(t,relativeTo:world)
@@ -345,7 +425,7 @@ import simd
             transition.moving=true
         }
         if transition.moving {
-            let t=min(1,Float((transition.elapsed-0.4)/0.68))
+            let t=min(1,Float((transition.elapsed-HamsterMotion.rotationDuration)/HamsterMotion.crossingDuration))
             for ball in transition.after.balls {
                 guard let origin=transition.rotated.balls.first(where:{$0.id==ball.id}), let hamster=hamsters[ball.id] else { continue }
                 let source=TubePath(row:origin.row,col:origin.col,state:transition.rotated)
@@ -361,7 +441,7 @@ import simd
             for (ball,receiver) in transition.turn.delivered {
                 guard let hamster=hamsters[ball.id] else { continue }
                 let source=TubePath(row:ball.row,col:ball.col,state:transition.rotated)
-                let end=SIMD3<Float>(source.endpoint(ball.exit).x,TubePath.height,receiver == .top ? -3.67 : 3.67)
+                let end=SIMD3<Float>(source.endpoint(ball.exit).x,TubePath.height,receiver == .top ? -3.43 : 3.43)
                 let first=source.length/2, distance=t*(first+simd_distance(source.endpoint(ball.exit),end))
                 hamster.crawl(progress:t,time:clock,squeeze:max(0,1-abs(t-0.6)*5))
                 hamster.followTube { offset in
@@ -371,12 +451,20 @@ import simd
                 }
             }
         }
-        if transition.elapsed >= 1.1 {
+        if transition.elapsed >= HamsterMotion.resolveDuration {
             let final=transition.after
             self.transition=nil; isAnimating=false
             // The final tube layout is already installed. Keep the articulated
             // models instead of allocating a second scene at every round end.
             self.state=final
+            for receiver in [Side.top,.bottom] {
+                let delivered=transition.turn.delivered.filter { $0.1 == receiver }
+                let firstSeat=final.score[receiver]-delivered.count
+                for (offset,delivery) in delivered.enumerated() {
+                    guard let rig=hamsters.removeValue(forKey:delivery.0.id) else { continue }
+                    welcome(rig,to:HomeSeat(receiver:receiver,index:firstSeat+offset))
+                }
+            }
             let remaining=Set(final.balls.map(\.id))
             for id in Array(hamsters.keys) where !remaining.contains(id) {
                 hamsters.removeValue(forKey:id)?.root.removeFromParent()
@@ -393,16 +481,6 @@ import simd
             setSelection(selection,highlighted:selection?.platform,enabled:enabled,animated:false)
             if !transition.turn.delivered.isEmpty {
                 AudioEngine.shared.play("happy")
-                for (ball,receiver) in transition.turn.delivered {
-                    let visitor=HamsterRig(id:ball.id)
-                    visitor.root.position=[TubePath(row:ball.row,col:ball.col,state:transition.rotated).endpoint(ball.exit).x,0.30,receiver == .top ? -3.67 : 3.67]
-                    visitor.root.orientation=simd_quatf(angle:side == .top ? 0 : .pi,axis:[0,1,0])
-                    residents.addChild(visitor.root); visitor.celebrate()
-                    Task { @MainActor in
-                        try? await Task.sleep(for:.milliseconds(700))
-                        visitor.root.removeFromParent()
-                    }
-                }
             }
         } else { self.transition=transition }
     }

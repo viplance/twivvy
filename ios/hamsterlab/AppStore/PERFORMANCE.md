@@ -8,6 +8,13 @@ platform ports. `/tmp/hamsterlab-tube-fit-verified.xcresult` passed the existing
 simulator callback measurements, not physical-device GPU frame rates. Earlier
 measurements below describe their respective prior implementations.
 
+Home arrivals retain and reparent the delivered rig instead of creating a
+temporary visitor and replacing it with primitive score markers. Seated rigs
+are cached by receiver/seat, with no per-frame model allocation. The final
+12-resident workload in `/tmp/hamsterlab-home-arrivals-release-check.xcresult`
+passed the 1,000-model ceiling: 692 models and approximately 60 scene callbacks
+per second. Arrival animations continue independently of the next round.
+
 The original board submitted thousands of small model entities. Each tube used
 20 separate rounded boxes for each collar and 36 for its two highlights. A round
 also rebuilt every platform, and a full state refresh recreated all hamster rigs.

@@ -5,6 +5,55 @@ import simd
 @testable import HamsterLab
 
 final class HamsterCharacterTests: XCTestCase {
+    @MainActor func testSeatedCharacterRendersAndCanRunAgain() async throws {
+        let renderer=ARView(frame:CGRect(x:0,y:0,width:650,height:650),cameraMode:.nonAR,automaticallyConfigureSession:false)
+        renderer.renderOptions=[.disableMotionBlur,.disableCameraGrain,.disableDepthOfField]
+        renderer.environment.background = .color(.white)
+        let anchor=AnchorEntity(world:.zero), camera=PerspectiveCamera()
+        camera.camera.fieldOfViewInDegrees=36
+        camera.look(at:[0,0.24,0],from:[0.36,0.55,-1.25],relativeTo:nil); anchor.addChild(camera)
+        let light=DirectionalLight(); light.light.intensity=2000
+        light.look(at:.zero,from:[-1,3,-2],relativeTo:nil); anchor.addChild(light)
+        let fill=DirectionalLight(); fill.light.intensity=900
+        fill.look(at:.zero,from:[2,2,-1],relativeTo:nil); anchor.addChild(fill)
+        let rig=HamsterRig(id:0); anchor.addChild(rig.root)
+        func lowestVertex(_ entity: Entity) -> Float {
+            var lowest=Float.infinity
+            if let model=entity as? ModelEntity,let mesh=model.model?.mesh {
+                let matrix=entity.transformMatrix(relativeTo:anchor)
+                for part in mesh.contents.models.flatMap({ $0.parts }) {
+                    for point in part.positions {
+                        lowest=min(lowest,(matrix*SIMD4<Float>(point,1)).y)
+                    }
+                }
+            }
+            for child in entity.children { lowest=min(lowest,lowestVertex(child)) }
+            return lowest
+        }
+        anchor.addChild(LabGeometry.box([1.1,0.06,0.85],at:[0,-0.04,0],color:UIColor(lab:0xB4CEE8)))
+        renderer.scene.addAnchor(anchor)
+        let controller=UIViewController(), window=UIWindow(frame:renderer.bounds)
+        window.rootViewController=controller; controller.view.addSubview(renderer); window.makeKeyAndVisible()
+        defer { renderer.removeFromSuperview(); window.isHidden=true }
+        for step in 0...2 {
+            let t=Float(step)/2
+            rig.root.position.y=0.16*(1-t)
+            rig.sit(progress:t,time:Double(t))
+            let bounds=rig.root.visualBounds(relativeTo:rig.root)
+            XCTAssertLessThan(bounds.extents.y,0.8,"Sitting must preserve anatomical proportions")
+            XCTAssertGreaterThan(lowestVertex(rig.root),-0.025,"Actual feet/haunches must stay on the home floor")
+            try await Task.sleep(for:.milliseconds(250))
+            let snapshot: UIImage? = await withCheckedContinuation { continuation in
+                renderer.snapshot(saveToHDR:false) { continuation.resume(returning:$0) }
+            }
+            let attachment=XCTAttachment(image:try XCTUnwrap(snapshot))
+            attachment.name="home-sit-\(step)"; attachment.lifetime = .keepAlways; add(attachment)
+        }
+        rig.run(progress:0.2,time:2)
+        XCTAssertEqual(rig.body.position.y,abs(sin(Float(0.2)*Float.pi*4))*0.010,accuracy:0.00001)
+        XCTAssertEqual(rig.head.position,[0,0.029,-0.116])
+        XCTAssertEqual(simd_length(rig.body.orientation.vector),1,accuracy:0.0001)
+    }
     @MainActor func testCharacterInsideRenderedGlassElbows() async throws {
         let renderer=ARView(frame:CGRect(x:0,y:0,width:900,height:650),cameraMode:.nonAR,automaticallyConfigureSession:false)
         renderer.renderOptions=[.disableMotionBlur,.disableCameraGrain,.disableDepthOfField]
