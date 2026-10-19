@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+const iosTranslations = JSON.parse(fs.readFileSync(new URL('./ios-locales.json', import.meta.url), 'utf8'));
 const duel = {
  en:'DUEL', ru:'ДУЭЛЬ', be:'ДУЭЛЬ', uk:'ДУЕЛЬ', de:'DUELL', fr:'DUEL',
  es:'DUELO', it:'DUELLO', pt:'DUELO', pl:'POJEDYNEK', tr:'DÜELLO'
@@ -112,8 +113,14 @@ for(const locale of ['en','ru',...Object.keys(rows)]) {
  const {goal,...nativeGameplay} = gameplay[locale];
  const extra = locale==='ru'?ru:rows[locale]?Object.fromEntries(keys.map((key,i)=>[key,rows[locale][i]])):{};
  if(rows[locale]?.length !== undefined && rows[locale].length!==keys.length)throw Error(locale+' key mismatch');
- const strings=Object.entries({...en,...extra,...nativeGameplay,duel:duel[locale],selectHint:selectHint[locale],back:back[locale]}).map(([k,v])=>`${k==='turnLimitHint'?'\n':''}${JSON.stringify('native.'+k)} = ${JSON.stringify(v)};`).join('\n');
+ const overrides=iosTranslations[locale];
+ if (!overrides) throw Error(`${locale}: missing iOS translations`);
+ const nativeOverrides=Object.fromEntries(Object.entries(overrides).filter(([key])=>key.startsWith('native.')).map(([key,value])=>[key.slice(7),value]));
+ const strings=Object.entries({...en,...extra,...nativeGameplay,duel:duel[locale],selectHint:selectHint[locale],back:back[locale],...nativeOverrides}).map(([k,v])=>`${k==='turnLimitHint'?'\n':''}${JSON.stringify('native.'+k)} = ${JSON.stringify(v)};`).join('\n');
  const target = new URL(`../Twivvy/Resources/${locale}.lproj/Localizable.strings`,import.meta.url);
- const base = fs.readFileSync(target,'utf8').split('\n').filter(line=>!line.startsWith('\"native.')).join('\n').trim().replace(/^"rules\.goal" = .*;$/m, () => `"rules.goal" = ${JSON.stringify(goal)};`);
+ const base = fs.readFileSync(target,'utf8').split('\n').filter(line=>!line.startsWith('\"native.')).map(line=>{
+  const match=line.match(/^"([^"]+)" = /);
+  return match && Object.hasOwn(overrides,match[1]) ? `${JSON.stringify(match[1])} = ${JSON.stringify(overrides[match[1]])};` : line;
+ }).join('\n').trim().replace(/^"rules\.goal" = .*;$/m, () => `"rules.goal" = ${JSON.stringify(goal)};`);
  fs.writeFileSync(target,base+'\n\n'+strings+'\n');
 }

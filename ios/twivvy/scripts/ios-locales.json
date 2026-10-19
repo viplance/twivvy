@@ -1,0 +1,112 @@
+{
+  "en": {
+    "status.storageUnavailable": "This device cannot save the game. Keep the app open.",
+    "status.startupFailed": "Could not start the game. Restart the app on both devices.",
+    "error.oldVersion": "This game uses an older version. Update the game on both devices and create a new room.",
+    "error.occupied": "This game is already open on another device. Continue playing there.",
+    "error.connectFailed": "Could not connect. Please try joining again.",
+    "native.codeHint": "ABCD7 or https://…",
+    "native.privacyText": "Twivvy does not use advertising, analytics, tracking, accounts, or in-app purchases.\n\nYour nickname and preferences stay on your device. Online play sends your nickname, a random room credential and connection details to the Twivvy signaling service. Your opponent sees your nickname and can receive your IP address through the direct WebRTC connection. Moves travel directly between the two players.\n\nWaiting rooms and matches with an absent player expire after 30 minutes. Active rooms remain available. Infrastructure providers may retain technical request logs, including IP addresses, for security and service operation.\n\nRecovery credentials and hidden moves are stored in the iOS Keychain on this device. Leaving an online game clears its recovery data. Sound and haptics can be disabled in Settings. Training works without an internet connection; an optional online-presence check may contact the signaling service.\n\nNo camera, microphone, contacts or location access is requested.\n\nPublisher: Dzmitry Sharko. Support and privacy requests: https://twivvy.e-notix.com/support.html\n\nUpdated: 17 September 2026.",
+    "native.seconds": "{seconds}s"
+  },
+  "be": {
+    "status.storageUnavailable": "Не ўдалося захаваць гульню на прыладзе. Не закрывай праграму.",
+    "status.startupFailed": "Не ўдалося запусціць гульню. Перазапусці праграму на абедзвюх прыладах.",
+    "error.oldVersion": "Гульня створана ў старой версіі. Абнаві гульню на абедзвюх прыладах і ствары новы пакой.",
+    "error.occupied": "Гэтая гульня ўжо адкрыта на іншай прыладзе. Працягні гуляць на ёй.",
+    "error.connectFailed": "Не ўдалося падключыцца. Паспрабуй далучыцца яшчэ раз.",
+    "native.codeHint": "ABCD7 або https://…",
+    "native.privacyText": "У Twivvy няма рэкламы, аналітыкі, адсочвання, уліковых запісаў або ўбудаваных пакупак.\n\nТваё імя ў гульні і налады захоўваюцца на прыладзе. Для анлайн-гульні імя, выпадковыя даныя доступу да пакоя і звесткі пра злучэнне перадаюцца сігнальнаму сэрвісу Twivvy. Супернік бачыць тваё імя і можа атрымаць твой IP-адрас праз прамое WebRTC-злучэнне. Хады перадаюцца непасрэдна паміж гульцамі.\n\nПакоі чакання і партыі з адсутным гульцом заканчваюцца праз 30 хвілін. Актыўныя пакоі застаюцца даступнымі. Пастаўшчыкі інфраструктуры могуць захоўваць тэхнічныя журналы запытаў, у тым ліку IP-адрасы, для бяспекі і працы сэрвісу.\n\nДаныя аднаўлення і сакрэтныя хады захоўваюцца ў iOS Keychain на гэтай прыладзе. Выхад з анлайн-гульні выдаляе даныя яе аднаўлення. Гук і тактыльны водгук можна выключыць у наладах. Трэніроўка працуе без інтэрнэту; дадатковая праверка прысутнасці гульцоў можа звяртацца да сігнальнага сэрвісу.\n\nПраграма не запытвае доступ да камеры, мікрафона, кантактаў або месцазнаходжання.\n\nВыдавец: Dzmitry Sharko. Падтрымка і запыты аб прыватнасці: https://twivvy.e-notix.com/support.html\n\nАбноўлена: 17 верасня 2026 года.",
+    "native.seconds": "{seconds} с"
+  },
+  "es": {
+    "status.storageUnavailable": "No se puede guardar la partida en este dispositivo. Mantén la aplicación abierta.",
+    "status.startupFailed": "No se pudo iniciar la partida. Reinicia la aplicación en ambos dispositivos.",
+    "error.oldVersion": "La partida se creó con una versión anterior. Actualiza el juego en ambos dispositivos y crea una sala nueva.",
+    "error.occupied": "Esta partida ya está abierta en otro dispositivo. Sigue jugando allí.",
+    "error.connectFailed": "No se pudo conectar. Intenta unirte de nuevo.",
+    "native.codeHint": "ABCD7 o https://…",
+    "native.privacyText": "Twivvy no utiliza publicidad, analíticas, seguimiento, cuentas ni compras dentro de la aplicación.\n\nTu apodo y tus preferencias permanecen en tu dispositivo. El juego en línea envía tu apodo, unas credenciales aleatorias de acceso a la sala e información de conexión al servicio de señalización de Twivvy. Tu rival ve tu apodo y puede recibir tu dirección IP mediante la conexión WebRTC directa. Las jugadas se transmiten directamente entre los dos jugadores.\n\nLas salas de espera y las partidas con una persona ausente caducan a los 30 minutos. Las salas activas siguen disponibles. Los proveedores de infraestructura pueden conservar registros técnicos de las solicitudes, incluidas las direcciones IP, para la seguridad y el funcionamiento del servicio.\n\nLas credenciales de recuperación y las jugadas secretas se guardan en el llavero de iOS de este dispositivo. Al salir de una partida en línea, se borran sus datos de recuperación. Puedes desactivar el sonido y la respuesta háptica en Ajustes. El entrenamiento funciona sin internet; una comprobación opcional de la presencia de jugadores puede contactar con el servicio de señalización.\n\nNo se solicita acceso a la cámara, al micrófono, a los contactos ni a la ubicación.\n\nEditor: Dzmitry Sharko. Asistencia y consultas de privacidad: https://twivvy.e-notix.com/support.html\n\nActualización: 17 de septiembre de 2026.",
+    "native.seconds": "{seconds} s"
+  },
+  "ru": {
+    "status.storageUnavailable": "Не удалось сохранить игру на устройстве. Не закрывай приложение.",
+    "status.startupFailed": "Не удалось запустить игру. Перезапусти приложение на обоих устройствах.",
+    "error.oldVersion": "Игра создана в старой версии. Обнови игру на обоих устройствах и создай новую комнату.",
+    "error.occupied": "Эта игра уже открыта на другом устройстве. Продолжи играть на нём.",
+    "error.connectFailed": "Не удалось подключиться. Попробуй войти ещё раз.",
+    "native.codeHint": "ABCD7 или https://…",
+    "native.privacyText": "В Twivvy нет рекламы, аналитики, отслеживания, аккаунтов и встроенных покупок.\n\nИмя и настройки хранятся на устройстве. Для онлайн-игры имя, случайные данные доступа к комнате и сведения о соединении передаются сигнальному сервису Twivvy. Соперник видит имя и может получить IP-адрес через прямое WebRTC-соединение. Ходы передаются напрямую между игроками.\n\nОжидающие комнаты и партии с отсутствующим игроком истекают через 30 минут. Активные комнаты сохраняются. Инфраструктурные провайдеры могут хранить технические журналы запросов, включая IP-адреса, для работы и защиты сервиса.\n\nДанные восстановления и скрытые ходы хранятся в Связке ключей iOS на этом устройстве. Выход из онлайн-игры удаляет данные её восстановления. Звуки и тактильный отклик отключаются в настройках. Тренировка работает офлайн; дополнительная проверка присутствия игроков может обращаться к сигнальному сервису.\n\nПриложение не запрашивает доступ к камере, микрофону, контактам или геопозиции.\n\nИздатель: Dzmitry Sharko. Поддержка и запросы о конфиденциальности: https://twivvy.e-notix.com/support.html\n\nОбновлено: 17 сентября 2026.",
+    "native.seconds": "{seconds} с"
+  },
+  "uk": {
+    "status.storageUnavailable": "Не вдалося зберегти гру на пристрої. Не закривай застосунок.",
+    "status.startupFailed": "Не вдалося запустити гру. Перезапусти застосунок на обох пристроях.",
+    "error.oldVersion": "Гру створено в старій версії. Онови гру на обох пристроях і створи нову кімнату.",
+    "error.occupied": "Ця гра вже відкрита на іншому пристрої. Продовжуй грати на ньому.",
+    "error.connectFailed": "Не вдалося підключитися. Спробуй приєднатися ще раз.",
+    "native.codeHint": "ABCD7 або https://…",
+    "native.privacyText": "У Twivvy немає реклами, аналітики, відстеження, облікових записів або вбудованих покупок.\n\nТвоє ім’я в грі та налаштування зберігаються на пристрої. Для онлайн-гри ім’я, випадкові дані доступу до кімнати й відомості про з’єднання передаються сигнальному сервісу Twivvy. Суперник бачить твоє ім’я та може отримати твою IP-адресу через пряме WebRTC-з’єднання. Ходи передаються безпосередньо між гравцями.\n\nКімнати очікування та партії з відсутнім гравцем завершуються через 30 хвилин. Активні кімнати залишаються доступними. Постачальники інфраструктури можуть зберігати технічні журнали запитів, зокрема IP-адреси, для безпеки й роботи сервісу.\n\nДані відновлення та секретні ходи зберігаються у В’язці ключів iOS на цьому пристрої. Вихід з онлайн-гри видаляє дані її відновлення. Звук і тактильний відгук можна вимкнути в налаштуваннях. Тренування працює без інтернету; додаткова перевірка присутності гравців може звертатися до сигнального сервісу.\n\nЗастосунок не запитує доступу до камери, мікрофона, контактів або геопозиції.\n\nВидавець: Dzmitry Sharko. Підтримка й запити щодо конфіденційності: https://twivvy.e-notix.com/support.html\n\nОновлено: 17 вересня 2026 року.",
+    "native.seconds": "{seconds} с"
+  },
+  "it": {
+    "status.storageUnavailable": "Impossibile salvare la partita su questo dispositivo. Tieni aperta l’app.",
+    "status.startupFailed": "Impossibile avviare la partita. Riavvia l’app su entrambi i dispositivi.",
+    "error.oldVersion": "La partita è stata creata con una versione precedente. Aggiorna il gioco su entrambi i dispositivi e crea una nuova stanza.",
+    "error.occupied": "Questa partita è già aperta su un altro dispositivo. Continua a giocare lì.",
+    "error.connectFailed": "Connessione non riuscita. Prova a unirti di nuovo alla partita.",
+    "native.codeHint": "ABCD7 o https://…",
+    "native.privacyText": "Twivvy non utilizza pubblicità, analisi, tracciamento, account o acquisti in-app.\n\nIl tuo soprannome e le tue preferenze restano sul dispositivo. Il gioco online invia il tuo soprannome, credenziali casuali di accesso alla stanza e informazioni sulla connessione al servizio di segnalazione di Twivvy. L’avversario vede il tuo soprannome e può ricevere il tuo indirizzo IP tramite la connessione WebRTC diretta. Le mosse vengono trasmesse direttamente tra i due giocatori.\n\nLe stanze in attesa e le partite con una persona assente scadono dopo 30 minuti. Le stanze attive restano disponibili. I fornitori dell’infrastruttura possono conservare registri tecnici delle richieste, inclusi gli indirizzi IP, per la sicurezza e il funzionamento del servizio.\n\nLe credenziali di ripristino e le mosse segrete sono memorizzate nel portachiavi iOS di questo dispositivo. Uscire da una partita online ne elimina i dati di ripristino. Suoni e feedback aptico possono essere disattivati nelle impostazioni. L’allenamento funziona senza internet; un controllo facoltativo della presenza dei giocatori può contattare il servizio di segnalazione.\n\nNon viene richiesto l’accesso a fotocamera, microfono, contatti o posizione.\n\nEditore: Dzmitry Sharko. Assistenza e richieste sulla privacy: https://twivvy.e-notix.com/support.html\n\nAggiornamento: 17 settembre 2026.",
+    "native.seconds": "{seconds} s"
+  },
+  "pt": {
+    "status.storageUnavailable": "Não foi possível guardar a partida neste dispositivo. Mantém a aplicação aberta.",
+    "status.startupFailed": "Não foi possível iniciar a partida. Reinicia a aplicação nos dois dispositivos.",
+    "error.oldVersion": "A partida foi criada numa versão anterior. Atualiza o jogo nos dois dispositivos e cria uma nova sala.",
+    "error.occupied": "Esta partida já está aberta noutro dispositivo. Continua a jogar lá.",
+    "error.connectFailed": "Não foi possível estabelecer ligação. Tenta entrar novamente.",
+    "native.codeHint": "ABCD7 ou https://…",
+    "native.privacyText": "O Twivvy não utiliza publicidade, análise de utilização, rastreio, contas ou compras integradas.\n\nA tua alcunha e as tuas preferências ficam no teu dispositivo. O jogo online envia a tua alcunha, credenciais aleatórias de acesso à sala e informações de ligação ao serviço de sinalização do Twivvy. O adversário vê a tua alcunha e pode receber o teu endereço IP através da ligação WebRTC direta. As jogadas são transmitidas diretamente entre os dois jogadores.\n\nAs salas de espera e as partidas com uma pessoa ausente expiram após 30 minutos. As salas ativas continuam disponíveis. Os fornecedores de infraestrutura podem conservar registos técnicos dos pedidos, incluindo endereços IP, para a segurança e o funcionamento do serviço.\n\nAs credenciais de recuperação e as jogadas secretas são guardadas no Porta-chaves do iOS deste dispositivo. Sair de uma partida online elimina os respetivos dados de recuperação. O som e a resposta háptica podem ser desativados nas definições. O treino funciona sem internet; uma verificação opcional da presença de jogadores pode contactar o serviço de sinalização.\n\nNão é pedido acesso à câmara, ao microfone, aos contactos ou à localização.\n\nEditor: Dzmitry Sharko. Suporte e pedidos de privacidade: https://twivvy.e-notix.com/support.html\n\nAtualizado: 17 de setembro de 2026.",
+    "native.seconds": "{seconds} s"
+  },
+  "pl": {
+    "status.storageUnavailable": "Nie udało się zapisać gry na tym urządzeniu. Nie zamykaj aplikacji.",
+    "status.startupFailed": "Nie udało się uruchomić gry. Uruchom ponownie aplikację na obu urządzeniach.",
+    "error.oldVersion": "Gra została utworzona w starszej wersji. Zaktualizuj grę na obu urządzeniach i utwórz nowy pokój.",
+    "error.occupied": "Ta gra jest już otwarta na innym urządzeniu. Kontynuuj grę na nim.",
+    "error.connectFailed": "Nie udało się połączyć. Spróbuj dołączyć ponownie.",
+    "native.codeHint": "ABCD7 lub https://…",
+    "native.privacyText": "Twivvy nie korzysta z reklam, analityki, śledzenia, kont ani zakupów w aplikacji.\n\nTwój pseudonim i preferencje pozostają na urządzeniu. Gra online wysyła twój pseudonim, losowe dane dostępu do pokoju oraz informacje o połączeniu do usługi sygnalizacyjnej Twivvy. Przeciwnik widzi twój pseudonim i może otrzymać twój adres IP przez bezpośrednie połączenie WebRTC. Ruchy są przesyłane bezpośrednio między dwoma graczami.\n\nPoczekalnie i partie z nieobecnym graczem wygasają po 30 minutach. Aktywne pokoje pozostają dostępne. Dostawcy infrastruktury mogą przechowywać techniczne dzienniki żądań, w tym adresy IP, na potrzeby bezpieczeństwa i działania usługi.\n\nDane odzyskiwania i tajne ruchy są przechowywane w pęku kluczy iOS na tym urządzeniu. Opuszczenie gry online usuwa jej dane odzyskiwania. Dźwięk i wibracje można wyłączyć w ustawieniach. Trening działa bez internetu; opcjonalne sprawdzanie obecności graczy może łączyć się z usługą sygnalizacyjną.\n\nAplikacja nie prosi o dostęp do aparatu, mikrofonu, kontaktów ani lokalizacji.\n\nWydawca: Dzmitry Sharko. Pomoc i pytania o prywatność: https://twivvy.e-notix.com/support.html\n\nAktualizacja: 17 września 2026 r.",
+    "native.seconds": "{seconds} s"
+  },
+  "fr": {
+    "status.storageUnavailable": "Impossible d’enregistrer la partie sur cet appareil. Garde l’application ouverte.",
+    "status.startupFailed": "Impossible de démarrer la partie. Relance l’application sur les deux appareils.",
+    "error.oldVersion": "La partie a été créée avec une ancienne version. Mets le jeu à jour sur les deux appareils et crée une nouvelle salle.",
+    "error.occupied": "Cette partie est déjà ouverte sur un autre appareil. Continue à jouer dessus.",
+    "error.connectFailed": "Connexion impossible. Essaie de rejoindre la partie à nouveau.",
+    "native.codeHint": "ABCD7 ou https://…",
+    "native.privacyText": "Twivvy n’utilise ni publicité, ni outils d’analyse, ni suivi, ni comptes, ni achats intégrés.\n\nTon pseudo et tes préférences restent sur ton appareil. Le jeu en ligne envoie ton pseudo, des identifiants de salle aléatoires et des informations de connexion au service de signalisation de Twivvy. Ton adversaire voit ton pseudo et peut recevoir ton adresse IP par la connexion WebRTC directe. Les coups sont transmis directement entre les deux joueurs.\n\nLes salles d’attente et les parties avec une personne absente expirent après 30 minutes. Les salles actives restent disponibles. Les prestataires d’infrastructure peuvent conserver des journaux techniques des requêtes, comprenant les adresses IP, pour la sécurité et le fonctionnement du service.\n\nLes données de reprise et les coups secrets sont stockés dans le trousseau iOS de cet appareil. Quitter une partie en ligne supprime ses données de reprise. Le son et les vibrations peuvent être désactivés dans les réglages. L’entraînement fonctionne sans internet ; une vérification facultative de la présence des joueurs peut contacter le service de signalisation.\n\nAucun accès à la caméra, au microphone, aux contacts ou à la localisation n’est demandé.\n\nÉditeur : Dzmitry Sharko. Assistance et demandes de confidentialité : https://twivvy.e-notix.com/support.html\n\nMise à jour : 17 septembre 2026.",
+    "native.seconds": "{seconds} s"
+  },
+  "de": {
+    "status.storageUnavailable": "Das Spiel kann auf diesem Gerät nicht gespeichert werden. Lass die App geöffnet.",
+    "status.startupFailed": "Das Spiel konnte nicht gestartet werden. Starte die App auf beiden Geräten neu.",
+    "error.oldVersion": "Das Spiel wurde mit einer älteren Version erstellt. Aktualisiere das Spiel auf beiden Geräten und erstelle einen neuen Raum.",
+    "error.occupied": "Dieses Spiel ist bereits auf einem anderen Gerät geöffnet. Spiele dort weiter.",
+    "error.connectFailed": "Verbindung fehlgeschlagen. Versuche erneut, dem Spiel beizutreten.",
+    "native.codeHint": "ABCD7 oder https://…",
+    "native.privacyText": "Twivvy verwendet keine Werbung, Analysen, Tracking, Benutzerkonten oder In-App-Käufe.\n\nDein Spitzname und deine Einstellungen bleiben auf deinem Gerät. Beim Onlinespiel werden dein Spitzname, zufällige Zugangsdaten für den Raum und Verbindungsinformationen an den Signalisierungsdienst von Twivvy gesendet. Dein Gegenüber sieht deinen Spitznamen und kann über die direkte WebRTC-Verbindung deine IP-Adresse erhalten. Spielzüge werden direkt zwischen den beiden Spielern übertragen.\n\nWarteräume und Partien mit einer abwesenden Person laufen nach 30 Minuten ab. Aktive Räume bleiben verfügbar. Infrastrukturanbieter können technische Anfrageprotokolle einschließlich IP-Adressen für die Sicherheit und den Betrieb des Dienstes speichern.\n\nWiederherstellungsdaten und geheime Spielzüge werden im iOS-Schlüsselbund auf diesem Gerät gespeichert. Wenn du ein Onlinespiel verlässt, werden dessen Wiederherstellungsdaten gelöscht. Ton und haptisches Feedback lassen sich in den Einstellungen ausschalten. Das Training funktioniert ohne Internet; eine optionale Anwesenheitsprüfung kann den Signalisierungsdienst kontaktieren.\n\nEs wird kein Zugriff auf Kamera, Mikrofon, Kontakte oder Standort angefordert.\n\nHerausgeber: Dzmitry Sharko. Support und Datenschutzanfragen: https://twivvy.e-notix.com/support.html\n\nAktualisiert: 17. September 2026.",
+    "native.seconds": "{seconds} s"
+  },
+  "tr": {
+    "status.storageUnavailable": "Oyun bu cihaza kaydedilemiyor. Uygulamayı açık tut.",
+    "status.startupFailed": "Oyun başlatılamadı. Uygulamayı iki cihazda da yeniden başlat.",
+    "error.oldVersion": "Oyun eski bir sürümle oluşturulmuş. Oyunu iki cihazda da güncelle ve yeni bir oda oluştur.",
+    "error.occupied": "Bu oyun başka bir cihazda zaten açık. O cihazda oynamaya devam et.",
+    "error.connectFailed": "Bağlantı kurulamadı. Oyuna katılmayı tekrar dene.",
+    "native.codeHint": "ABCD7 veya https://…",
+    "native.privacyText": "Twivvy reklam, kullanım analizi, takip, hesap veya uygulama içi satın alma kullanmaz.\n\nTakma adın ve tercihlerin cihazında kalır. Çevrimiçi oyun, takma adını, oda için rastgele oluşturulan erişim bilgilerini ve bağlantı bilgilerini Twivvy’in sinyalleşme hizmetine gönderir. Rakibin takma adını görür ve doğrudan WebRTC bağlantısı üzerinden IP adresini alabilir. Hamleler iki oyuncu arasında doğrudan iletilir.\n\nBekleme odaları ve oyunculardan birinin bulunmadığı maçlar 30 dakika sonra sona erer. Etkin odalar kullanılabilir durumda kalır. Altyapı sağlayıcıları, güvenlik ve hizmetin çalışması için IP adresleri dâhil teknik istek kayıtlarını saklayabilir.\n\nKurtarma bilgileri ve gizli hamleler bu cihazın iOS Anahtar Zinciri’nde saklanır. Çevrimiçi oyundan çıkmak, o oyunun kurtarma verilerini siler. Ses ve dokunsal geri bildirim Ayarlar’dan kapatılabilir. Antrenman internet olmadan çalışır; isteğe bağlı oyuncu varlığı kontrolü sinyalleşme hizmetine bağlanabilir.\n\nKamera, mikrofon, kişiler veya konum erişimi istenmez.\n\nYayıncı: Dzmitry Sharko. Destek ve gizlilik talepleri: https://twivvy.e-notix.com/support.html\n\nGüncelleme: 17 Eylül 2026.",
+    "native.seconds": "{seconds} sn"
+  }
+}

@@ -64,6 +64,12 @@ The interface, rendering, offline rules and bot are Swift. To preserve compatibi
 
 `Resources/Bridge/protocol.js` is generated from `js/rules.js`, `js/net.js` and `js/session.js`. Do not edit the generated file. `scripts/sync-web.mjs` regenerates it, all locales and 45 deterministic reference games (1,337 rounds). The bridge adapter lives in `Resources/Bridge/bridge.js`.
 
+Native error wording, localized invitation examples, privacy text and timer units
+are maintained in `scripts/ios-locales.json`, applied after importing web strings.
+Every sync validates all eleven catalogs, placeholders, display names and literal
+UI/bridge references, and rejects unexpected English fallback text. Run
+`pnpm ios:validate-locales` to check existing generated resources separately.
+
 ## Tests
 
 The **Twivvy** scheme runs native rule/browser parity tests, local WebKit/hash/data-channel capability tests, and UI flows. UI tests disable network presence checks. Screenshots are retained in `.xcresult` attachments.

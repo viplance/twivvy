@@ -248,7 +248,7 @@ struct ContentView: View {
                     HStack {
                         Text(game.paused ? L("native.recovering") : game.active ? L("native.yourMove") : L("status.waitingOpponent"))
                         Spacer()
-                        Text("\(Int(ceil(game.remaining)))s").monospacedDigit().foregroundStyle(game.remaining < 5 ? coral : mint)
+                        Text(LF("native.seconds",["seconds":"\(Int(ceil(game.remaining)))"])).monospacedDigit().foregroundStyle(game.remaining < 5 ? coral : mint)
                     }.font(.caption.weight(.semibold))
                     GeometryReader { proxy in
                         Capsule().fill(.white.opacity(0.08))

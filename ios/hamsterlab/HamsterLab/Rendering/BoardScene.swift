@@ -18,6 +18,8 @@ import simd
     private var tileStyles: [Int:Int] = [:]
     private var tileContent = Entity()
     private var residents = Entity()
+    private var couplers = Entity()
+    private static var couplerTemplate: Entity?
     private var state = BoardState()
     private var side: Side = .bottom
     private var enabled = false
@@ -37,7 +39,6 @@ import simd
     private var hero: HamsterRig?
     private var updateSubscription: (any Cancellable)?
     private static var tubeTemplates: [String: Entity] = [:]
-    private static var labelMeshes: [Int:MeshResource] = [:]
     private struct Drag { let platform: Int; let start: SIMD3<Float>; let angle: Float; let selected: Command?; var delta: Float = 0; var moved = false }
     private struct Transition {
         let after: BoardState
@@ -49,7 +50,7 @@ import simd
 
     init(showcase: Bool = false) {
         self.showcase=showcase
-        anchor.addChild(world); world.addChild(tileContent); world.addChild(residents)
+        anchor.addChild(world); world.addChild(tileContent); world.addChild(residents); world.addChild(couplers)
         configureCamera(); configureLighting()
         if showcase { buildShowcase() } else { buildEnvironment(); render(BoardState(),side:.bottom) }
     }
@@ -67,7 +68,7 @@ import simd
         if self.view !== view {
             updateSubscription?.cancel(); updateSubscription=nil; self.view=view
             view.scene.addAnchor(anchor)
-            view.environment.background = .color(UIColor(lab:0x102537))
+            view.environment.background = .color(UIColor(lab:0xFFFFFF))
             view.environment.lighting.intensityExponent = 0.6
         }
         view.isHidden=false; anchor.isEnabled=true
@@ -87,13 +88,13 @@ import simd
         view.removeFromSuperview()
     }
     private func configureCamera() {
-        camera.camera.fieldOfViewInDegrees = showcase ? 38 : 43
+        camera.camera.fieldOfViewInDegrees = showcase ? 38 : 46
         camera.position = showcase ? [0,3.25,5.4] : [0,8.8,7.0]
         camera.look(at:showcase ? [0,0.75,0] : [0,0.05,0.65],from:camera.position,relativeTo:nil)
         anchor.addChild(camera)
     }
     private func configureLighting() {
-        let key=DirectionalLight(); key.light.color=UIColor(lab:0xFFF0DE); key.light.intensity=2400
+        let key=DirectionalLight(); key.light.color=UIColor(lab:0xF5F9FF); key.light.intensity=2400
         key.look(at:.zero,from:[-4,8,5],relativeTo:nil)
         key.shadow = DirectionalLightComponent.Shadow(maximumDistance:18,depthBias:2)
         anchor.addChild(key)
@@ -103,8 +104,8 @@ import simd
         rim.light.attenuationRadius=15; rim.position=[0,4,-4]; anchor.addChild(rim)
     }
     private func buildEnvironment() {
-        world.addChild(LabGeometry.box([7.15,0.28,7.65],at:[0,-0.25,0],color:UIColor(lab:0x203C50),radius:0.24))
-        world.addChild(LabGeometry.box([6.86,0.06,6.85],at:[0,-0.065,0],color:UIColor(lab:0x698090),radius:0.17))
+        world.addChild(LabGeometry.box([7.15,0.28,7.65],at:[0,-0.25,0],color:UIColor(lab:0xB5CCE3),radius:0.24))
+        world.addChild(LabGeometry.box([6.86,0.06,6.85],at:[0,-0.065,0],color:UIColor(lab:0xDFECFA),radius:0.17))
         // Corner fasteners, tiny status LEDs, and the laboratory workbench.
         for x: Float in [-3.34,3.34] { for z: Float in [-3.46,3.46] {
             world.addChild(LabGeometry.ellipsoid([0.055,0.02,0.055],at:[x,-0.08,z],color:UIColor(lab:0xB5CBD1)))
@@ -122,14 +123,15 @@ import simd
         world.addChild(LabGeometry.box([4.32,0.10,2.72],at:[0,-0.04,0],color:UIColor(lab:0xB7C9D0),radius:0.24))
         let points=(0...30).map { i -> SIMD3<Float> in
             let t=Float(i)/30
-            return [-2.0+4*t,0.92,sin(t * .pi*2)*0.38]
+            return TubePath.quadratic([-2.0,0.92,-0.65],[0,0.92,-0.65],[0,0.92,1.12],t)
         }
         world.addChild(LabGeometry.tubeAssembly(points:points,tint:LabGeometry.mint,radius:0.74))
-        for x: Float in [-1.7,1.7] {
-            world.addChild(LabGeometry.box([0.13,0.70,0.65],at:[x,0.31,0],color:LabGeometry.lavender,radius:0.04))
+        for position: SIMD3<Float> in [[-1.70,0.31,-0.62],[-0.08,0.31,0.69]] {
+            world.addChild(LabGeometry.box([0.65,0.70,0.13],at:position,color:LabGeometry.lavender,radius:0.04))
         }
-        let hamster=HamsterRig(id:0); hamster.root.position=[-0.12,0.93,0]; hamster.root.scale = .init(repeating:4.0)
-        hamster.root.orientation=simd_quatf(angle:.pi-0.22,axis:[0,1,0]); world.addChild(hamster.root); hero=hamster
+        // The hero peeks from the open end, along the tube's actual axis.
+        let hamster=HamsterRig(id:0); hamster.root.position=[-0.08,0.93,0.22]; hamster.root.scale = .init(repeating:4.0)
+        hamster.root.orientation=simd_quatf(angle:.pi-0.08,axis:[0,1,0]); world.addChild(hamster.root); hero=hamster
         // A flask and a rack of specimen vials reinforce the miniature lab.
         let flask=Entity(); flask.position=[1.46,0.37,-0.85]
         let sphere=LabGeometry.ellipsoid([0.32,0.34,0.32],at:.zero,color:LabGeometry.mint)
@@ -156,7 +158,7 @@ import simd
             hamsters.removeValue(forKey:id)?.root.removeFromParent()
         }
         hamsters.values.forEach { $0.root.removeFromParent() }
-        rebuildTiles(state); rebuildReceivers(state)
+        rebuildTiles(state); rebuildCouplers(state); rebuildReceivers(state)
         for ball in state.balls { install(ball,in:state) }
         setSelection(selection,highlighted:selection?.platform,enabled:enabled,animated:false)
     }
@@ -175,8 +177,8 @@ import simd
             if p==4 { rebuiltCenter=true }
             let tile=Entity(); tile.name="platform-\(p)"; tile.position=TubePath.tileCenter(p)
             let tint=palette[(p+p/3)%3]
-            tile.addChild(LabGeometry.box([2.06,0.10,2.06],at:[0,0.02,0],color:UIColor(lab:0x263D54),radius:0.14))
-            let base=LabGeometry.box([1.99,0.08,1.99],at:[0,0.10,0],color:UIColor(lab:0x527184),radius:0.13)
+            tile.addChild(LabGeometry.box([2.06,0.10,2.06],at:[0,0.02,0],color:UIColor(lab:0x94B5D6),radius:0.14))
+            let base=LabGeometry.box([1.99,0.08,1.99],at:[0,0.10,0],color:UIColor(lab:0xEDF5FF),radius:0.13)
             base.name="base"; tile.addChild(base); tileBases[p]=base
             // Drag/tap selection uses boardPoint's ray/plane intersection;
             // invisible physics/collision meshes are unnecessary.
@@ -189,7 +191,7 @@ import simd
                     if let cached=Self.tubeTemplates[key] { template=cached }
                     else {
                         let path=TubePath(center:[0,TubePath.height,0],mask:mask)
-                        let points=(0...18).map { path.sample(Float($0)/18) }
+                        let points=(0...28).map { path.sample(Float($0)/28) }
                         template=LabGeometry.tubeAssembly(points:points,tint:tint)
                         Self.tubeTemplates[key]=template
                     }
@@ -199,14 +201,6 @@ import simd
                     dot.position=[center.x,0.17,center.z]; tile.addChild(dot)
                 }
             } }
-            let labelMesh: MeshResource
-            if let cached=Self.labelMeshes[p] { labelMesh=cached }
-            else {
-                labelMesh = .generateText(String(format:"%02d",p+1),extrusionDepth:0.001,font:.monospacedSystemFont(ofSize:0.11,weight:.bold))
-                Self.labelMeshes[p]=labelMesh
-            }
-            let label=ModelEntity(mesh:labelMesh,materials:[LabGeometry.material(UIColor(lab:0xB8D2DC))])
-            label.position=[-0.88,0.15,0.91]; label.orientation=simd_quatf(angle:-.pi/2,axis:[1,0,0]); tile.addChild(label)
             tileContent.addChild(tile); tiles[p]=tile
         }
         guard rebuiltCenter else { return }
@@ -226,7 +220,7 @@ import simd
         for receiver in [Side.top,.bottom] {
             let tint=receiver == side ? LabGeometry.mint : LabGeometry.pink
             let z: Float=receiver == .top ? -3.67 : 3.67
-            residents.addChild(LabGeometry.box([5.9,0.12,0.43],at:[0,0.03,z],color:UIColor(lab:0x314D60),radius:0.12))
+            residents.addChild(LabGeometry.box([5.9,0.12,0.43],at:[0,0.03,z],color:UIColor(lab:0xB4CEE8),radius:0.12))
             for i in 0..<max(7,state.score[receiver]) {
                 let x=Float(i)*0.34-Float(max(7,state.score[receiver])-1)*0.17
                 if i < state.score[receiver] {
@@ -241,25 +235,51 @@ import simd
             }
         }
     }
+    private func rebuildCouplers(_ state: BoardState) {
+        couplers.children.removeAll(); couplers.isEnabled=true
+        let gap=TubePath.pitch-2*TubePath.cell
+        if Self.couplerTemplate == nil {
+            Self.couplerTemplate=LabGeometry.tubeAssembly(points:[[0,0,-gap/2],[0,0,gap/2]],tint:LabGeometry.mint,collars:false)
+        }
+        for row in 0..<6 { for col in 0..<6 {
+            for exit in [1,2] {
+                let nr=row+(exit == 2 ? 1 : 0), nc=col+(exit == 1 ? 1 : 0)
+                guard nr<6,nc<6,Rules.platform(row,col) != Rules.platform(nr,nc) else { continue }
+                let source=TubePath(row:row,col:col,state:state), destination=TubePath(row:nr,col:nc,state:state)
+                guard source.ports.contains(exit),destination.ports.contains((exit+2)%4),let template=Self.couplerTemplate else { continue }
+                let a=source.endpoint(exit), b=destination.endpoint((exit+2)%4)
+                let sleeve=template.clone(recursive:true)
+                sleeve.position=(a+b)/2
+                sleeve.orientation=simd_quatf(from:[0,0,1],to:simd_normalize(b-a))
+                couplers.addChild(sleeve)
+            }
+        } }
+    }
     private func install(_ ball: Ball, in state: BoardState) {
         let hamster=hamsters[ball.id] ?? HamsterRig(id:ball.id)
         let tile=tiles[Rules.platform(ball.row,ball.col)]!
         tile.addChild(hamster.root)
-        hamster.root.position=TubePath(row:ball.row,col:ball.col,state:state).midpoint-TubePath.tileCenter(Rules.platform(ball.row,ball.col))
-        hamster.root.orientation=simd_quatf(angle:TubePath.heading(exit:ball.exit),axis:[0,1,0])
         hamster.root.scale = .one
         hamster.rest(time:clock)
+        pose(hamster, ball:ball, state:state)
         hamsters[ball.id]=hamster
+    }
+    private func pose(_ hamster: HamsterRig, ball: Ball, state: BoardState) {
+        let path=TubePath(row:ball.row,col:ball.col,state:state)
+        let tileOffset=TubePath.tileCenter(Rules.platform(ball.row,ball.col))
+        let offset=hamster.root.parent === world ? SIMD3<Float>.zero : tileOffset
+        hamster.followTube { path.fromMidpoint(toward:ball.exit,distance:$0)-offset }
     }
     func setSelection(_ selection: Command?, highlighted: Int?, enabled: Bool, animated: Bool = true) {
         self.selection=selection; self.enabled=enabled
         guard !isAnimating else { return }
+        couplers.isEnabled = selection == nil && drag == nil
         for (p,tile) in tiles {
             let selected=selection?.platform == p
             let hot=state.cooldown.contains(p)
             let style=hot ? 2 : selected ? 1 : 0
             if tileStyles[p] != style {
-                tileBases[p]?.model?.materials=[LabGeometry.material(hot ? UIColor(lab:0x9B687C) : selected ? UIColor(lab:0xC5AE72) : UIColor(lab:0x527184))]
+                tileBases[p]?.model?.materials=[LabGeometry.material(hot ? UIColor(lab:0xEAB2BD) : selected ? UIColor(lab:0xFFD973) : UIColor(lab:0xEDF5FF))]
                 tileStyles[p]=style
             }
             guard drag?.platform != p else { continue }
@@ -281,6 +301,7 @@ import simd
         tiles.values.forEach { $0.stopAllAnimations(recursive:false) }
         guard !UIAccessibility.isReduceMotionEnabled else { render(after,side:side); return }
         isAnimating=true
+        couplers.isEnabled=false
         var rotated=before; rotated.balls.append(contentsOf:turn.spawned)
         for ball in turn.spawned {
             install(ball,in:before)
@@ -307,7 +328,10 @@ import simd
         clock += delta
         if let hero { hero.rest(time:clock) }
         guard var transition else {
-            for hamster in hamsters.values { hamster.rest(time:clock) }
+            for ball in state.balls {
+                guard let hamster=hamsters[ball.id] else { continue }
+                hamster.rest(time:clock); pose(hamster,ball:ball,state:state)
+            }
             return
         }
         transition.elapsed += delta
@@ -317,6 +341,7 @@ import simd
                 hamster.root.removeFromParent(); world.addChild(hamster.root); hamster.root.setTransformMatrix(t,relativeTo:world)
             }
             rebuildTiles(transition.after)
+            rebuildCouplers(transition.after)
             transition.moving=true
         }
         if transition.moving {
@@ -326,29 +351,24 @@ import simd
                 let source=TubePath(row:origin.row,col:origin.col,state:transition.rotated)
                 if origin.row != ball.row || origin.col != ball.col {
                     let destination=TubePath(row:ball.row,col:ball.col,state:transition.after)
-                    let point=source.travel(to:destination,exit:origin.exit,progress:t)
-                    let ahead=source.travel(to:destination,exit:origin.exit,progress:min(1,t+0.015))
-                    let behind=source.travel(to:destination,exit:origin.exit,progress:max(0,t-0.015))
-                    hamster.root.position=point
-                    let d=ahead-behind
-                    if simd_length(d)>0.0001 { hamster.root.orientation=simd_quatf(angle:atan2(-d.x,-d.z),axis:[0,1,0]) }
                     let squeeze=max(0,1-abs(t-0.5)*4)
                     hamster.crawl(progress:t,time:clock,squeeze:squeeze)
+                    hamster.followTube { source.travel(to:destination,exit:origin.exit,progress:t,offset:$0) }
                 } else {
-                    hamster.root.position=source.midpoint
-                    hamster.root.orientation=simd_quatf(angle:TubePath.heading(exit:ball.exit),axis:[0,1,0]); hamster.rest(time:clock)
+                    hamster.rest(time:clock); pose(hamster,ball:ball,state:transition.after)
                 }
             }
             for (ball,receiver) in transition.turn.delivered {
                 guard let hamster=hamsters[ball.id] else { continue }
                 let source=TubePath(row:ball.row,col:ball.col,state:transition.rotated)
                 let end=SIMD3<Float>(source.endpoint(ball.exit).x,TubePath.height,receiver == .top ? -3.67 : 3.67)
-                let point: SIMD3<Float>
-                if t<0.65 { point=source.half(port:ball.exit,towardPort:true,progress:t/0.65) }
-                else { point=simd_mix(source.endpoint(ball.exit),end,.init(repeating:(t-0.65)/0.35)) }
-                hamster.root.position=point
-                hamster.root.orientation=simd_quatf(angle:TubePath.heading(exit:ball.exit),axis:[0,1,0])
+                let first=source.length/2, distance=t*(first+simd_distance(source.endpoint(ball.exit),end))
                 hamster.crawl(progress:t,time:clock,squeeze:max(0,1-abs(t-0.6)*5))
+                hamster.followTube { offset in
+                    if distance+offset <= first { return source.fromMidpoint(toward:ball.exit,distance:distance+offset) }
+                    let direction=simd_normalize(end-source.endpoint(ball.exit))
+                    return source.endpoint(ball.exit)+direction*(distance+offset-first)
+                }
             }
         }
         if transition.elapsed >= 1.1 {
@@ -365,10 +385,9 @@ import simd
                 guard let hamster=hamsters[ball.id],let tile=tiles[Rules.platform(ball.row,ball.col)] else { continue }
                 hamster.root.stopAllAnimations(recursive:false)
                 hamster.root.removeFromParent(); tile.addChild(hamster.root)
-                hamster.root.position=TubePath(row:ball.row,col:ball.col,state:final).midpoint-TubePath.tileCenter(Rules.platform(ball.row,ball.col))
-                hamster.root.orientation=simd_quatf(angle:TubePath.heading(exit:ball.exit),axis:[0,1,0])
                 hamster.root.scale = .one
                 hamster.rest(time:clock)
+                pose(hamster,ball:ball,state:final)
             }
             rebuildReceivers(final)
             setSelection(selection,highlighted:selection?.platform,enabled:enabled,animated:false)
@@ -420,6 +439,7 @@ import simd
         if drag == nil {
             guard let initial=boardPoint(start),let p=platform(at:initial),!state.cooldown.contains(p) else { return }
             onDragStart?(); tiles[p]?.stopAllAnimations(recursive:false)
+            couplers.isEnabled=false
             let local=initial-TubePath.tileCenter(p)
             drag=Drag(platform:p,start:initial,angle:atan2(local.z,local.x),selected:selection)
         }

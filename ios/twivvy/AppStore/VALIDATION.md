@@ -1,5 +1,22 @@
 # Validation — 17 September 2026
 
+## Localization follow-up — 19 October 2026
+
+Corrected browser/tab/page instructions in five status/error messages for all
+eleven languages. Nine privacy translations previously fell back to English;
+all eleven now have authored iOS privacy text. Invitation examples and timer
+second units are localized. These overrides live in `scripts/ios-locales.json`
+and survive regeneration from the web catalogs.
+
+`pnpm ios:generate` passed, including validation of 115 keys per language,
+placeholders, localized display names, unexpected English fallback and 89 literal
+UI/bridge key references. `/tmp/twivvy-ios-locales.xcresult` passed one bundled
+localization test across all eleven languages and two UI tests: local invitation
+validation plus Russian/French/Turkish timer and privacy screens. No production
+room was created. The earlier release checks below describe the September build.
+
+## Original release validation
+
 Validated locally with Xcode 26.6 and iOS SDK 26.5.
 
 | Check | Outcome |

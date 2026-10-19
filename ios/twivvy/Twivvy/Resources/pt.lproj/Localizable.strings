@@ -46,8 +46,8 @@
 "training.exit" = "Sair do treino";
 "status.round" = "Ronda {round} de {total}";
 "status.peerFound" = "Adversário encontrado, a estabelecer ligação…";
-"status.storageUnavailable" = "O navegador não permite guardar o jogo. Não feche este separador.";
-"status.startupFailed" = "Não foi possível iniciar o jogo. Atualize a página nos dois dispositivos.";
+"status.storageUnavailable" = "Não foi possível guardar a partida neste dispositivo. Mantém a aplicação aberta.";
+"status.startupFailed" = "Não foi possível iniciar a partida. Reinicia a aplicação nos dois dispositivos.";
 "status.peerDisconnected" = "O adversário desligou-se";
 "status.waitingOpponent" = "À espera do adversário…";
 "status.finding" = "A procurar adversário…";
@@ -60,9 +60,9 @@
 "error.matchConnect" = "Não foi possível ligar ao adversário encontrado.";
 "error.createRoom" = "Não foi possível criar a sala.";
 "error.notFound" = "Sala não encontrada ou convite expirado. Peça um novo link.";
-"error.oldVersion" = "O jogo foi criado numa versão anterior. Atualize os dois dispositivos e crie uma nova sala.";
-"error.occupied" = "O lugar está ocupado. Volte ao separador original do jogo.";
-"error.connectFailed" = "Não foi possível ligar. Atualize a página para tentar novamente.";
+"error.oldVersion" = "A partida foi criada numa versão anterior. Atualiza o jogo nos dois dispositivos e cria uma nova sala.";
+"error.occupied" = "Esta partida já está aberta noutro dispositivo. Continua a jogar lá.";
+"error.connectFailed" = "Não foi possível estabelecer ligação. Tenta entrar novamente.";
 "error.peerAbsent" = "Jogo terminado: o adversário esteve ausente por mais de 30 minutos.";
 "error.restoreMismatch" = "Não foi possível conciliar o jogo guardado.";
 "error.platformCooldown" = "A plataforma está a arrefecer";
@@ -99,7 +99,7 @@
 "native.hidden" = "Oculto até à revelação";
 "native.rematchInvite" = "O adversário quer uma desforra!";
 "native.inviteCode" = "Código ou ligação de convite";
-"native.codeHint" = "ABCD7 or https://…";
+"native.codeHint" = "ABCD7 ou https://…";
 "native.invalidCode" = "Introduz um código ou ligação Twivvy válido.";
 "native.offline" = "O treino funciona offline. O bot escolhe antes de ti.";
 "native.onlinePrivacy" = "O adversário vê o teu nome. Os jogadores ligam-se diretamente.";
@@ -109,8 +109,9 @@
 "native.language" = "Idioma da app";
 "native.winRule" = "Sete pontos dão a vitória antecipada. Caso contrário, ganha a maior pontuação após 30 rondas. Pontuações iguais dão empate.";
 "native.gestureRule" = "Arrasta uma plataforma para a rodar. Toca em qualquer plataforma para cancelar a rotação. Podes mudar a jogada durante os 30 segundos do temporizador.";
-"native.privacyText" = "Twivvy does not use advertising, analytics, tracking, accounts, or in-app purchases.\n\nYour nickname and preferences stay on your device. Online play sends your nickname, a random room credential and connection details to the Twivvy signaling service. Your opponent sees your nickname and can receive your IP address through the direct WebRTC connection. Moves travel directly between the two players.\n\nWaiting rooms and matches with an absent player expire after 30 minutes. Active rooms remain available. Infrastructure providers may retain technical request logs, including IP addresses, for security and service operation.\n\nRecovery credentials and hidden moves are stored in the iOS Keychain on this device. Leaving an online game clears its recovery data. Sound and haptics can be disabled in Settings. Training works without an internet connection; an optional online-presence check may contact the signaling service.\n\nNo camera, microphone, contacts or location access is requested.\n\nPublisher: Dzmitry Sharko. Support and privacy requests: https://twivvy.e-notix.com/support.html\n\nUpdated: 17 September 2026.";
+"native.privacyText" = "O Twivvy não utiliza publicidade, análise de utilização, rastreio, contas ou compras integradas.\n\nA tua alcunha e as tuas preferências ficam no teu dispositivo. O jogo online envia a tua alcunha, credenciais aleatórias de acesso à sala e informações de ligação ao serviço de sinalização do Twivvy. O adversário vê a tua alcunha e pode receber o teu endereço IP através da ligação WebRTC direta. As jogadas são transmitidas diretamente entre os dois jogadores.\n\nAs salas de espera e as partidas com uma pessoa ausente expiram após 30 minutos. As salas ativas continuam disponíveis. Os fornecedores de infraestrutura podem conservar registos técnicos dos pedidos, incluindo endereços IP, para a segurança e o funcionamento do serviço.\n\nAs credenciais de recuperação e as jogadas secretas são guardadas no Porta-chaves do iOS deste dispositivo. Sair de uma partida online elimina os respetivos dados de recuperação. O som e a resposta háptica podem ser desativados nas definições. O treino funciona sem internet; uma verificação opcional da presença de jogadores pode contactar o serviço de sinalização.\n\nNão é pedido acesso à câmara, ao microfone, aos contactos ou à localização.\n\nEditor: Dzmitry Sharko. Suporte e pedidos de privacidade: https://twivvy.e-notix.com/support.html\n\nAtualizado: 17 de setembro de 2026.";
 
 "native.turnLimitHint" = "Só podes rodar uma plataforma uma vez por ronda.";
 "native.duel" = "DUELO";
 "native.back" = "Voltar";
+"native.seconds" = "{seconds} s";

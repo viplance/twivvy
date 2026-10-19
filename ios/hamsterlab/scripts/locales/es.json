@@ -1,8 +1,7 @@
 {
   "meta.title": "HamsterLab",
   "meta.description": "Pequeños hámsteres. Tubos con curvas. Una gran aventura en miniatura.",
-  "tagline.first": "Patitas pequeñas. Grandes descubrimientos.",
-  "tagline.second": "Gira los tubos. Lleva a los hámsteres a casa.",
+  "lab.tagline": "¡Ayuda a los hámsteres a encontrar el camino a casa!",
   "native.eyebrow": "EL PEQUEÑO LABORATORIO DE GRANDES AVENTURAS",
   "native.notice": "HamsterLab",
   "native.board": "Laboratorio de hámsteres",
@@ -10,7 +9,7 @@
   "native.platform": "Plataforma de tubos",
   "native.yourMove": "¡Es hora de girar los tubos!",
   "native.selectHint": "Arrastra una plataforma para girar los tubos. Guía a los hámsteres hasta tu casita de abajo.",
-  "native.selected": "¡La plataforma {platform} está lista! Tu giro seguirá en secreto hasta que se revele.",
+  "native.selected": "¡Movimiento realizado! Tu giro seguirá en secreto hasta que se revele.",
   "native.footer": "9 plataformas · patitas pequeñas · grandes descubrimientos",
   "native.gestureRule": "Arrastra el dedo alrededor del centro de una plataforma para girarla. Toca una plataforma para cancelar tu jugada. Puedes cambiar de idea durante los 30 segundos del temporizador. Tu casita siempre está abajo.",
   "native.winRule": "Lleva siete hámsteres a casa para ganar antes del final. Si no, gana quien tenga más hámsteres tras 30 rondas. Si hay igualdad, es un empate.",
@@ -29,5 +28,11 @@
   "lab.finish": "¡Un experimento estupendo! ¿Lo intentamos otra vez?",
   "lab.experiment": "EXPERIMENTO 01",
   "lab.collection": "Hámsteres en casa",
-  "native.privacyText": "HamsterLab no utiliza publicidad, analíticas, seguimiento, cuentas ni compras dentro de la aplicación.\n\nTu apodo y tus preferencias permanecen en tu dispositivo. El juego en línea envía tu apodo, unas credenciales aleatorias de acceso a la sala e información de conexión al servicio de señalización de HamsterLab. Tu rival ve tu apodo y puede recibir tu dirección IP mediante la conexión WebRTC directa. Las jugadas se transmiten directamente entre los dos jugadores.\n\nLas salas de espera y las partidas con una persona ausente caducan a los 30 minutos. Las salas activas siguen disponibles. Los proveedores de infraestructura pueden conservar registros técnicos de las solicitudes, incluidas las direcciones IP, para la seguridad y el funcionamiento del servicio.\n\nLas credenciales de recuperación y las jugadas secretas se guardan en el llavero de iOS de este dispositivo. Al salir de una partida en línea, se borran sus datos de recuperación. Puedes desactivar el sonido y la respuesta háptica en Ajustes. El entrenamiento funciona sin internet; una comprobación opcional de la presencia de jugadores puede contactar con el servicio de señalización.\n\nNo se solicita acceso a la cámara, al micrófono, a los contactos ni a la ubicación.\n\nEditor: Dzmitry Sharko. Asistencia y consultas de privacidad: https://twivvy.e-notix.com/support.html\n\nActualización: 17 de septiembre de 2026."
+  "native.privacyText": "HamsterLab no utiliza publicidad, analíticas, seguimiento, cuentas ni compras dentro de la aplicación.\n\nTu apodo y tus preferencias permanecen en tu dispositivo. El juego en línea envía tu apodo, unas credenciales aleatorias de acceso a la sala e información de conexión al servicio de señalización de HamsterLab. Tu rival ve tu apodo y puede recibir tu dirección IP mediante la conexión WebRTC directa. Las jugadas se transmiten directamente entre los dos jugadores.\n\nLas salas de espera y las partidas con una persona ausente caducan a los 30 minutos. Las salas activas siguen disponibles. Los proveedores de infraestructura pueden conservar registros técnicos de las solicitudes, incluidas las direcciones IP, para la seguridad y el funcionamiento del servicio.\n\nLas credenciales de recuperación y las jugadas secretas se guardan en el llavero de iOS de este dispositivo. Al salir de una partida en línea, se borran sus datos de recuperación. Puedes desactivar el sonido y la respuesta háptica en Ajustes. El entrenamiento funciona sin internet; una comprobación opcional de la presencia de jugadores puede contactar con el servicio de señalización.\n\nNo se solicita acceso a la cámara, al micrófono, a los contactos ni a la ubicación.\n\nEditor: Dzmitry Sharko. Asistencia y consultas de privacidad: https://twivvy.e-notix.com/support.html\n\nActualización: 17 de septiembre de 2026.",
+  "status.storageUnavailable": "No se puede guardar la partida en este dispositivo. Mantén la aplicación abierta.",
+  "status.startupFailed": "No se pudo iniciar la partida. Reinicia la aplicación en ambos dispositivos.",
+  "error.oldVersion": "La partida se creó con una versión anterior. Actualiza el juego en ambos dispositivos y crea una sala nueva.",
+  "error.occupied": "Esta partida ya está abierta en otro dispositivo. Sigue jugando allí.",
+  "error.connectFailed": "No se pudo conectar. Intenta unirte de nuevo.",
+  "native.invalidCode": "Introduce un código de sala o un enlace de invitación de HamsterLab válido."
 }

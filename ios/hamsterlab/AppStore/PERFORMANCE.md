@@ -1,5 +1,13 @@
 # Rendering optimization — 18 October 2026
 
+Tube fit follow-up, 19 October 2026: circular elbows now use 28 path segments
+and 24 sides per wall ring, with cached transparent sleeves between compatible
+platform ports. `/tmp/hamsterlab-tube-fit-verified.xcresult` passed the existing
+12-hamster workload: 704 models, 60.0 SceneEvents.Update callbacks/second,
+16.96 ms p95 callback interval and 22.53 ms mean full-state refresh. These are
+simulator callback measurements, not physical-device GPU frame rates. Earlier
+measurements below describe their respective prior implementations.
+
 The original board submitted thousands of small model entities. Each tube used
 20 separate rounded boxes for each collar and 36 for its two highlights. A round
 also rebuilt every platform, and a full state refresh recreated all hamster rigs.
@@ -60,3 +68,25 @@ The final host-layout regression, menu and orientation UI checks are recorded in
 to confirm the board and hamsters remain visible after a round and rotation.
 The final UI run with pixel assertions passed in
 `/tmp/hamsterlab-perf-visible.xcresult`.
+
+## Character redesign — 19 October 2026
+
+The redesigned characters add sculpted heads and cheek pouches, cupped ears,
+textured fur, moving pupils, smiles and coordinated foot contact/recovery.
+Paw fingers and whiskers are batched meshes. Coat textures and a shared normal
+map are baked offline by `scripts/generate-character-textures.swift`; no image
+generation runs during spawning. All opaque meshes and materials are cached.
+
+Same twelve-hamster workload, iPhone 16 Pro Max / iOS 18.6, Debug:
+
+| Measurement | Previous optimized characters | Redesigned characters |
+|---|---:|---:|
+| Model entities | 805 | 697 |
+| Scene update callbacks / second | 60.0 | 59.5 |
+| 95th percentile callback interval | 18.60 ms | 18.43 ms |
+| Mean full state refresh, twelve resolved states | 24.31 ms | 20.33 ms |
+
+Final report: `/tmp/hamsterlab-characters-final.xcresult` (14 native checks and
+two UI scenarios passed). The callback/presentation and simulator limitations
+above still apply. New character tests also exercise repeated squeeze/reset
+cycles and save front, side, rear and squeeze renders for visual inspection.

@@ -36,3 +36,4 @@ fs.writeFileSync(path.join(root,'ios/twivvy/Tests/web-fixtures.json'),JSON.strin
 console.log(`Synced protocol, 11 locales, ${fixtures.reduce((n,f)=>n+f.turns.length,0)} parity rounds.`);
 
 await import("./native-locales.mjs");
+await import("./validate-locales.mjs");

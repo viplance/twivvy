@@ -5,6 +5,14 @@ through transparent tubes on a miniature laboratory workbench. Russian display
 name: **ХомаЛаб**. Bundle ID: `com.enotix.hamsterlab`; version 1.0.0, build 1.
 Open `HamsterLab.xcodeproj` and choose the **HamsterLab** scheme.
 
+The interface uses a white canvas, dark slate text, teal/berry accents, sunshine
+buttons and mint/peach secondary buttons. `App/LabTheme.swift` defines the palette;
+active text/background pairs have at least 5.6:1 contrast. Rounded system type
+supports all eleven languages and Dynamic Type. Sheets also use the light theme.
+The menu displays a bundled static watercolor illustration of three hamsters in
+laboratory tubes, without an active 3D renderer. See [scripts/MENU-ART.md](scripts/MENU-ART.md)
+for the asset path and generation prompt.
+
 ## Build and run
 
 Requires Xcode 26+, XcodeGen, Node.js and pnpm. From the repository root:
@@ -53,21 +61,43 @@ HTTPS links can launch the new app. This task does not publish website changes.
 
 ## Original models and animation
 
-`Rendering/HamsterRig.swift` builds an original pear-shaped body mesh with a
-named articulation hierarchy: body, head, four paws, two ears, eyes, eyebrows,
-cheek pouches, teeth, whiskers and tail. Five coat colors identify residents.
-The models are authored in source; there are no downloaded models, asset-store
-licenses, remote assets or third-party native dependencies.
+`Rendering/HamsterSculpt.swift` builds original organic body/head/cheek surfaces,
+cupped ears, soft four-fingered paws and curved whiskers. Five natural coat colors,
+cream bellies, a forehead blaze, subtle fur normals and silhouette tufts give the
+residents a soft cartoon appearance. `Rendering/HamsterRig.swift` articulates the
+body, head, paws, ears, cheeks, brows, nose, mouth and eyes. Glossy pupils move
+inside warm white eyes; the smile contains two incisors and a pink tongue.
+Meshes and materials are shared between residents. The original textures in
+`HamsterLab/Resources/HamsterCoats` are baked offline, so spawning a new coat color
+does not generate images on the main thread. There are no downloaded models,
+asset-store licenses, remote assets or third-party native dependencies.
 
-RealityKit's `AnimationResource` / `FromToByAnimation` handles breathing, ear
-movement and idle loops; `Entity.move` handles platform rotation. Exact quadratic
-routes drive traversal. Paws alternate, heads lead turns, cheeks puff and the
-body squashes and stretches at couplings. Eye blinks and eyebrow movements make
-faces expressive. Crossing the small platform seam adds a gentle climbing arc.
+RealityKit's `AnimationResource` / `FromToByAnimation` handles breathing and head
+motion outside tubes; `Entity.move` handles platform rotation. Constant-radius
+circular elbows and straight bores share one arc-length path for glass,
+residents and traversal. Characters face the tangent, turn their heads along
+the curve and shorten slightly on bends to keep their pouches and ears inside.
+Two alternating stride cycles per crossing coordinate foot contact,
+recovery, shoulder sway and head motion. Cheeks puff, ears fold and the mouth
+opens as the body squeezes through couplings. Independent glances, blinks, nose
+sniffs, ear twitches and occasional paw lifts animate resting characters.
+Matching ports across a platform seam have transparent sleeves; crossing stays
+on the tube axis without a vertical hop. Sleeves retract during private rotation.
 Visual interpolation never changes the integer game state.
 
+Regenerate the twelve original 512×256 coat/normal PNGs from the repository root:
+
+```sh
+swift ios/hamsterlab/scripts/generate-character-textures.swift
+```
+
+`HamsterCharacterTests` checks repeated squeeze/reset cycles and valid pivot
+rotations, and saves front, three-quarter, profile, rear and squeeze renders in
+the local `.xcresult` attachments. These review screenshots are not app resources.
+
 `Rendering/LabGeometry.swift` generates hollow, open-ended tube meshes with inner
-walls, translucent PBR glass, highlights and colored coupling rings. All tubes
+walls, blue translucent PBR glass, highlights and colored coupling rings. Elbows
+have 28 longitudinal segments and 24 vertices around each inner/outer ring. All tubes
 and hamster resting points use `TubePath`; rotations carry the whole rig and
 spawn markers on the platform. A perspective camera, soft shadows, colored
 lights, specimen vials and a flask create a toy laboratory. Shared mesh resources
@@ -109,13 +139,13 @@ ESPEAK_NG=/path/to/espeak-ng pnpm hamsterlab:narration
 pnpm hamsterlab:generate
 ```
 
-The icon is original vector artwork from `scripts/draw-icon.swift`, rendered into
-the asset catalog. Regenerate local artwork/audio with:
+The app icon is a hand-drawn-style hamster illustration, stored as an opaque
+1024 × 1024 PNG in the asset catalog. Xcode derives the iPhone/iPad icon sizes
+from this universal source. See [scripts/ICON-ART.md](scripts/ICON-ART.md) for its
+generation prompt and replacement instructions. Regenerate local audio with:
 
 ```sh
 python3 ios/hamsterlab/scripts/generate-audio.py
-swift ios/hamsterlab/scripts/draw-icon.swift \
-  ios/hamsterlab/HamsterLab/Resources/Assets.xcassets/AppIcon.appiconset/AppIcon.png
 ```
 
 ## Verification and release preparation

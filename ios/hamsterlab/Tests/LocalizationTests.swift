@@ -11,7 +11,12 @@ final class LocalizationTests: XCTestCase {
             for (key, value) in localized {
                 XCTAssertFalse(value.trimmingCharacters(in:.whitespacesAndNewlines).isEmpty, "\(language)/\(key)")
             }
-            XCTAssertTrue(try XCTUnwrap(localized["native.selected"]).contains("{platform}"))
+            XCTAssertFalse(try XCTUnwrap(localized["native.selected"]).contains("{platform}"), language)
+            let tagline = try XCTUnwrap(localized["lab.tagline"])
+            XCTAssertFalse(tagline.contains("\n"), language)
+            XCTAssertNil(localized["tagline.first"], language)
+            XCTAssertNil(localized["tagline.second"], language)
+            if language != "en" { XCTAssertNotEqual(tagline, english["lab.tagline"], language) }
             for prompt in NarrationPrompt.allCases {
                 let text = NarrationCatalog.text(for:prompt,language:language)
                 XCTAssertEqual(text,localized[prompt.key])

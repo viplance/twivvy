@@ -2,6 +2,26 @@ import XCTest
 import UIKit
 
 final class TwivvyUITests: XCTestCase {
+    @MainActor func testLocalizedTimerAndPrivacy() {
+        let cases = [
+            ("ru", "[0-9]+ с", "Конфиденциальность", "В Twivvy нет рекламы"),
+            ("fr", "[0-9]+ s", "Confidentialité", "Twivvy n’utilise ni publicité"),
+            ("tr", "[0-9]+ sn", "Gizlilik", "Twivvy reklam, kullanım analizi")
+        ]
+        for (language, timer, privacy, opening) in cases {
+            let app = XCUIApplication()
+            app.launchArguments = ["--uitesting","--training","-AppleLanguages","(\(language))"]
+            app.launch()
+            XCTAssertTrue(app.buttons["game.next"].waitForExistence(timeout:15), language)
+            XCTAssertTrue(app.staticTexts.matching(NSPredicate(format:"label MATCHES %@",timer)).firstMatch.waitForExistence(timeout:5), language)
+            app.buttons["menu.settings"].tap()
+            XCTAssertTrue(app.buttons[privacy].waitForExistence(timeout:5), language)
+            app.buttons[privacy].tap()
+            XCTAssertTrue(app.staticTexts.matching(NSPredicate(format:"label BEGINSWITH %@",opening)).firstMatch.waitForExistence(timeout:5), language)
+            capture("localized-privacy-\(language)")
+            app.terminate()
+        }
+    }
     @MainActor func testJoinHighlightsEmptyCodeAndClearsErrorWhenEditing() {
         let app = XCUIApplication()
         app.launchArguments = ["--uitesting","-AppleLanguages","(en)","-AppleLocale","en_US"]

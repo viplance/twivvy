@@ -5,6 +5,95 @@ import simd
 @testable import HamsterLab
 
 final class LaboratoryTests: XCTestCase {
+    func testElbowsHaveCircularWallsAndAxialPortTangents() {
+        for mask in [3,5,6,9,10,12] {
+            let path=TubePath(center:.zero,mask:mask)
+            let a=path.endpoint(path.ports[0]), b=path.endpoint(path.ports[1])
+            XCTAssertLessThan(simd_distance(path.sample(0),a),0.00001)
+            XCTAssertLessThan(simd_distance(path.sample(1),b),0.00001)
+            XCTAssertGreaterThan(simd_dot(path.tangent(0),simd_normalize(-a)),0.99999)
+            XCTAssertGreaterThan(simd_dot(path.tangent(1),simd_normalize(b)),0.99999)
+            if path.isElbow {
+                let center=a+b
+                for step in 0...100 {
+                    let point=path.sample(Float(step)/100)
+                    XCTAssertEqual(simd_distance(point,center),TubePath.cell/2,accuracy:0.00001)
+                    XCTAssertLessThan(distanceToBore(path.half(port:path.ports[0],towardPort:true,progress:Float(step)/100),path:path),0.00001)
+                }
+            }
+        }
+    }
+    @MainActor func testCharacterMeshesStayInsideEveryCompatibleBendAndJoint() {
+        let rig=HamsterRig(id:0)
+        // Test real mesh vertices after all head/paw/ear transforms, rather
+        // than only checking that the root is on the path centreline.
+        func surfaces(_ entity: Entity) -> [(Entity,[SIMD3<Float>])] {
+            var result: [(Entity,[SIMD3<Float>])] = []
+            if let model=entity as? ModelEntity,let mesh=model.model?.mesh {
+                let points=mesh.contents.models.flatMap { $0.parts.flatMap { Array($0.positions) } }
+                result.append((entity,stride(from:0,to:points.count,by:4).map { points[$0] }))
+            }
+            return result+entity.children.flatMap { surfaces($0) }
+        }
+        let vertices=surfaces(rig.root)
+        for mask in [3,5,6,9,10,12] {
+            let source=TubePath(center:[0,TubePath.height,0],mask:mask)
+            let sourceDistance=boreDistance(source)
+            for exit in source.ports {
+                let entry=(exit+2)%4, direction=simd_normalize(source.endpoint(exit)-source.center)
+                for other in [3,5,6,9,10,12] where other & (1<<entry) != 0 {
+                    for gap: Float in [0,TubePath.pitch-2*TubePath.cell] {
+                        let destination=TubePath(center:source.center+direction*(TubePath.cell+gap),mask:other)
+                        let destinationDistance=boreDistance(destination)
+                        for step in 0...8 {
+                            let t=Float(step)/8
+                            rig.crawl(progress:t,time:Double(t),squeeze:max(0,1-abs(t-0.5)*4))
+                            rig.followTube { source.travel(to:destination,exit:exit,progress:t,offset:$0) }
+                            var worst: Float=0
+                            for (entity,points) in vertices {
+                                let transform=entity.transformMatrix(relativeTo:nil)
+                                for point in points {
+                                    let p=transform*SIMD4<Float>(point,1), world=SIMD3<Float>(p.x,p.y,p.z)
+                                    var distance=min(sourceDistance(world),destinationDistance(world))
+                                    if gap>0 { distance=min(distance,distanceToSegment(world,source.endpoint(exit),destination.endpoint(entry))) }
+                                    worst=max(worst,distance)
+                                }
+                            }
+                            XCTAssertLessThanOrEqual(worst,TubePath.radius-TubePath.wall,"mask \(mask)→\(other), exit \(exit), t \(t), gap \(gap)")
+                        }
+                    }
+                }
+            }
+        }
+        rig.rest(time:2)
+        let path=TubePath(center:.zero,mask:3)
+        for _ in 0..<100 {
+            rig.rest(time:2); rig.followTube { path.fromMidpoint(toward:0,distance:$0) }
+            for entity in [rig.root,rig.body,rig.head] {
+                XCTAssertEqual(simd_length(entity.orientation.vector),1,accuracy:0.0001)
+                XCTAssertTrue(entity.position.x.isFinite && entity.position.y.isFinite && entity.position.z.isFinite)
+            }
+        }
+        XCTAssertGreaterThan(rig.body.scale.x,0.9,"Fitting must not compound scale across frames")
+    }
+    private func distanceToSegment(_ point: SIMD3<Float>, _ a: SIMD3<Float>, _ b: SIMD3<Float>) -> Float {
+        let delta=b-a
+        let t=max(0,min(1,simd_dot(point-a,delta)/max(0.000001,simd_length_squared(delta))))
+        return simd_distance(point,a+delta*t)
+    }
+    private func distanceToBore(_ point: SIMD3<Float>, path: TubePath) -> Float {
+        boreDistance(path)(point)
+    }
+    private func boreDistance(_ path: TubePath) -> (SIMD3<Float>) -> Float {
+        let a=path.endpoint(path.ports[0]), b=path.endpoint(path.ports[1])
+        if !path.isElbow { return { self.distanceToSegment($0,a,b) } }
+        let center=a+b-path.center, u=simd_normalize(a-center), v=simd_normalize(b-center)
+        return { point in
+            let delta=point-center
+            let angle=max(0,min(Float.pi/2,atan2(simd_dot(delta,v),simd_dot(delta,u))))
+            return simd_distance(point,center+(u*cos(angle)+v*sin(angle))*TubePath.cell/2)
+        }
+    }
     func testEveryTubeUsesTheRulesPortsAndTravelIsContinuous() {
         for map in 0..<3 {
             let state=BoardState(map:map)

@@ -33,6 +33,9 @@ for (const locale of supportedLocales) {
  }
  for (const [key, value] of Object.entries(translated)) assert.equal(generated[key], value, `${locale}: stale ${key}`);
  assert.equal(strings(locale, 'InfoPlist').CFBundleDisplayName, translated['meta.title']);
+ assert.ok(generated['lab.tagline'] && !generated['lab.tagline'].includes('\n'), `${locale}: missing single-phrase slogan`);
+ assert.ok(!Object.hasOwn(generated, 'tagline.first') && !Object.hasOwn(generated, 'tagline.second'), `${locale}: obsolete two-part slogan`);
+ if (locale !== 'en') assert.notEqual(generated['lab.tagline'], english['lab.tagline'], `${locale}: untranslated slogan`);
  for (const key of narrationKeys) {
   const prompt = key.slice(4);
   const clip = manifest.clips.find(clip => clip.language === locale && clip.prompt === prompt);

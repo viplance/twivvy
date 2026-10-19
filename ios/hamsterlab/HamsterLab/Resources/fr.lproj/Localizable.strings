@@ -3,8 +3,6 @@
 "sound.label" = "Son";
 "sound.enable" = "Activer le son";
 "sound.disable" = "Couper le son";
-"tagline.first" = "Petites pattes. Grandes découvertes.";
-"tagline.second" = "Tourne les tubes. Ramène les hamsters chez eux.";
 "menu.friend" = "Jouer avec un ami";
 "menu.online" = "Adversaire aléatoire";
 "menu.training" = "Entraînement";
@@ -46,8 +44,8 @@
 "training.exit" = "Quitter l'entraînement";
 "status.round" = "Manche {round} sur {total}";
 "status.peerFound" = "Adversaire trouvé, connexion en cours…";
-"status.storageUnavailable" = "Le navigateur ne permet pas d'enregistrer la partie. Ne fermez pas cet onglet.";
-"status.startupFailed" = "Impossible de démarrer la partie. Actualisez la page sur les deux appareils.";
+"status.storageUnavailable" = "Impossible d’enregistrer la partie sur cet appareil. Garde l’application ouverte.";
+"status.startupFailed" = "Impossible de démarrer la partie. Relance l’application sur les deux appareils.";
 "status.peerDisconnected" = "L'adversaire s'est déconnecté";
 "status.waitingOpponent" = "En attente de l'adversaire…";
 "status.finding" = "Recherche d'un adversaire…";
@@ -60,9 +58,9 @@
 "error.matchConnect" = "Impossible de se connecter à l'adversaire trouvé.";
 "error.createRoom" = "Impossible de créer la salle.";
 "error.notFound" = "Salle introuvable ou invitation expirée. Demandez un nouveau lien.";
-"error.oldVersion" = "La partie a été créée avec une ancienne version. Actualisez les deux appareils et créez une nouvelle salle.";
-"error.occupied" = "La place est occupée. Revenez à l'onglet d'origine de la partie.";
-"error.connectFailed" = "Connexion impossible. Actualisez la page pour réessayer.";
+"error.oldVersion" = "La partie a été créée avec une ancienne version. Mets le jeu à jour sur les deux appareils et crée une nouvelle salle.";
+"error.occupied" = "Cette partie est déjà ouverte sur un autre appareil. Continue à jouer dessus.";
+"error.connectFailed" = "Connexion impossible. Essaie de rejoindre la partie à nouveau.";
 "error.peerAbsent" = "Partie terminée : l'adversaire était absent depuis plus de 30 minutes.";
 "error.restoreMismatch" = "Impossible de réconcilier la partie enregistrée.";
 "error.platformCooldown" = "La plateforme est en refroidissement";
@@ -91,7 +89,7 @@
 "native.south" = "Bas";
 "native.west" = "Gauche";
 "native.selectHint" = "Fais glisser une plateforme pour tourner les tubes. Guide les hamsters vers ta maisonnette en bas.";
-"native.selected" = "La plateforme {platform} est prête. Ta rotation reste secrète jusqu’à la révélation !";
+"native.selected" = "Coup joué. Ta rotation reste secrète jusqu’à la révélation !";
 "native.left" = "À gauche";
 "native.right" = "À droite";
 "native.skip" = "Effacer / passer";
@@ -100,7 +98,7 @@
 "native.rematchInvite" = "Ton adversaire veut une revanche !";
 "native.inviteCode" = "Code ou lien d’invitation";
 "native.codeHint" = "ABCD7 ou https://…";
-"native.invalidCode" = "Saisis un code ou un lien HamsterLab valide.";
+"native.invalidCode" = "Saisis un code de salle ou un lien d’invitation HamsterLab valide.";
 "native.offline" = "Explore le labo hors ligne avec un bot. Il choisit son coup avant toi.";
 "native.onlinePrivacy" = "Ton adversaire voit ton nom. Les joueurs sont connectés directement.";
 "native.haptics" = "Retour haptique";
@@ -115,6 +113,7 @@
 "native.duel" = "DUEL AU LABO";
 "native.back" = "Retour";
 
+"lab.tagline" = "Aide les hamsters à retrouver le chemin de leur maison !";
 "lab.voices" = "Petits cris et conseils vocaux";
 "lab.welcome" = "Bienvenue dans HamsterLab ! Ramenons nos petits amis chez eux !";
 "lab.begin" = "Les pattes sont prêtes ? Explorons !";

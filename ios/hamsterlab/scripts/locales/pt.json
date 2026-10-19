@@ -1,8 +1,7 @@
 {
   "meta.title": "HamsterLab",
   "meta.description": "Pequenos hamsters. Tubos sinuosos. Uma grande aventura em miniatura.",
-  "tagline.first": "Patinhas pequenas. Grandes descobertas.",
-  "tagline.second": "Roda os tubos. Leva os hamsters para casa.",
+  "lab.tagline": "Ajuda os hamsters a encontrar o caminho para casa!",
   "native.eyebrow": "O PEQUENO LABORATÓRIO DAS GRANDES AVENTURAS",
   "native.notice": "HamsterLab",
   "native.board": "Laboratório dos hamsters",
@@ -10,7 +9,7 @@
   "native.platform": "Plataforma de tubos",
   "native.yourMove": "Está na hora de rodar os tubos!",
   "native.selectHint": "Arrasta uma plataforma para rodar os tubos. Guia os hamsters até à tua casinha em baixo.",
-  "native.selected": "A plataforma {platform} está pronta. A tua rotação fica em segredo até ser revelada!",
+  "native.selected": "Jogada feita. A tua rotação fica em segredo até ser revelada!",
   "native.footer": "9 plataformas · patinhas pequenas · grandes descobertas",
   "native.gestureRule": "Arrasta o dedo à volta do centro de uma plataforma para a rodar. Toca numa plataforma para anular a jogada planeada. Podes mudar de ideias durante os 30 segundos do temporizador. A tua casinha está sempre em baixo.",
   "native.winRule": "Leva sete hamsters para casa para ganhares antes do fim. Caso contrário, ganha quem tiver mais hamsters após 30 rondas. Se houver igualdade, é empate.",
@@ -29,5 +28,11 @@
   "lab.finish": "Uma bela experiência! Vamos tentar outra vez?",
   "lab.experiment": "EXPERIÊNCIA 01",
   "lab.collection": "Hamsters em casa",
-  "native.privacyText": "O HamsterLab não utiliza publicidade, análise de utilização, rastreio, contas ou compras integradas.\n\nA tua alcunha e as tuas preferências ficam no teu dispositivo. O jogo online envia a tua alcunha, credenciais aleatórias de acesso à sala e informações de ligação ao serviço de sinalização do HamsterLab. O adversário vê a tua alcunha e pode receber o teu endereço IP através da ligação WebRTC direta. As jogadas são transmitidas diretamente entre os dois jogadores.\n\nAs salas de espera e as partidas com uma pessoa ausente expiram após 30 minutos. As salas ativas continuam disponíveis. Os fornecedores de infraestrutura podem conservar registos técnicos dos pedidos, incluindo endereços IP, para a segurança e o funcionamento do serviço.\n\nAs credenciais de recuperação e as jogadas secretas são guardadas no Porta-chaves do iOS deste dispositivo. Sair de uma partida online elimina os respetivos dados de recuperação. O som e a resposta háptica podem ser desativados nas definições. O treino funciona sem internet; uma verificação opcional da presença de jogadores pode contactar o serviço de sinalização.\n\nNão é pedido acesso à câmara, ao microfone, aos contactos ou à localização.\n\nEditor: Dzmitry Sharko. Suporte e pedidos de privacidade: https://twivvy.e-notix.com/support.html\n\nAtualizado: 17 de setembro de 2026."
+  "native.privacyText": "O HamsterLab não utiliza publicidade, análise de utilização, rastreio, contas ou compras integradas.\n\nA tua alcunha e as tuas preferências ficam no teu dispositivo. O jogo online envia a tua alcunha, credenciais aleatórias de acesso à sala e informações de ligação ao serviço de sinalização do HamsterLab. O adversário vê a tua alcunha e pode receber o teu endereço IP através da ligação WebRTC direta. As jogadas são transmitidas diretamente entre os dois jogadores.\n\nAs salas de espera e as partidas com uma pessoa ausente expiram após 30 minutos. As salas ativas continuam disponíveis. Os fornecedores de infraestrutura podem conservar registos técnicos dos pedidos, incluindo endereços IP, para a segurança e o funcionamento do serviço.\n\nAs credenciais de recuperação e as jogadas secretas são guardadas no Porta-chaves do iOS deste dispositivo. Sair de uma partida online elimina os respetivos dados de recuperação. O som e a resposta háptica podem ser desativados nas definições. O treino funciona sem internet; uma verificação opcional da presença de jogadores pode contactar o serviço de sinalização.\n\nNão é pedido acesso à câmara, ao microfone, aos contactos ou à localização.\n\nEditor: Dzmitry Sharko. Suporte e pedidos de privacidade: https://twivvy.e-notix.com/support.html\n\nAtualizado: 17 de setembro de 2026.",
+  "status.storageUnavailable": "Não foi possível guardar a partida neste dispositivo. Mantém a aplicação aberta.",
+  "status.startupFailed": "Não foi possível iniciar a partida. Reinicia a aplicação nos dois dispositivos.",
+  "error.oldVersion": "A partida foi criada numa versão anterior. Atualiza o jogo nos dois dispositivos e cria uma nova sala.",
+  "error.occupied": "Esta partida já está aberta noutro dispositivo. Continua a jogar lá.",
+  "error.connectFailed": "Não foi possível estabelecer ligação. Tenta entrar novamente.",
+  "native.invalidCode": "Introduz um código de sala ou uma ligação de convite do HamsterLab válida."
 }

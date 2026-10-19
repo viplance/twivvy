@@ -1,11 +1,12 @@
 import SwiftUI
 import RealityKit
 
-private let mint = Color(red:0.62,green:0.97,blue:0.80)
-private let coral = Color(red:1,green:0.68,blue:0.77)
-private let muted = Color(red:0.63,green:0.70,blue:0.82)
+private let mint = LabTheme.teal
+private let coral = LabTheme.berry
+private let muted = LabTheme.secondaryInk
 
 struct ContentView: View {
+    @ScaledMetric(relativeTo:.largeTitle) private var titleSize = 58.0
     @GestureState private var boardTouchActive = false
     @Bindable var game: GameModel
     @Environment(\.scenePhase) private var scenePhase
@@ -15,10 +16,6 @@ struct ContentView: View {
     @State private var invalidJoinCode = false
     @State private var confirmLeave = false
     @State private var incomingCode: String?
-    @State private var menuScene: BoardScene = {
-        let scene = BoardScene(showcase:true)
-        return scene
-    }()
     enum Panel: Identifiable {
         case setup(String), settings, rules, privacy
         var dismissTitleKey: String {
@@ -53,7 +50,9 @@ struct ContentView: View {
                 .frame(maxWidth:1200).frame(maxWidth:.infinity,maxHeight:.infinity)
             }
         }
+        .font(.system(.body,design:.rounded))
         .fontDesign(.rounded)
+        .foregroundStyle(LabTheme.ink)
         .tint(mint)
         .sheet(item:$sheet) { panel in
             NavigationStack {
@@ -65,9 +64,14 @@ struct ContentView: View {
                     case .privacy: privacy
                     }
                 }
+                .scrollContentBackground(.hidden)
+                .background(LabTheme.canvas)
+                .foregroundStyle(LabTheme.ink)
+                .fontDesign(.rounded)
                 .toolbar { ToolbarItem(placement:.confirmationAction) { Button(L(panel.dismissTitleKey)) { sheet = nil }.accessibilityIdentifier("sheet.done") } }
-                .toolbarBackground(Color(red:0.06,green:0.10,blue:0.19),for:.navigationBar)
-            }.presentationDetents([.large]).preferredColorScheme(.dark)
+                .toolbarBackground(LabTheme.canvas,for:.navigationBar)
+                .toolbarBackground(.visible,for:.navigationBar)
+            }.presentationDetents([.large]).preferredColorScheme(.light).tint(mint)
         }
         .alert(L("native.notice"),isPresented:Binding(get:{game.error != nil},set:{if !$0 {game.error=nil}})) {
             Button(L("native.done"),role:.cancel) { game.error = nil }
@@ -86,7 +90,6 @@ struct ContentView: View {
         }
         .onChange(of:reduceMotion) { _,_ in
             game.boardScene.refreshMotionPreferences()
-            menuScene.refreshMotionPreferences()
         }
         .onOpenURL { acceptInvitation($0) }
         .onContinueUserActivity(NSUserActivityTypeBrowsingWeb) { activity in
@@ -116,11 +119,7 @@ struct ContentView: View {
         else { incomingCode = value; confirmLeave = true }
     }
     private var background: some View {
-        ZStack {
-            Color(red:0.063,green:0.145,blue:0.216)
-            RadialGradient(colors:[Color(red:0.12,green:0.22,blue:0.34).opacity(0.8),.clear],center:.topLeading,startRadius:10,endRadius:650)
-            RadialGradient(colors:[Color.purple.opacity(0.11),.clear],center:.bottomTrailing,startRadius:10,endRadius:500)
-        }.ignoresSafeArea()
+        LabTheme.canvas.ignoresSafeArea()
     }
     private var topBar: some View {
         HStack {
@@ -128,8 +127,8 @@ struct ContentView: View {
                 Button { confirmLeave = true } label: { Image(systemName:"chevron.left").frame(width:44,height:44) }
                     .accessibilityLabel(L("native.leave")).accessibilityIdentifier("game.leave")
             } else {
-                Text(L("meta.title")).textCase(.uppercase)
-                    .tracking(3).font(.caption.weight(.heavy))
+                Text(L("meta.title"))
+                    .font(.headline.weight(.heavy)).foregroundStyle(mint)
                     .lineLimit(1).minimumScaleFactor(0.7)
             }
             Spacer()
@@ -154,27 +153,20 @@ struct ContentView: View {
     }
     private var title: some View {
         VStack(spacing:12) {
-            HStack(spacing:8) { Circle().fill(mint).frame(width:6,height:6); Text(L("native.eyebrow")).tracking(2) }.font(.caption2.weight(.heavy)).foregroundStyle(mint)
-            Text(L("meta.title")).font(.system(size:58,weight:.black,design:.rounded)).tracking(-2)
-                .foregroundStyle(LinearGradient(colors:[.white,Color(red:0.65,green:0.85,blue:0.98)],startPoint:.top,endPoint:.bottom))
+            HStack(spacing:8) { Image(systemName:"sparkles"); Text(L("native.eyebrow")) }.font(.caption.weight(.bold)).foregroundStyle(mint)
+            Text(L("meta.title")).font(.system(size:titleSize,weight:.black,design:.rounded)).tracking(-2)
+                .foregroundStyle(mint)
                 .minimumScaleFactor(0.5).lineLimit(1)
-            Text(L("tagline.first")+"\n"+L("tagline.second"))
+            Text(L("lab.tagline"))
                 .font(.subheadline).foregroundStyle(muted).multilineTextAlignment(.center).fixedSize(horizontal:false,vertical:true)
         }
     }
     private var menuIntro: some View { VStack(spacing:30) { title; menuActions }.frame(maxWidth:420) }
     private var menuArt: some View {
-        ZStack {
-            Circle().fill(mint.opacity(0.06)).blur(radius:30).padding(25)
-            BoardSceneView(scene:menuScene)
-                .aspectRatio(1.35,contentMode:.fit)
-                .clipShape(RoundedRectangle(cornerRadius:28))
-                .overlay { RoundedRectangle(cornerRadius:28).strokeBorder(mint.opacity(0.12),lineWidth:1) }
-                .overlay(alignment:.topLeading) {
-                    Text(L("lab.experiment")).font(.system(size:9,weight:.heavy,design:.monospaced)).tracking(2).foregroundStyle(mint.opacity(0.85)).padding(16)
-                }
-                .shadow(color:mint.opacity(0.10),radius:30).allowsHitTesting(false)
-        }.accessibilityHidden(true)
+        Image("MenuHamsters")
+            .resizable()
+            .scaledToFit()
+            .accessibilityHidden(true)
     }
     private var menuActions: some View {
         VStack(spacing:12) {
@@ -187,7 +179,7 @@ struct ContentView: View {
                 }.buttonStyle(GameButtonStyle(secondary:true)).accessibilityIdentifier("menu.friend")
                 Button { sheet = .setup("training") } label: {
                     Label(L("menu.training"),systemImage:"sparkles").frame(maxWidth:.infinity)
-                }.buttonStyle(GameButtonStyle(secondary:true)).accessibilityIdentifier("menu.training")
+                }.buttonStyle(GameButtonStyle(secondary:true,playful:true)).accessibilityIdentifier("menu.training")
             }
             Button { sheet = .setup("join") } label: {
                 Label(L("native.haveCode"),systemImage:"link").font(.subheadline.weight(.semibold)).padding(10)
@@ -232,9 +224,10 @@ struct ContentView: View {
                         scoreboard.padding(.horizontal,24)
                         Spacer(minLength:0)
                         VStack(spacing:12) {
-                            boardView.frame(height:min(max(size.height*0.46,260),600))
-                            if game.screen == .result { resultCard.padding(.horizontal,24) }
-                            else { turnControls.padding(.horizontal,24) }
+                            // Fit by width so a short viewport does not narrow the board.
+                            boardView.frame(width:viewport.size.width,height:viewport.size.width*828/720)
+                            if game.screen == .result { resultCard.padding(.horizontal,24).frame(maxWidth:700) }
+                            else { turnControls.padding(.horizontal,24).frame(maxWidth:700) }
                         }
                         Spacer(minLength:0)
                     }
@@ -242,7 +235,7 @@ struct ContentView: View {
                     // Share spare height above and below the play area, while
                     // allowing compact screens and larger text to scroll.
                     .frame(minHeight:viewport.size.height)
-                    .frame(maxWidth:700).frame(maxWidth:.infinity)
+                    .frame(maxWidth:.infinity)
                 }.scrollIndicators(.hidden)
             }
         }
@@ -328,13 +321,10 @@ struct ContentView: View {
             ZStack(alignment:.top) {
                 Text(L("native.selectHint")).fixedSize(horizontal:false,vertical:true).hidden()
                 Text(L("native.turnLimitHint")).fixedSize(horizontal:false,vertical:true).hidden()
-                ForEach(1...9,id:\.self) { platform in
-                    Text(LF("native.selected",["platform":"\(platform)"]))
-                        .fixedSize(horizontal:false,vertical:true).hidden()
-                }
+                Text(L("native.selected")).fixedSize(horizontal:false,vertical:true).hidden()
             }
             .overlay(alignment:.top) {
-                Text(game.turnLimitHint ? L("native.turnLimitHint") : game.selection == nil ? L("native.selectHint") : LF("native.selected",["platform":"\(game.selection!.platform+1)"]))
+                Text(game.turnLimitHint ? L("native.turnLimitHint") : game.selection == nil ? L("native.selectHint") : L("native.selected"))
                     .fixedSize(horizontal:false,vertical:true)
                     .foregroundStyle(game.turnLimitHint ? coral : game.selection == nil ? muted : mint)
             }
@@ -354,7 +344,7 @@ struct ContentView: View {
     }
     private var resultCard: some View {
         VStack(spacing:16) {
-            Image(systemName:game.ownScore > game.opponentScore ? "trophy.fill" : "flag.checkered").font(.largeTitle).foregroundStyle(Color.yellow)
+            Image(systemName:game.ownScore > game.opponentScore ? "trophy.fill" : "flag.checkered").font(.largeTitle).foregroundStyle(LabTheme.amberInk)
             Text(game.resultTitle).font(.largeTitle.bold()).multilineTextAlignment(.center).accessibilityIdentifier("game.result")
             Text("\(game.ownScore) : \(game.opponentScore)").font(.title.monospacedDigit()).foregroundStyle(muted)
             if game.peerRematch { Text(L("native.rematchInvite")).font(.subheadline).foregroundStyle(mint) }
@@ -362,7 +352,7 @@ struct ContentView: View {
                 Text(L(game.rematchRequested ? "status.waitingOpponent" : "action.rematch")).frame(maxWidth:.infinity)
             }.buttonStyle(GameButtonStyle()).disabled(game.rematchRequested).accessibilityIdentifier("game.rematch")
             Button(L("action.newGame")) { game.leave() }.frame(minHeight:44)
-        }.padding(24).background(.white.opacity(0.045),in:RoundedRectangle(cornerRadius:28))
+        }.padding(24).background(LabTheme.peach,in:RoundedRectangle(cornerRadius:28))
     }
     private func setup(mode: String) -> some View {
         Form {
@@ -398,7 +388,14 @@ struct ContentView: View {
                     } else if mode == "training" { game.startTraining() }
                     else { game.startOnline(mode) }
                     sheet = nil
-                } label: { Text(L(mode == "training" ? "dialog.trainingSubmit" : mode == "host" ? "dialog.createSubmit" : mode == "join" ? "dialog.joinSubmit" : "dialog.onlineSubmit")).frame(maxWidth:.infinity).font(.headline).padding(8) }
+                } label: {
+                    Label(L(mode == "training" ? "dialog.trainingSubmit" : mode == "host" ? "dialog.createSubmit" : mode == "join" ? "dialog.joinSubmit" : "dialog.onlineSubmit"),systemImage:mode == "training" ? "play.fill" : "arrow.right")
+                        .frame(maxWidth:.infinity)
+                }
+                .buttonStyle(GameButtonStyle())
+                .listRowBackground(Color.clear)
+                .listRowInsets(EdgeInsets(top:6,leading:0,bottom:6,trailing:0))
+                .listRowSeparator(.hidden)
                 .accessibilityIdentifier("setup.start")
             } footer: {
                 Text(L(mode == "training" ? "native.offline" : "native.onlinePrivacy"))
@@ -455,18 +452,16 @@ private struct BoardSceneView: UIViewRepresentable {
 private struct RoundClock: View {
     let game: GameModel
     var body: some View {
-        VStack(spacing:7) {
-            HStack {
-                Text(game.paused ? L("native.recovering") : game.active ? L("native.yourMove") : L("status.waitingOpponent"))
-                Spacer()
-                Text("\(Int(ceil(game.remaining)))s").monospacedDigit().foregroundStyle(game.remaining < 5 ? coral : mint)
-            }.font(.caption.weight(.semibold))
-            GeometryReader { proxy in
-                Capsule().fill(.white.opacity(0.08))
-                Capsule().fill(LinearGradient(colors:[mint,.cyan],startPoint:.leading,endPoint:.trailing))
+        GeometryReader { proxy in
+            ZStack(alignment:.leading) {
+                Capsule().fill(LabTheme.mint)
+                Capsule().fill(game.remaining < 5 ? coral : mint)
                     .frame(width:proxy.size.width * min(1,max(0,game.remaining/30)))
-            }.frame(height:4)
-        }.foregroundStyle(muted)
+            }
+        }.frame(height:4)
+            .accessibilityElement(children:.ignore)
+            .accessibilityLabel(game.paused ? L("native.recovering") : game.active ? L("native.yourMove") : L("status.waitingOpponent"))
+            .accessibilityValue(Text(min(1,max(0,game.remaining/30)),format:.percent.precision(.fractionLength(0))))
     }
 }
 
@@ -529,15 +524,17 @@ private struct InvitationCodeField: View {
 
 struct GameButtonStyle: ButtonStyle {
     var secondary = false
+    var playful = false
     @Environment(\.isEnabled) private var enabled
     func makeBody(configuration: Configuration) -> some View {
         configuration.label.font(.subheadline.weight(.bold)).padding(.horizontal,18).padding(.vertical,18)
             .frame(minHeight:56)
-            .foregroundStyle(secondary ? Color.white : Color(red:0.03,green:0.14,blue:0.15))
+            .foregroundStyle(secondary ? LabTheme.teal : LabTheme.ink)
             .background {
-                RoundedRectangle(cornerRadius:18).fill(secondary ? AnyShapeStyle(.white.opacity(0.06)) : AnyShapeStyle(LinearGradient(colors:[mint,Color(red:0.37,green:0.77,blue:0.95)],startPoint:.leading,endPoint:.trailing)))
+                RoundedRectangle(cornerRadius:18).fill(secondary ? playful ? LabTheme.peach : LabTheme.mint : LabTheme.sunshine)
             }
-            .overlay { RoundedRectangle(cornerRadius:18).strokeBorder(.white.opacity(secondary ? 0.10 : 0.20),lineWidth:1) }
-            .opacity(enabled ? configuration.isPressed ? 0.7 : 1 : 0.35)
+            .overlay { RoundedRectangle(cornerRadius:18).strokeBorder(secondary ? LabTheme.border : LabTheme.amberInk.opacity(0.20),lineWidth:1) }
+            .scaleEffect(configuration.isPressed ? 0.98 : 1)
+            .opacity(enabled ? 1 : 0.45)
     }
 }

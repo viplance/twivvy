@@ -8,12 +8,39 @@ final class HamsterLabUITests: XCTestCase {
         app.launch()
         XCTAssertTrue(app.buttons["menu.training"].waitForExistence(timeout:20))
         XCTAssertTrue(app.staticTexts["ХомаЛаб"].firstMatch.exists)
+        XCTAssertTrue(app.staticTexts["Помоги хомячкам найти дорогу домой!"].exists)
         capture("01-menu-ru")
         app.buttons["menu.settings"].tap()
         XCTAssertTrue(app.switches["settings.sound"].waitForExistence(timeout:5))
         XCTAssertTrue(app.switches["settings.voices"].exists)
         app.buttons["sheet.done"].tap()
         XCTAssertTrue(app.buttons["menu.training"].waitForExistence(timeout:5))
+    }
+    @MainActor func testMenuSloganInEveryLanguage() {
+        let slogans = [
+            ("en", "Help the hamsters find their way home!"),
+            ("be", "Дапамажы хамячкам знайсці дарогу дадому!"),
+            ("es", "¡Ayuda a los hámsteres a encontrar el camino a casa!"),
+            ("ru", "Помоги хомячкам найти дорогу домой!"),
+            ("uk", "Допоможи хом’ячкам знайти дорогу додому!"),
+            ("it", "Aiuta i criceti a trovare la strada di casa!"),
+            ("pt", "Ajuda os hamsters a encontrar o caminho para casa!"),
+            ("pl", "Pomóż chomikom znaleźć drogę do domu!"),
+            ("fr", "Aide les hamsters à retrouver le chemin de leur maison !"),
+            ("de", "Hilf den Hamstern, den Weg nach Hause zu finden!"),
+            ("tr", "Hamsterların evlerinin yolunu bulmasına yardım et!")
+        ]
+        for (language, slogan) in slogans {
+            let app = XCUIApplication()
+            app.launchArguments = ["--uitesting", "-AppleLanguages", "(\(language))"]
+            app.launch()
+            XCTAssertTrue(app.buttons["menu.training"].waitForExistence(timeout:20), language)
+            let label = app.staticTexts[slogan]
+            XCTAssertTrue(label.exists, language)
+            XCTAssertTrue(label.isHittable, "Slogan must be visible: \(language)")
+            capture("menu-slogan-\(language)")
+            app.terminate()
+        }
     }
     @MainActor func testTrainingRotationRevealAndLandscape() {
         let app=XCUIApplication()
@@ -27,7 +54,7 @@ final class HamsterLabUITests: XCTestCase {
         let start=platform.coordinate(withNormalizedOffset:CGVector(dx:0.86,dy:0.5))
         let end=platform.coordinate(withNormalizedOffset:CGVector(dx:0.5,dy:0.87))
         start.press(forDuration:0.06,thenDragTo:end,withVelocity:.slow,thenHoldForDuration:0.1)
-        XCTAssertTrue(app.staticTexts["Platform 5 is ready. Your twist stays secret until reveal!"].waitForExistence(timeout:5))
+        XCTAssertTrue(app.staticTexts["Move made. Your twist stays secret until reveal!"].waitForExistence(timeout:5))
         capture("02-private-twist")
         next.tap()
         XCTAssertTrue(app.staticTexts["2 / 30"].waitForExistence(timeout:5))
@@ -90,7 +117,8 @@ final class HamsterLabUITests: XCTestCase {
         }
     }
     @MainActor private func waitUntilReady(_ app: XCUIApplication) {
-        XCTAssertTrue(app.staticTexts["Time for a little twist!"].waitForExistence(timeout:20))
+        let ready=XCTNSPredicateExpectation(predicate:NSPredicate(format:"enabled == true"),object:app.buttons["game.next"])
+        XCTAssertEqual(XCTWaiter.wait(for:[ready],timeout:20),.completed)
     }
     @MainActor private func capture(_ name: String) {
         let attachment=XCTAttachment(screenshot:XCUIScreen.main.screenshot())

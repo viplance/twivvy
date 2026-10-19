@@ -1,8 +1,7 @@
 {
   "meta.title": "HamsterLab",
   "meta.description": "Piccoli criceti. Tubi tortuosi. Una grande avventura in miniatura.",
-  "tagline.first": "Piccole zampe. Grandi scoperte.",
-  "tagline.second": "Gira i tubi. Accompagna i criceti a casa.",
+  "lab.tagline": "Aiuta i criceti a trovare la strada di casa!",
   "native.eyebrow": "IL PICCOLO LABORATORIO DELLE GRANDI AVVENTURE",
   "native.notice": "HamsterLab",
   "native.board": "Laboratorio dei criceti",
@@ -10,7 +9,7 @@
   "native.platform": "Piattaforma con tubi",
   "native.yourMove": "È ora di girare i tubi!",
   "native.selectHint": "Trascina una piattaforma per girare i tubi. Guida i criceti nella tua casetta in basso.",
-  "native.selected": "La piattaforma {platform} è pronta. La tua rotazione resta segreta fino alla rivelazione!",
+  "native.selected": "Mossa fatta. La tua rotazione resta segreta fino alla rivelazione!",
   "native.footer": "9 piattaforme · piccole zampe · grandi scoperte",
   "native.gestureRule": "Trascina il dito attorno al centro di una piattaforma per girarla. Tocca una piattaforma per annullare la mossa prevista. Puoi cambiare idea durante i 30 secondi del timer. La tua casetta è sempre in basso.",
   "native.winRule": "Porta a casa sette criceti per vincere in anticipo. Altrimenti vince chi ha più criceti dopo 30 turni. A parità di punteggio è un pareggio.",
@@ -29,5 +28,11 @@
   "lab.finish": "Un bell’esperimento! Ci riproviamo?",
   "lab.experiment": "ESPERIMENTO 01",
   "lab.collection": "Criceti a casa",
-  "native.privacyText": "HamsterLab non utilizza pubblicità, analisi, tracciamento, account o acquisti in-app.\n\nIl tuo soprannome e le tue preferenze restano sul dispositivo. Il gioco online invia il tuo soprannome, credenziali casuali di accesso alla stanza e informazioni sulla connessione al servizio di segnalazione di HamsterLab. L’avversario vede il tuo soprannome e può ricevere il tuo indirizzo IP tramite la connessione WebRTC diretta. Le mosse vengono trasmesse direttamente tra i due giocatori.\n\nLe stanze in attesa e le partite con una persona assente scadono dopo 30 minuti. Le stanze attive restano disponibili. I fornitori dell’infrastruttura possono conservare registri tecnici delle richieste, inclusi gli indirizzi IP, per la sicurezza e il funzionamento del servizio.\n\nLe credenziali di ripristino e le mosse segrete sono memorizzate nel portachiavi iOS di questo dispositivo. Uscire da una partita online ne elimina i dati di ripristino. Suoni e feedback aptico possono essere disattivati nelle impostazioni. L’allenamento funziona senza internet; un controllo facoltativo della presenza dei giocatori può contattare il servizio di segnalazione.\n\nNon viene richiesto l’accesso a fotocamera, microfono, contatti o posizione.\n\nEditore: Dzmitry Sharko. Assistenza e richieste sulla privacy: https://twivvy.e-notix.com/support.html\n\nAggiornamento: 17 settembre 2026."
+  "native.privacyText": "HamsterLab non utilizza pubblicità, analisi, tracciamento, account o acquisti in-app.\n\nIl tuo soprannome e le tue preferenze restano sul dispositivo. Il gioco online invia il tuo soprannome, credenziali casuali di accesso alla stanza e informazioni sulla connessione al servizio di segnalazione di HamsterLab. L’avversario vede il tuo soprannome e può ricevere il tuo indirizzo IP tramite la connessione WebRTC diretta. Le mosse vengono trasmesse direttamente tra i due giocatori.\n\nLe stanze in attesa e le partite con una persona assente scadono dopo 30 minuti. Le stanze attive restano disponibili. I fornitori dell’infrastruttura possono conservare registri tecnici delle richieste, inclusi gli indirizzi IP, per la sicurezza e il funzionamento del servizio.\n\nLe credenziali di ripristino e le mosse segrete sono memorizzate nel portachiavi iOS di questo dispositivo. Uscire da una partita online ne elimina i dati di ripristino. Suoni e feedback aptico possono essere disattivati nelle impostazioni. L’allenamento funziona senza internet; un controllo facoltativo della presenza dei giocatori può contattare il servizio di segnalazione.\n\nNon viene richiesto l’accesso a fotocamera, microfono, contatti o posizione.\n\nEditore: Dzmitry Sharko. Assistenza e richieste sulla privacy: https://twivvy.e-notix.com/support.html\n\nAggiornamento: 17 settembre 2026.",
+  "status.storageUnavailable": "Impossibile salvare la partita su questo dispositivo. Tieni aperta l’app.",
+  "status.startupFailed": "Impossibile avviare la partita. Riavvia l’app su entrambi i dispositivi.",
+  "error.oldVersion": "La partita è stata creata con una versione precedente. Aggiorna il gioco su entrambi i dispositivi e crea una nuova stanza.",
+  "error.occupied": "Questa partita è già aperta su un altro dispositivo. Continua a giocare lì.",
+  "error.connectFailed": "Connessione non riuscita. Prova a unirti di nuovo alla partita.",
+  "native.invalidCode": "Inserisci un codice stanza o un link di invito HamsterLab valido."
 }

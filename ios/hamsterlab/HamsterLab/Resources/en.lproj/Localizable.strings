@@ -3,8 +3,6 @@
 "sound.label" = "Sound";
 "sound.enable" = "Turn sound on";
 "sound.disable" = "Turn sound off";
-"tagline.first" = "Tiny paws. Big discoveries.";
-"tagline.second" = "Twist the tubes. Bring your hamsters home.";
 "menu.friend" = "Play with a friend";
 "menu.online" = "Random opponent";
 "menu.training" = "Training";
@@ -46,8 +44,8 @@
 "training.exit" = "Exit training";
 "status.round" = "Round {round} of {total}";
 "status.peerFound" = "Opponent found, establishing connection…";
-"status.storageUnavailable" = "Your browser cannot save the match. Do not close this tab.";
-"status.startupFailed" = "Could not start the game. Refresh the page on both devices.";
+"status.storageUnavailable" = "This device cannot save the game. Keep the app open.";
+"status.startupFailed" = "Could not start the game. Restart the app on both devices.";
 "status.peerDisconnected" = "Opponent disconnected";
 "status.waitingOpponent" = "Waiting for opponent…";
 "status.finding" = "Finding an opponent…";
@@ -60,9 +58,9 @@
 "error.matchConnect" = "Could not connect to the matched opponent.";
 "error.createRoom" = "Could not create the room.";
 "error.notFound" = "Room not found or the invitation has expired. Ask for a new link.";
-"error.oldVersion" = "The game was created with an older version. Refresh both devices and create a new room.";
-"error.occupied" = "The seat is occupied. Return to the original game tab.";
-"error.connectFailed" = "Could not connect. Refresh the page to try again.";
+"error.oldVersion" = "This game uses an older version. Update the game on both devices and create a new room.";
+"error.occupied" = "This game is already open on another device. Continue playing there.";
+"error.connectFailed" = "Could not connect. Please try joining again.";
 "error.peerAbsent" = "Match ended: the opponent was away for more than 30 minutes.";
 "error.restoreMismatch" = "Could not reconcile the saved match.";
 "error.platformCooldown" = "Platform is cooling down";
@@ -91,7 +89,7 @@
 "native.south" = "Down";
 "native.west" = "Left";
 "native.selectHint" = "Drag a platform to twist the tubes. Guide the hamsters to your home below.";
-"native.selected" = "Platform {platform} is ready. Your twist stays secret until reveal!";
+"native.selected" = "Move made. Your twist stays secret until reveal!";
 "native.left" = "Turn left";
 "native.right" = "Turn right";
 "native.skip" = "Clear / skip";
@@ -115,6 +113,7 @@
 "native.duel" = "LAB DUEL";
 "native.back" = "Back";
 
+"lab.tagline" = "Help the hamsters find their way home!";
 "lab.voices" = "Hamster chatter & narration";
 "lab.welcome" = "Welcome to HamsterLab! Let’s bring our tiny friends home.";
 "lab.begin" = "Paws ready? Let’s explore!";

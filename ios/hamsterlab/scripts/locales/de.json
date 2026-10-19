@@ -1,8 +1,7 @@
 {
   "meta.title": "HamsterLab",
   "meta.description": "Kleine Hamster. Gewundene Röhren. Ein großes kleines Abenteuer.",
-  "tagline.first": "Kleine Pfoten. Große Entdeckungen.",
-  "tagline.second": "Dreh die Röhren. Bring die Hamster nach Hause.",
+  "lab.tagline": "Hilf den Hamstern, den Weg nach Hause zu finden!",
   "native.eyebrow": "DAS KLEINE LABOR FÜR GROSSE ABENTEUER",
   "native.notice": "HamsterLab",
   "native.board": "Hamsterlabor",
@@ -10,7 +9,7 @@
   "native.platform": "Röhrenplattform",
   "native.yourMove": "Zeit für eine kleine Drehung!",
   "native.selectHint": "Ziehe an einer Plattform, um die Röhren zu drehen. Führe die Hamster in dein Häuschen unten.",
-  "native.selected": "Plattform {platform} ist bereit. Deine Drehung bleibt bis zur Aufdeckung geheim!",
+  "native.selected": "Zug gemacht. Deine Drehung bleibt bis zur Aufdeckung geheim!",
   "native.footer": "9 Plattformen · kleine Pfoten · große Entdeckungen",
   "native.gestureRule": "Ziehe um die Mitte einer Plattform, um sie zu drehen. Tippe auf eine Plattform, um deinen geplanten Zug zu löschen. Du kannst deine Wahl während der 30 Sekunden ändern. Dein Hamsterhäuschen ist immer unten.",
   "native.winRule": "Bring sieben Hamster nach Hause, um vorzeitig zu gewinnen. Sonst gewinnt nach 30 Runden, wer die meisten Hamster hat. Bei Gleichstand ist es unentschieden.",
@@ -29,5 +28,11 @@
   "lab.finish": "Ein tolles Experiment! Versuchen wir es noch einmal?",
   "lab.experiment": "EXPERIMENT 01",
   "lab.collection": "Hamster zu Hause",
-  "native.privacyText": "HamsterLab verwendet keine Werbung, Analysen, Tracking, Benutzerkonten oder In-App-Käufe.\n\nDein Spitzname und deine Einstellungen bleiben auf deinem Gerät. Beim Onlinespiel werden dein Spitzname, zufällige Zugangsdaten für den Raum und Verbindungsinformationen an den Signalisierungsdienst von HamsterLab gesendet. Dein Gegenüber sieht deinen Spitznamen und kann über die direkte WebRTC-Verbindung deine IP-Adresse erhalten. Spielzüge werden direkt zwischen den beiden Spielern übertragen.\n\nWarteräume und Partien mit einer abwesenden Person laufen nach 30 Minuten ab. Aktive Räume bleiben verfügbar. Infrastrukturanbieter können technische Anfrageprotokolle einschließlich IP-Adressen für die Sicherheit und den Betrieb des Dienstes speichern.\n\nWiederherstellungsdaten und geheime Spielzüge werden im iOS-Schlüsselbund auf diesem Gerät gespeichert. Wenn du ein Onlinespiel verlässt, werden dessen Wiederherstellungsdaten gelöscht. Ton und haptisches Feedback lassen sich in den Einstellungen ausschalten. Das Training funktioniert ohne Internet; eine optionale Anwesenheitsprüfung kann den Signalisierungsdienst kontaktieren.\n\nEs wird kein Zugriff auf Kamera, Mikrofon, Kontakte oder Standort angefordert.\n\nHerausgeber: Dzmitry Sharko. Support und Datenschutzanfragen: https://twivvy.e-notix.com/support.html\n\nAktualisiert: 17. September 2026."
+  "native.privacyText": "HamsterLab verwendet keine Werbung, Analysen, Tracking, Benutzerkonten oder In-App-Käufe.\n\nDein Spitzname und deine Einstellungen bleiben auf deinem Gerät. Beim Onlinespiel werden dein Spitzname, zufällige Zugangsdaten für den Raum und Verbindungsinformationen an den Signalisierungsdienst von HamsterLab gesendet. Dein Gegenüber sieht deinen Spitznamen und kann über die direkte WebRTC-Verbindung deine IP-Adresse erhalten. Spielzüge werden direkt zwischen den beiden Spielern übertragen.\n\nWarteräume und Partien mit einer abwesenden Person laufen nach 30 Minuten ab. Aktive Räume bleiben verfügbar. Infrastrukturanbieter können technische Anfrageprotokolle einschließlich IP-Adressen für die Sicherheit und den Betrieb des Dienstes speichern.\n\nWiederherstellungsdaten und geheime Spielzüge werden im iOS-Schlüsselbund auf diesem Gerät gespeichert. Wenn du ein Onlinespiel verlässt, werden dessen Wiederherstellungsdaten gelöscht. Ton und haptisches Feedback lassen sich in den Einstellungen ausschalten. Das Training funktioniert ohne Internet; eine optionale Anwesenheitsprüfung kann den Signalisierungsdienst kontaktieren.\n\nEs wird kein Zugriff auf Kamera, Mikrofon, Kontakte oder Standort angefordert.\n\nHerausgeber: Dzmitry Sharko. Support und Datenschutzanfragen: https://twivvy.e-notix.com/support.html\n\nAktualisiert: 17. September 2026.",
+  "status.storageUnavailable": "Das Spiel kann auf diesem Gerät nicht gespeichert werden. Lass die App geöffnet.",
+  "status.startupFailed": "Das Spiel konnte nicht gestartet werden. Starte die App auf beiden Geräten neu.",
+  "error.oldVersion": "Das Spiel wurde mit einer älteren Version erstellt. Aktualisiere das Spiel auf beiden Geräten und erstelle einen neuen Raum.",
+  "error.occupied": "Dieses Spiel ist bereits auf einem anderen Gerät geöffnet. Spiele dort weiter.",
+  "error.connectFailed": "Verbindung fehlgeschlagen. Versuche erneut, dem Spiel beizutreten.",
+  "native.invalidCode": "Gib einen gültigen Raumcode oder HamsterLab-Einladungslink ein."
 }

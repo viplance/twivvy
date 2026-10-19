@@ -2,7 +2,7 @@ import RealityKit
 import UIKit
 import simd
 
-/// All 3D routes use the exact quadratic centreline of the deterministic board.
+/// Glass and characters share the same constant-radius elbow or straight bore.
 /// World X follows columns, Z follows rows; visual height never changes rules.
 struct TubePath {
     let center: SIMD3<Float>
@@ -10,6 +10,8 @@ struct TubePath {
     static let cell: Float = 0.98
     static let pitch: Float = 2.16
     static let height: Float = 0.43
+    static let radius: Float = 0.245
+    static let wall: Float = 0.012
     var ports: [Int] { (0..<4).filter { mask & (1 << $0) != 0 } }
     static func tileCenter(_ platform: Int) -> SIMD3<Float> {
         [Float(platform % 3 - 1) * pitch, 0, Float(platform / 3 - 1) * pitch]
@@ -24,24 +26,47 @@ struct TubePath {
     func endpoint(_ port: Int) -> SIMD3<Float> {
         center + [SIMD3<Float>(0,0,-1), [1,0,0], [0,0,1], [-1,0,0]][port] * Self.cell / 2
     }
+    var isElbow: Bool { ports.count == 2 && (ports[0] + 2) % 4 != ports[1] }
+    var length: Float { isElbow ? Self.cell * .pi / 4 : Self.cell }
+    private var bendCenter: SIMD3<Float> {
+        guard let a=ports.first, let b=ports.last else { return center }
+        return endpoint(a) + endpoint(b) - center
+    }
+    func tangent(_ t: Float) -> SIMD3<Float> {
+        guard let a=ports.first, let b=ports.last, a != b else { return [0,0,-1] }
+        if !isElbow { return simd_normalize(endpoint(b)-endpoint(a)) }
+        let u=simd_normalize(endpoint(a)-bendCenter), v=simd_normalize(endpoint(b)-bendCenter)
+        let angle=max(0,min(1,t)) * .pi/2
+        return -u*sin(angle) + v*cos(angle)
+    }
     func sample(_ t: Float) -> SIMD3<Float> {
-        guard let a = ports.first, let b = ports.last else { return center }
-        return Self.quadratic(endpoint(a), center, endpoint(b), t)
+        guard let a=ports.first, let b=ports.last else { return center }
+        // Continue along the port axis when the nose/tail spans a joint.
+        if t < 0 { return endpoint(a) + tangent(0) * (t * length) }
+        if t > 1 { return endpoint(b) + tangent(1) * ((t-1) * length) }
+        if !isElbow { return simd_mix(endpoint(a),endpoint(b),SIMD3(repeating:t)) }
+        let angle=t * .pi/2
+        return bendCenter + (endpoint(a)-bendCenter)*cos(angle) + (endpoint(b)-bendCenter)*sin(angle)
     }
     var midpoint: SIMD3<Float> { sample(0.5) }
     static func quadratic(_ a: SIMD3<Float>, _ c: SIMD3<Float>, _ b: SIMD3<Float>, _ t: Float) -> SIMD3<Float> {
         (1-t)*(1-t)*a + 2*(1-t)*t*c + t*t*b
     }
-    func half(port: Int, towardPort: Bool, progress: Float) -> SIMD3<Float> {
-        let end = endpoint(port), control = (center + end) / 2
-        return Self.quadratic(towardPort ? midpoint : end, control, towardPort ? end : midpoint, progress)
+    func fromMidpoint(toward port: Int, distance: Float) -> SIMD3<Float> {
+        sample(0.5 + (port == ports.first ? -1 : 1) * distance / length)
     }
-    func travel(to destination: TubePath, exit: Int, progress: Float) -> SIMD3<Float> {
-        let entry = (exit + 2) % 4
-        if progress < 0.45 { return half(port: exit, towardPort: true, progress: progress / 0.45) }
-        if progress > 0.55 { return destination.half(port: entry, towardPort: false, progress: (progress-0.55) / 0.45) }
-        let t = (progress-0.45) / 0.1
-        return simd_mix(endpoint(exit), destination.endpoint(entry), SIMD3(repeating:t)) + [0, sin(t * .pi)*0.06, 0]
+    func half(port: Int, towardPort: Bool, progress: Float) -> SIMD3<Float> {
+        fromMidpoint(toward:port,distance:(towardPort ? progress : 1-progress)*length/2)
+    }
+    func travel(to destination: TubePath, exit: Int, progress: Float, offset: Float = 0) -> SIMD3<Float> {
+        let entry=(exit+2)%4, gap=simd_distance(endpoint(exit),destination.endpoint(entry))
+        let first=length/2, last=destination.length/2
+        let distance=progress*(first+gap+last)+offset
+        if distance <= first { return fromMidpoint(toward:exit,distance:distance) }
+        if distance >= first+gap {
+            return destination.fromMidpoint(toward:entry,distance:first+gap+last-distance)
+        }
+        return simd_mix(endpoint(exit),destination.endpoint(entry),SIMD3(repeating:(distance-first)/gap))
     }
     static func heading(exit: Int) -> Float { Float(exit) * -.pi / 2 }
 }
@@ -52,7 +77,7 @@ struct TubePath {
     private struct MaterialKey: Hashable { let color: UIColor; let metallic: Float; let roughness: Float }
     private static var boxes: [BoxKey:MeshResource] = [:]
     private static var materials: [MaterialKey:PhysicallyBasedMaterial] = [:]
-    static let mint = UIColor(lab:0x88F4D1), lavender = UIColor(lab:0xB8A4FF), pink = UIColor(lab:0xFFACBE)
+    static let mint = UIColor(lab:0x4799D1), lavender = UIColor(lab:0x9174CF), pink = UIColor(lab:0xD98B9D)
     static let ink = UIColor(lab:0x152B40), cream = UIColor(lab:0xFFF0CE)
     static func material(_ color: UIColor, metallic: Float = 0, roughness: Float = 0.55) -> PhysicallyBasedMaterial {
         let key = MaterialKey(color:color,metallic:metallic,roughness:roughness)
@@ -63,9 +88,9 @@ struct TubePath {
         return m
     }
     static func glow(_ color: UIColor) -> UnlitMaterial { UnlitMaterial(color:color) }
-    static func glass(_ color: UIColor = UIColor(lab:0xBCF5FF)) -> PhysicallyBasedMaterial {
+    static func glass(_ color: UIColor = UIColor(lab:0xADD3FF)) -> PhysicallyBasedMaterial {
         var m = material(color, metallic:0.12, roughness:0.08)
-        m.blending = .transparent(opacity:.init(floatLiteral:0.22))
+        m.blending = .transparent(opacity:.init(floatLiteral:0.26))
         m.faceCulling = .back // Inner and outer walls already have opposite winding.
         return m
     }
@@ -93,9 +118,9 @@ struct TubePath {
         return e
     }
     /// A swept, hollow mesh with inner walls and open ends, not a solid cylinder.
-    static func tube(points: [SIMD3<Float>], radius: Float = 0.2, thickness: Float = 0.012) throws -> MeshResource {
+    static func tube(points: [SIMD3<Float>], radius: Float = TubePath.radius, thickness: Float = TubePath.wall) throws -> MeshResource {
         var vertices: [SIMD3<Float>] = [], normals: [SIMD3<Float>] = [], indices: [UInt32] = []
-        let sides = 16, count = points.count
+        let sides = 24, count = points.count
         guard count >= 2 else { throw GeometryError.emptyPath }
         for shell in 0..<2 {
             let r = shell == 0 ? radius : radius-thickness
@@ -126,7 +151,7 @@ struct TubePath {
         descriptor.positions = .init(vertices); descriptor.normals = .init(normals); descriptor.primitives = .triangles(indices)
         return try MeshResource.generate(from:[descriptor])
     }
-    static func collar(at position: SIMD3<Float>, tangent: SIMD3<Float>, color: UIColor, radius: Float = 0.207) -> Entity {
+    static func collar(at position: SIMD3<Float>, tangent: SIMD3<Float>, color: UIColor, radius: Float = TubePath.radius + 0.01) -> Entity {
         let root = Entity(); root.position = position
         let direction = simd_normalize(tangent)
         let reference: SIMD3<Float> = abs(direction.y)>0.95 ? [1,0,0] : [0,1,0]
@@ -170,7 +195,7 @@ struct TubePath {
         descriptor.positions = .init(vertices); descriptor.normals = .init(normals); descriptor.primitives = .triangles(indices)
         return try MeshResource.generate(from:[descriptor])
     }
-    static func tubeAssembly(points: [SIMD3<Float>], tint: UIColor, collars: Bool = true, radius: Float = 0.2) -> Entity {
+    static func tubeAssembly(points: [SIMD3<Float>], tint: UIColor, collars: Bool = true, radius: Float = TubePath.radius) -> Entity {
         let root = Entity()
         do { root.addChild(ModelEntity(mesh:try tube(points:points,radius:radius),materials:[glass()])) }
         catch { assertionFailure("Tube mesh: \(error)") }
@@ -183,7 +208,7 @@ struct TubePath {
                 return points[i] + side*offset + [0,radius*0.72,0]
             }
         }
-        do { root.addChild(ModelEntity(mesh:try strokes(highlights,radius:0.007),materials:[glow(UIColor(lab:0xCCF5FF))])) }
+        do { root.addChild(ModelEntity(mesh:try strokes(highlights,radius:0.007),materials:[glow(UIColor(lab:0xD6E9FF))])) }
         catch { assertionFailure("Highlight mesh: \(error)") }
         if collars, points.count > 1 {
             root.addChild(collar(at:points[0],tangent:points[1]-points[0],color:tint,radius:radius+0.01))

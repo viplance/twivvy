@@ -3,8 +3,6 @@
 "sound.label" = "Dźwięk";
 "sound.enable" = "Włącz dźwięk";
 "sound.disable" = "Wyłącz dźwięk";
-"tagline.first" = "Małe łapki. Wielkie odkrycia.";
-"tagline.second" = "Obracaj rurki. Prowadź chomiki do domu.";
 "menu.friend" = "Zagraj ze znajomym";
 "menu.online" = "Losowy przeciwnik";
 "menu.training" = "Trening";
@@ -46,8 +44,8 @@
 "training.exit" = "Zakończ trening";
 "status.round" = "Runda {round} z {total}";
 "status.peerFound" = "Znaleziono przeciwnika, nawiązywanie połączenia…";
-"status.storageUnavailable" = "Przeglądarka nie pozwala zapisać gry. Nie zamykaj tej karty.";
-"status.startupFailed" = "Nie udało się uruchomić gry. Odśwież stronę na obu urządzeniach.";
+"status.storageUnavailable" = "Nie udało się zapisać gry na tym urządzeniu. Nie zamykaj aplikacji.";
+"status.startupFailed" = "Nie udało się uruchomić gry. Uruchom ponownie aplikację na obu urządzeniach.";
 "status.peerDisconnected" = "Przeciwnik się rozłączył";
 "status.waitingOpponent" = "Oczekiwanie na przeciwnika…";
 "status.finding" = "Szukanie przeciwnika…";
@@ -60,9 +58,9 @@
 "error.matchConnect" = "Nie udało się połączyć ze znalezionym przeciwnikiem.";
 "error.createRoom" = "Nie udało się utworzyć pokoju.";
 "error.notFound" = "Nie znaleziono pokoju lub zaproszenie wygasło. Poproś o nowy link.";
-"error.oldVersion" = "Gra została utworzona w starszej wersji. Odśwież oba urządzenia i utwórz nowy pokój.";
-"error.occupied" = "Miejsce jest zajęte. Wróć do pierwotnej karty gry.";
-"error.connectFailed" = "Nie udało się połączyć. Odśwież stronę, aby spróbować ponownie.";
+"error.oldVersion" = "Gra została utworzona w starszej wersji. Zaktualizuj grę na obu urządzeniach i utwórz nowy pokój.";
+"error.occupied" = "Ta gra jest już otwarta na innym urządzeniu. Kontynuuj grę na nim.";
+"error.connectFailed" = "Nie udało się połączyć. Spróbuj dołączyć ponownie.";
 "error.peerAbsent" = "Gra zakończona: przeciwnik był nieobecny przez ponad 30 minut.";
 "error.restoreMismatch" = "Nie udało się uzgodnić zapisanej gry.";
 "error.platformCooldown" = "Platforma się chłodzi";
@@ -91,7 +89,7 @@
 "native.south" = "Dół";
 "native.west" = "Lewo";
 "native.selectHint" = "Przeciągnij platformę, aby obrócić rurki. Prowadź chomiki do swojego domku na dole.";
-"native.selected" = "Platforma {platform} jest gotowa. Twój obrót pozostanie tajemnicą aż do ujawnienia!";
+"native.selected" = "Ruch wykonany. Twój obrót pozostanie tajemnicą aż do ujawnienia!";
 "native.left" = "W lewo";
 "native.right" = "W prawo";
 "native.skip" = "Wyczyść / pomiń";
@@ -100,7 +98,7 @@
 "native.rematchInvite" = "Przeciwnik chce rewanżu!";
 "native.inviteCode" = "Kod pokoju lub link zaproszenia";
 "native.codeHint" = "ABCD7 lub https://…";
-"native.invalidCode" = "Wpisz poprawny kod lub link HamsterLab.";
+"native.invalidCode" = "Wpisz prawidłowy kod pokoju lub link zaproszenia do HamsterLab.";
 "native.offline" = "Odkrywaj laboratorium offline z botem. Wybiera swój ruch przed tobą.";
 "native.onlinePrivacy" = "Przeciwnik widzi twoje imię. Gracze łączą się bezpośrednio.";
 "native.haptics" = "Wibracje";
@@ -115,6 +113,7 @@
 "native.duel" = "POJEDYNEK W LABORATORIUM";
 "native.back" = "Wstecz";
 
+"lab.tagline" = "Pomóż chomikom znaleźć drogę do domu!";
 "lab.voices" = "Głosy chomików i wskazówki głosowe";
 "lab.welcome" = "Witaj w HamsterLab! Zaprowadźmy naszych małych przyjaciół do domu!";
 "lab.begin" = "Łapki gotowe? Ruszamy na odkrycia!";

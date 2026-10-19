@@ -1,8 +1,7 @@
 {
   "meta.title": "HamsterLab",
   "meta.description": "Małe chomiki. Kręte rurki. Wielka przygoda w miniaturze.",
-  "tagline.first": "Małe łapki. Wielkie odkrycia.",
-  "tagline.second": "Obracaj rurki. Prowadź chomiki do domu.",
+  "lab.tagline": "Pomóż chomikom znaleźć drogę do domu!",
   "native.eyebrow": "MAŁE LABORATORIUM WIELKICH PRZYGÓD",
   "native.notice": "HamsterLab",
   "native.board": "Laboratorium chomików",
@@ -10,7 +9,7 @@
   "native.platform": "Platforma z rurkami",
   "native.yourMove": "Czas obrócić rurki!",
   "native.selectHint": "Przeciągnij platformę, aby obrócić rurki. Prowadź chomiki do swojego domku na dole.",
-  "native.selected": "Platforma {platform} jest gotowa. Twój obrót pozostanie tajemnicą aż do ujawnienia!",
+  "native.selected": "Ruch wykonany. Twój obrót pozostanie tajemnicą aż do ujawnienia!",
   "native.footer": "9 platform · małe łapki · wielkie odkrycia",
   "native.gestureRule": "Przeciągnij palcem wokół środka platformy, aby ją obrócić. Dotknij platformy, aby anulować zaplanowany ruch. Możesz zmieniać zdanie przez 30 sekund. Twój domek jest zawsze na dole.",
   "native.winRule": "Przyprowadź do domu siedem chomików, aby wygrać wcześniej. W przeciwnym razie wygrywa osoba z największą liczbą chomików po 30 rundach. Równy wynik oznacza remis.",
@@ -29,5 +28,11 @@
   "lab.finish": "Świetny eksperyment! Spróbujemy jeszcze raz?",
   "lab.experiment": "EKSPERYMENT 01",
   "lab.collection": "Chomiki w domku",
-  "native.privacyText": "HamsterLab nie korzysta z reklam, analityki, śledzenia, kont ani zakupów w aplikacji.\n\nTwój pseudonim i preferencje pozostają na urządzeniu. Gra online wysyła twój pseudonim, losowe dane dostępu do pokoju oraz informacje o połączeniu do usługi sygnalizacyjnej HamsterLab. Przeciwnik widzi twój pseudonim i może otrzymać twój adres IP przez bezpośrednie połączenie WebRTC. Ruchy są przesyłane bezpośrednio między dwoma graczami.\n\nPoczekalnie i partie z nieobecnym graczem wygasają po 30 minutach. Aktywne pokoje pozostają dostępne. Dostawcy infrastruktury mogą przechowywać techniczne dzienniki żądań, w tym adresy IP, na potrzeby bezpieczeństwa i działania usługi.\n\nDane odzyskiwania i tajne ruchy są przechowywane w pęku kluczy iOS na tym urządzeniu. Opuszczenie gry online usuwa jej dane odzyskiwania. Dźwięk i wibracje można wyłączyć w ustawieniach. Trening działa bez internetu; opcjonalne sprawdzanie obecności graczy może łączyć się z usługą sygnalizacyjną.\n\nAplikacja nie prosi o dostęp do aparatu, mikrofonu, kontaktów ani lokalizacji.\n\nWydawca: Dzmitry Sharko. Pomoc i pytania o prywatność: https://twivvy.e-notix.com/support.html\n\nAktualizacja: 17 września 2026 r."
+  "native.privacyText": "HamsterLab nie korzysta z reklam, analityki, śledzenia, kont ani zakupów w aplikacji.\n\nTwój pseudonim i preferencje pozostają na urządzeniu. Gra online wysyła twój pseudonim, losowe dane dostępu do pokoju oraz informacje o połączeniu do usługi sygnalizacyjnej HamsterLab. Przeciwnik widzi twój pseudonim i może otrzymać twój adres IP przez bezpośrednie połączenie WebRTC. Ruchy są przesyłane bezpośrednio między dwoma graczami.\n\nPoczekalnie i partie z nieobecnym graczem wygasają po 30 minutach. Aktywne pokoje pozostają dostępne. Dostawcy infrastruktury mogą przechowywać techniczne dzienniki żądań, w tym adresy IP, na potrzeby bezpieczeństwa i działania usługi.\n\nDane odzyskiwania i tajne ruchy są przechowywane w pęku kluczy iOS na tym urządzeniu. Opuszczenie gry online usuwa jej dane odzyskiwania. Dźwięk i wibracje można wyłączyć w ustawieniach. Trening działa bez internetu; opcjonalne sprawdzanie obecności graczy może łączyć się z usługą sygnalizacyjną.\n\nAplikacja nie prosi o dostęp do aparatu, mikrofonu, kontaktów ani lokalizacji.\n\nWydawca: Dzmitry Sharko. Pomoc i pytania o prywatność: https://twivvy.e-notix.com/support.html\n\nAktualizacja: 17 września 2026 r.",
+  "status.storageUnavailable": "Nie udało się zapisać gry na tym urządzeniu. Nie zamykaj aplikacji.",
+  "status.startupFailed": "Nie udało się uruchomić gry. Uruchom ponownie aplikację na obu urządzeniach.",
+  "error.oldVersion": "Gra została utworzona w starszej wersji. Zaktualizuj grę na obu urządzeniach i utwórz nowy pokój.",
+  "error.occupied": "Ta gra jest już otwarta na innym urządzeniu. Kontynuuj grę na nim.",
+  "error.connectFailed": "Nie udało się połączyć. Spróbuj dołączyć ponownie.",
+  "native.invalidCode": "Wpisz prawidłowy kod pokoju lub link zaproszenia do HamsterLab."
 }

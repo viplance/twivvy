@@ -13,6 +13,7 @@
 		43A0B1A19ED4A63E49B864B6 /* OnlineBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE120B89395FDC49E2DC95EF /* OnlineBridge.swift */; };
 		463B03777EEF6C16A723C257 /* countdown.wav in Resources */ = {isa = PBXBuildFile; fileRef = 673B32BB97FBB8B85F7703DB /* countdown.wav */; };
 		46B8D920CEC849ED63E439AD /* TwivvyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E2ABBC8DB5D320BCAC6A06E /* TwivvyApp.swift */; };
+		55BC8C43B166FE30BA5A58FB /* LocalizationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72ABEBD21ECEC450F5F5DE74 /* LocalizationTests.swift */; };
 		657F454B719ECA4E699BAEFD /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = ED05F47D159BBA6AEA6C3F04 /* Localizable.strings */; };
 		767448424C6CAF45C53A1997 /* web-fixtures.json in Resources */ = {isa = PBXBuildFile; fileRef = 0F0B37DB7FEA4A059F368AC9 /* web-fixtures.json */; };
 		767E352D66902FE7064AE608 /* TrackGeometryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA643EEEEFB1023B6F2FFD0A /* TrackGeometryTests.swift */; };
@@ -85,6 +86,7 @@
 		6E4996232C43792D708ED20F /* GameModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameModel.swift; sourceTree = "<group>"; };
 		6FF09C952A1014421BC16A98 /* TwivvyUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = TwivvyUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		70E74B0A5E4047A02080C210 /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		72ABEBD21ECEC450F5F5DE74 /* LocalizationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizationTests.swift; sourceTree = "<group>"; };
 		749B9CF1A1D3FBF0166814D5 /* BoardScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardScene.swift; sourceTree = "<group>"; };
 		7C8AA58238FF36EBD8E47DFD /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = it.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		813BC0FCA08C09EB3C03992B /* BridgeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BridgeTests.swift; sourceTree = "<group>"; };
@@ -177,6 +179,7 @@
 			isa = PBXGroup;
 			children = (
 				813BC0FCA08C09EB3C03992B /* BridgeTests.swift */,
+				72ABEBD21ECEC450F5F5DE74 /* LocalizationTests.swift */,
 				4F553E52B3D7454258242C5F /* RulesTests.swift */,
 				DA643EEEEFB1023B6F2FFD0A /* TrackGeometryTests.swift */,
 				0F0B37DB7FEA4A059F368AC9 /* web-fixtures.json */,
@@ -446,6 +449,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F763341F76301EBE3F17CD43 /* BridgeTests.swift in Sources */,
+				55BC8C43B166FE30BA5A58FB /* LocalizationTests.swift in Sources */,
 				B824C40D955F45E27130C4FC /* RulesTests.swift in Sources */,
 				767E352D66902FE7064AE608 /* TrackGeometryTests.swift in Sources */,
 			);

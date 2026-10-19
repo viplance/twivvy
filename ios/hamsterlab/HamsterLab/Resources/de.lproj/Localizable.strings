@@ -3,8 +3,6 @@
 "sound.label" = "Ton";
 "sound.enable" = "Ton einschalten";
 "sound.disable" = "Ton ausschalten";
-"tagline.first" = "Kleine Pfoten. Große Entdeckungen.";
-"tagline.second" = "Dreh die Röhren. Bring die Hamster nach Hause.";
 "menu.friend" = "Mit einem Freund spielen";
 "menu.online" = "Zufälliger Gegner";
 "menu.training" = "Training";
@@ -46,8 +44,8 @@
 "training.exit" = "Training beenden";
 "status.round" = "Runde {round} von {total}";
 "status.peerFound" = "Gegner gefunden, Verbindung wird hergestellt…";
-"status.storageUnavailable" = "Dein Browser kann das Spiel nicht speichern. Schließe diesen Tab nicht.";
-"status.startupFailed" = "Das Spiel konnte nicht gestartet werden. Aktualisiert die Seite auf beiden Geräten.";
+"status.storageUnavailable" = "Das Spiel kann auf diesem Gerät nicht gespeichert werden. Lass die App geöffnet.";
+"status.startupFailed" = "Das Spiel konnte nicht gestartet werden. Starte die App auf beiden Geräten neu.";
 "status.peerDisconnected" = "Verbindung zum Gegner getrennt";
 "status.waitingOpponent" = "Warten auf den Gegner…";
 "status.finding" = "Gegner wird gesucht…";
@@ -60,9 +58,9 @@
 "error.matchConnect" = "Verbindung zum gefundenen Gegner fehlgeschlagen.";
 "error.createRoom" = "Der Raum konnte nicht erstellt werden.";
 "error.notFound" = "Raum nicht gefunden oder Einladung abgelaufen. Bitte um einen neuen Link.";
-"error.oldVersion" = "Das Spiel wurde mit einer älteren Version erstellt. Aktualisiert beide Geräte und erstellt einen neuen Raum.";
-"error.occupied" = "Der Platz ist belegt. Kehre zum ursprünglichen Spiel-Tab zurück.";
-"error.connectFailed" = "Verbindung fehlgeschlagen. Aktualisiere die Seite, um es erneut zu versuchen.";
+"error.oldVersion" = "Das Spiel wurde mit einer älteren Version erstellt. Aktualisiere das Spiel auf beiden Geräten und erstelle einen neuen Raum.";
+"error.occupied" = "Dieses Spiel ist bereits auf einem anderen Gerät geöffnet. Spiele dort weiter.";
+"error.connectFailed" = "Verbindung fehlgeschlagen. Versuche erneut, dem Spiel beizutreten.";
 "error.peerAbsent" = "Spiel beendet: Der Gegner war länger als 30 Minuten abwesend.";
 "error.restoreMismatch" = "Das gespeicherte Spiel konnte nicht abgeglichen werden.";
 "error.platformCooldown" = "Die Plattform kühlt ab";
@@ -91,7 +89,7 @@
 "native.south" = "Unten";
 "native.west" = "Links";
 "native.selectHint" = "Ziehe an einer Plattform, um die Röhren zu drehen. Führe die Hamster in dein Häuschen unten.";
-"native.selected" = "Plattform {platform} ist bereit. Deine Drehung bleibt bis zur Aufdeckung geheim!";
+"native.selected" = "Zug gemacht. Deine Drehung bleibt bis zur Aufdeckung geheim!";
 "native.left" = "Links drehen";
 "native.right" = "Rechts drehen";
 "native.skip" = "Löschen / passen";
@@ -100,7 +98,7 @@
 "native.rematchInvite" = "Dein Gegner möchte eine Revanche!";
 "native.inviteCode" = "Raumcode oder Einladungslink";
 "native.codeHint" = "ABCD7 oder https://…";
-"native.invalidCode" = "Gib einen gültigen Code oder HamsterLab-Link ein.";
+"native.invalidCode" = "Gib einen gültigen Raumcode oder HamsterLab-Einladungslink ein.";
 "native.offline" = "Erkunde das Labor offline mit einem Bot. Er wählt seinen Zug vor dir.";
 "native.onlinePrivacy" = "Dein Gegner sieht deinen Namen. Spieler sind direkt verbunden.";
 "native.haptics" = "Haptisches Feedback";
@@ -115,6 +113,7 @@
 "native.duel" = "LABORDUELL";
 "native.back" = "Zurück";
 
+"lab.tagline" = "Hilf den Hamstern, den Weg nach Hause zu finden!";
 "lab.voices" = "Hamsterstimmen und Sprachhinweise";
 "lab.welcome" = "Willkommen im HamsterLab! Bringen wir unsere kleinen Freunde nach Hause!";
 "lab.begin" = "Pfoten bereit? Auf Entdeckungstour!";

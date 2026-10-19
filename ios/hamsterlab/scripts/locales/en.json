@@ -1,8 +1,7 @@
 {
   "meta.title": "HamsterLab",
   "meta.description": "Tiny hamsters. Twisty tubes. A big little adventure.",
-  "tagline.first": "Tiny paws. Big discoveries.",
-  "tagline.second": "Twist the tubes. Bring your hamsters home.",
+  "lab.tagline": "Help the hamsters find their way home!",
   "native.eyebrow": "THE LITTLE LAB OF BIG ADVENTURES",
   "native.notice": "HamsterLab",
   "native.board": "Hamster laboratory",
@@ -10,7 +9,7 @@
   "native.platform": "Tube platform",
   "native.yourMove": "Time for a little twist!",
   "native.selectHint": "Drag a platform to twist the tubes. Guide the hamsters to your home below.",
-  "native.selected": "Platform {platform} is ready. Your twist stays secret until reveal!",
+  "native.selected": "Move made. Your twist stays secret until reveal!",
   "native.footer": "9 platforms · tiny paws · big discoveries",
   "native.gestureRule": "Drag around a platform to turn it. Tap a platform to clear your planned turn. You can change your choice during the 30-second timer. Your hamster home is always at the bottom.",
   "native.winRule": "Bring seven hamsters home to win early. Otherwise the most hamsters after 30 rounds wins. Equal scores are a draw.",
@@ -29,5 +28,11 @@
   "lab.finish": "A lovely experiment! Shall we try again?",
   "lab.experiment": "EXPERIMENT 01",
   "lab.collection": "Hamsters home",
-  "native.privacyText": "HamsterLab does not use advertising, analytics, tracking, accounts, or in-app purchases.\n\nYour nickname and preferences stay on your device. Online play sends your nickname, a random room credential and connection details to the HamsterLab signaling service. Your opponent sees your nickname and can receive your IP address through the direct WebRTC connection. Moves travel directly between the two players.\n\nWaiting rooms and matches with an absent player expire after 30 minutes. Active rooms remain available. Infrastructure providers may retain technical request logs, including IP addresses, for security and service operation.\n\nRecovery credentials and hidden moves are stored in the iOS Keychain on this device. Leaving an online game clears its recovery data. Sound and haptics can be disabled in Settings. Training works without an internet connection; an optional online-presence check may contact the signaling service.\n\nNo camera, microphone, contacts or location access is requested.\n\nPublisher: Dzmitry Sharko. Support and privacy requests: https://twivvy.e-notix.com/support.html\n\nUpdated: 17 September 2026."
+  "native.privacyText": "HamsterLab does not use advertising, analytics, tracking, accounts, or in-app purchases.\n\nYour nickname and preferences stay on your device. Online play sends your nickname, a random room credential and connection details to the HamsterLab signaling service. Your opponent sees your nickname and can receive your IP address through the direct WebRTC connection. Moves travel directly between the two players.\n\nWaiting rooms and matches with an absent player expire after 30 minutes. Active rooms remain available. Infrastructure providers may retain technical request logs, including IP addresses, for security and service operation.\n\nRecovery credentials and hidden moves are stored in the iOS Keychain on this device. Leaving an online game clears its recovery data. Sound and haptics can be disabled in Settings. Training works without an internet connection; an optional online-presence check may contact the signaling service.\n\nNo camera, microphone, contacts or location access is requested.\n\nPublisher: Dzmitry Sharko. Support and privacy requests: https://twivvy.e-notix.com/support.html\n\nUpdated: 17 September 2026.",
+  "status.storageUnavailable": "This device cannot save the game. Keep the app open.",
+  "status.startupFailed": "Could not start the game. Restart the app on both devices.",
+  "error.oldVersion": "This game uses an older version. Update the game on both devices and create a new room.",
+  "error.occupied": "This game is already open on another device. Continue playing there.",
+  "error.connectFailed": "Could not connect. Please try joining again.",
+  "native.invalidCode": "Enter a valid room code or HamsterLab invitation link."
 }

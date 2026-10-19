@@ -19,7 +19,9 @@ for (const locale of supportedLocales) {
  }
  const folder=new URL(`../HamsterLab/Resources/${locale}.lproj/`,import.meta.url);
  const target=new URL('Localizable.strings',folder);
- const lines=fs.readFileSync(target,'utf8').split('\n').map(line=>line.replaceAll('Twivvy','HamsterLab').replaceAll('Твивви','ХомаЛаб'));
+ const lines=fs.readFileSync(target,'utf8').split('\n')
+  .filter(line=>!/^"tagline\.(first|second)" = /.test(line))
+  .map(line=>line.replaceAll('Twivvy','HamsterLab').replaceAll('Твивви','ХомаЛаб'));
  for (const [key,value] of Object.entries(translations)) {
   const prefix=JSON.stringify(key)+' = ';
   const index=lines.findIndex(line=>line.startsWith(prefix));
