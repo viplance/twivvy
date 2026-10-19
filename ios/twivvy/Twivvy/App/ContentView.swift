@@ -92,7 +92,6 @@ struct ContentView: View {
         .task {
             if ProcessInfo.processInfo.arguments.contains("--uitesting") {
                 game.name = "Explorer"
-                AudioEngine.shared.enabled = false
                 if ProcessInfo.processInfo.arguments.contains("--training") { game.startTraining() }
             }
         }

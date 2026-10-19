@@ -98,7 +98,6 @@ struct ContentView: View {
         .task {
             if ProcessInfo.processInfo.arguments.contains("--uitesting") {
                 game.name = "Explorer"
-                AudioEngine.shared.enabled = false
                 if ProcessInfo.processInfo.arguments.contains("--training") || ProcessInfo.processInfo.arguments.contains("--autoplay") { game.startTraining() }
                 if ProcessInfo.processInfo.arguments.contains("--lab-preview") {
                     game.startTraining()
@@ -168,7 +167,7 @@ struct ContentView: View {
     }
     private var title: some View {
         VStack(spacing:12) {
-            HStack(spacing:8) { Image(systemName:"sparkles"); Text(L("native.eyebrow")) }.font(.caption.weight(.bold)).foregroundStyle(mint)
+            Text(L("native.eyebrow")).font(.caption.weight(.bold)).foregroundStyle(mint)
             Text(L("meta.title")).font(.system(size:titleSize,weight:.black,design:.rounded)).tracking(-2)
                 .foregroundStyle(mint)
                 .minimumScaleFactor(0.5).lineLimit(1)

@@ -34,7 +34,7 @@ import UIKit
             else if name == "turn" { UIImpactFeedbackGenerator(style:.soft).impactOccurred() }
             else if name == "select" { UISelectionFeedbackGenerator().selectionChanged() }
         }
-        guard enabled,!UIAccessibility.isVoiceOverRunning else { return }
+        guard enabled,!UIAccessibility.isVoiceOverRunning,!ProcessInfo.processInfo.arguments.contains("--uitesting") else { return }
         if ["chirp","happy"].contains(name),!voices { return }
         try? AVAudioSession.sharedInstance().setActive(true)
         if let player=players[name] { player.currentTime=0; player.play() }

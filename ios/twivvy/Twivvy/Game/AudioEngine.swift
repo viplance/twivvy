@@ -22,12 +22,12 @@ import UIKit
         }
     }
     func play(_ name: String) {
-        if haptics {
+        if haptics && !ProcessInfo.processInfo.arguments.contains("--uitesting") {
             if name == "delivery" || name == "win" { UINotificationFeedbackGenerator().notificationOccurred(.success) }
             else if name == "select" { UISelectionFeedbackGenerator().selectionChanged() }
             else if name == "turn" { UIImpactFeedbackGenerator(style: .soft).impactOccurred() }
         }
-        guard enabled, !UIAccessibility.isVoiceOverRunning else { return }
+        guard enabled, !UIAccessibility.isVoiceOverRunning, !ProcessInfo.processInfo.arguments.contains("--uitesting") else { return }
         try? AVAudioSession.sharedInstance().setActive(true)
         guard let player = players[name] else { return }
         player.currentTime = 0; player.play()
