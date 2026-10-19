@@ -1,0 +1,25 @@
+{
+  "appStoreConnectId": "6824583582",
+  "bundleId": "com.enotix.hamsterlab",
+  "version": "1.0.1",
+  "build": "2",
+  "uploadedAt": "2026-10-19T19:24:35Z",
+  "buildUploadId": "f882e0c1-c361-4deb-b893-9f850e1dbbd9",
+  "uploadStatus": "succeeded",
+  "lastObservedPackageStatus": "processing",
+  "submittedForAppReview": false,
+  "sourceCommit": "5aa4957",
+  "archive": "ios/hamsterlab/build/HamsterLab.xcarchive",
+  "exportedIpa": "ios/hamsterlab/build/AppStore/HamsterLab.ipa",
+  "confirmation": [
+    "Upload succeeded.",
+    "Uploaded HamsterLab",
+    "EXPORT SUCCEEDED"
+  ],
+  "validation": {
+    "localizations": "11 complete localizations, 116 keys each",
+    "regressionTests": "3 passed on iPhone SE 2020 / iOS 18.6",
+    "largeScreenLayout": "passed in portrait and landscape on iPhone 16 Pro Max / iOS 18.6",
+    "renderInspection": "denser blue side walls and clearer outlines; upper window preserves hamster color"
+  }
+}
