@@ -14,6 +14,7 @@ struct ContentView: View {
     @State private var sheet: Panel?
     @State private var code = ""
     @State private var invalidJoinCode = false
+    @State private var invalidName = false
     @State private var confirmLeave = false
     @State private var incomingCode: String?
     enum Panel: Identifiable {
@@ -40,7 +41,9 @@ struct ContentView: View {
             GeometryReader { geometry in
                 let wide = geometry.size.width > 760 && geometry.size.width > geometry.size.height
                 VStack(spacing:0) {
-                    topBar.padding(.horizontal,24).padding(.top,12).padding(.bottom,8)
+                    topBar.padding(.horizontal,24)
+                        .padding(.top,game.screen == .game ? 2 : 12)
+                        .padding(.bottom,game.screen == .game ? 2 : 8)
                     switch game.screen {
                     case .menu: menu(wide:wide, size:geometry.size)
                     case .lobby: lobby
@@ -97,7 +100,7 @@ struct ContentView: View {
         }
         .task {
             if ProcessInfo.processInfo.arguments.contains("--uitesting") {
-                game.name = "Explorer"
+                game.name = ProcessInfo.processInfo.arguments.contains("--empty-name") ? "" : "Explorer"
                 if ProcessInfo.processInfo.arguments.contains("--training") || ProcessInfo.processInfo.arguments.contains("--autoplay") { game.startTraining() }
                 if ProcessInfo.processInfo.arguments.contains("--lab-preview") {
                     game.startTraining()
@@ -228,7 +231,31 @@ struct ContentView: View {
     private func arena(wide: Bool, size: CGSize) -> some View {
         ScrollViewReader { scroll in
             Group {
-                if wide {
+                if game.screen == .game {
+                    GeometryReader { viewport in
+                        if viewport.size.width > viewport.size.height {
+                            HStack(spacing:12) {
+                                boardView.frame(maxWidth:.infinity,maxHeight:.infinity)
+                                VStack(spacing:8) {
+                                    scoreboard
+                                    turnControls
+                                }
+                                .fixedSize(horizontal:false,vertical:true)
+                                .frame(width:min(320,viewport.size.width * 0.44))
+                            }.padding(.horizontal,12).padding(.bottom,6)
+                        } else {
+                            VStack(spacing:6) {
+                                scoreboard.padding(.horizontal,20)
+                                    .fixedSize(horizontal:false,vertical:true)
+                                // The renderer takes only the height left after the
+                                // score and actions, rather than forcing a tall canvas.
+                                boardView.frame(maxWidth:.infinity,maxHeight:min(viewport.size.width * 0.95,viewport.size.height))
+                                turnControls.padding(.horizontal,20)
+                                    .fixedSize(horizontal:false,vertical:true)
+                            }.padding(.bottom,8)
+                        }
+                    }
+                } else if wide {
                     HStack(spacing:24) {
                         boardView.frame(maxWidth:.infinity,maxHeight:.infinity)
                         ScrollView { VStack(spacing:22) { scoreboard; turnControls; if game.screen == .result { resultCard } }.padding(20) }.frame(width:320)
@@ -269,7 +296,7 @@ struct ContentView: View {
         }
     }
     private var scoreboard: some View {
-        VStack(spacing:16) {
+        VStack(spacing:8) {
             HStack {
                 playerScore(name:game.name,score:game.ownScore,color:mint,icon:"person.fill")
                 Spacer()
@@ -283,7 +310,7 @@ struct ContentView: View {
             .accessibilityElement(children:.combine)
             .accessibilityLabel("\(game.roundLabel). \(game.name): \(game.ownScore). \(game.peerName): \(game.opponentScore)")
             if game.screen == .game { RoundClock(game:game) }
-        }.padding(.vertical,8)
+        }.padding(.vertical,4)
     }
     private func playerScore(name: String, score: Int, color: Color, icon: String) -> some View {
         VStack(spacing:5) {
@@ -293,7 +320,6 @@ struct ContentView: View {
     }
     private var boardView: some View {
         BoardSceneView(scene:game.boardScene)
-            .aspectRatio(720/828,contentMode:.fit)
             .clipShape(RoundedRectangle(cornerRadius:24))
             // Claim touches on the board before the surrounding ScrollView.
             .highPriorityGesture(DragGesture(minimumDistance:0)
@@ -343,7 +369,7 @@ struct ContentView: View {
         return "\(L("native.platform")) \(p+1). \(tracks). \(L("native.balls")): \(balls). \(game.board.cooldown.contains(p) ? L("error.platformCooldown") : "")"
     }
     private var turnControls: some View {
-        VStack(spacing:14) {
+        VStack(spacing:6) {
             // Reserve the tallest localized hint at the current width and text size.
             // Changing the visible hint must not recenter the board above it.
             ZStack(alignment:.top) {
@@ -363,10 +389,9 @@ struct ContentView: View {
                     Button { game.resolveTraining() } label: { Label(L("native.next"),systemImage:"forward.end.fill") }
                         .disabled(!game.active).accessibilityIdentifier("game.next")
                 }.font(.subheadline.weight(.semibold)).frame(minHeight:44)
-                Button(L("training.humanInvite")) { sheet = .setup("online") }.font(.caption)
-                    .opacity(game.onlineCount % 2 == 1 ? 1 : 0)
-                    .allowsHitTesting(game.onlineCount % 2 == 1)
-                    .accessibilityHidden(game.onlineCount % 2 != 1)
+                if game.onlineCount % 2 == 1 {
+                    Button(L("training.humanInvite")) { sheet = .setup("online") }.font(.caption)
+                }
             }
         }
     }
@@ -384,77 +409,89 @@ struct ContentView: View {
             .id("game.result.card")
     }
     private func setup(mode: String) -> some View {
-        Form {
-            Section {
-                TextField(L("name.label"),text:$game.name).textContentType(.nickname).autocorrectionDisabled()
-                    .onChange(of:game.name) { _,value in game.name = String(value.prefix(24)) }.accessibilityIdentifier("setup.name")
-            } header: { Text(L("name.label")) }
-            if mode == "training" {
-                Section(L("name.difficulty")) {
-                    VStack(spacing:12) {
-                        HStack(spacing:6) {
-                            ForEach(Difficulty.allCases,id:\.self) { level in
-                                Button { game.difficulty = level } label: {
-                                    Image("Difficulty" + level.rawValue.capitalized)
-                                        .resizable().scaledToFit()
-                                        .frame(height:level == .medium ? 90 : 104)
-                                        .frame(height:104,alignment:.bottom)
-                                        .frame(maxWidth:.infinity)
-                                        .padding(.vertical,4)
-                                        .background(game.difficulty == level ? LabTheme.mint : Color.clear,in:RoundedRectangle(cornerRadius:18))
-                                        .contentShape(Rectangle())
-                                }
-                                .buttonStyle(.plain)
-                                .accessibilityLabel(L("name.\(level.rawValue)"))
-                                .accessibilityAddTraits(game.difficulty == level ? .isSelected : [])
-                                .accessibilityIdentifier("setup.difficulty.\(level.rawValue)")
-                            }
-                        }
-                        Picker(L("name.difficulty"),selection:$game.difficulty) {
-                            ForEach(Difficulty.allCases,id:\.self) { Text(L("name.\($0.rawValue)")).tag($0) }
-                        }.pickerStyle(.segmented).accessibilityIdentifier("setup.difficulty")
-                    }
-                }
-            }
-            if mode == "join" {
+        ScrollViewReader { scroll in
+            Form {
                 Section {
-                    InvitationCodeField(code:$code,invalid:$invalidJoinCode)
-                } header: { Text(L("native.inviteCode")) }
+                    PlayerNameField(name:$game.name,invalid:$invalidName)
+                        .id("setup.name")
+                } header: { Text(L("name.label")) }
                 footer: {
-                    if invalidJoinCode {
-                        Text(L("native.invalidCode")).foregroundStyle(coral).accessibilityIdentifier("setup.code.error")
+                    if invalidName {
+                        Text(L("error.nameRequired")).foregroundStyle(coral).accessibilityIdentifier("setup.name.error")
                     }
                 }
-            }
-            Section {
-                Button {
-                    let roomCode = mode == "join" ? GameModel.roomCode(code) : nil
-                    if mode == "join", roomCode == nil {
-                        invalidJoinCode = true
-                        return
+                if mode == "training" {
+                    Section(L("name.difficulty")) {
+                        VStack(spacing:12) {
+                            HStack(spacing:6) {
+                                ForEach(Difficulty.allCases,id:\.self) { level in
+                                    Button { game.difficulty = level } label: {
+                                        Image("Difficulty" + level.rawValue.capitalized)
+                                            .resizable().scaledToFit()
+                                            .frame(height:level == .medium ? 90 : 104)
+                                            .frame(height:104,alignment:.bottom)
+                                            .frame(maxWidth:.infinity)
+                                            .padding(.vertical,4)
+                                            .background(game.difficulty == level ? LabTheme.mint : Color.clear,in:RoundedRectangle(cornerRadius:18))
+                                            .contentShape(Rectangle())
+                                    }
+                                    .buttonStyle(.plain)
+                                    .accessibilityLabel(L("name.\(level.rawValue)"))
+                                    .accessibilityAddTraits(game.difficulty == level ? .isSelected : [])
+                                    .accessibilityIdentifier("setup.difficulty.\(level.rawValue)")
+                                }
+                            }
+                            Picker(L("name.difficulty"),selection:$game.difficulty) {
+                                ForEach(Difficulty.allCases,id:\.self) { Text(L("name.\($0.rawValue)")).tag($0) }
+                            }.pickerStyle(.segmented).accessibilityIdentifier("setup.difficulty")
+                        }
                     }
-                    guard game.rememberName() else { return }
-                    if let roomCode {
-                        game.startOnline("join",code:roomCode)
-                    } else if mode == "training" { game.startTraining() }
-                    else { game.startOnline(mode) }
-                    sheet = nil
-                } label: {
-                    Label(L(mode == "training" ? "dialog.trainingSubmit" : mode == "host" ? "dialog.createSubmit" : mode == "join" ? "dialog.joinSubmit" : "dialog.onlineSubmit"),systemImage:mode == "training" ? "play.fill" : "arrow.right")
-                        .frame(maxWidth:.infinity)
                 }
-                .buttonStyle(GameButtonStyle())
-                .listRowBackground(Color.clear)
-                .listRowInsets(EdgeInsets(top:6,leading:0,bottom:6,trailing:0))
-                .listRowSeparator(.hidden)
-                .accessibilityIdentifier("setup.start")
-            } footer: {
-                if mode != "training" {
-                    Text(L("native.onlinePrivacy"))
+                if mode == "join" {
+                    Section {
+                        InvitationCodeField(code:$code,invalid:$invalidJoinCode)
+                    } header: { Text(L("native.inviteCode")) }
+                    footer: {
+                        if invalidJoinCode {
+                            Text(L("native.invalidCode")).foregroundStyle(coral).accessibilityIdentifier("setup.code.error")
+                        }
+                    }
                 }
-            }
-        }.navigationTitle(L(mode == "training" ? "dialog.trainingTitle" : mode == "host" ? "dialog.createTitle" : mode == "join" ? "dialog.joinTitle" : "dialog.onlineTitle"))
-            .onAppear { invalidJoinCode = false }
+                Section {
+                    Button {
+                        guard !game.name.trimmingCharacters(in:.whitespacesAndNewlines).isEmpty else {
+                            invalidName = true
+                            scroll.scrollTo("setup.name",anchor:.top)
+                            return
+                        }
+                        let roomCode = mode == "join" ? GameModel.roomCode(code) : nil
+                        if mode == "join", roomCode == nil {
+                            invalidJoinCode = true
+                            return
+                        }
+                        guard game.rememberName() else { return }
+                        if let roomCode {
+                            game.startOnline("join",code:roomCode)
+                        } else if mode == "training" { game.startTraining() }
+                        else { game.startOnline(mode) }
+                        sheet = nil
+                    } label: {
+                        Label(L(mode == "training" ? "dialog.trainingSubmit" : mode == "host" ? "dialog.createSubmit" : mode == "join" ? "dialog.joinSubmit" : "dialog.onlineSubmit"),systemImage:mode == "training" ? "play.fill" : "arrow.right")
+                            .frame(maxWidth:.infinity)
+                    }
+                    .buttonStyle(GameButtonStyle())
+                    .listRowBackground(Color.clear)
+                    .listRowInsets(EdgeInsets(top:6,leading:0,bottom:6,trailing:0))
+                    .listRowSeparator(.hidden)
+                    .accessibilityIdentifier("setup.start")
+                } footer: {
+                    if mode != "training" {
+                        Text(L("native.onlinePrivacy"))
+                    }
+                }
+            }.navigationTitle(L(mode == "training" ? "dialog.trainingTitle" : mode == "host" ? "dialog.createTitle" : mode == "join" ? "dialog.joinTitle" : "dialog.onlineTitle"))
+                .onAppear { invalidJoinCode = false; invalidName = false }
+        }
     }
     private var settings: some View {
         Form {
@@ -512,6 +549,7 @@ private struct RoundClock: View {
                     .frame(width:proxy.size.width * min(1,max(0,game.remaining/30)))
             }
         }.frame(height:4)
+            .accessibilityIdentifier("game.timer")
             .accessibilityElement(children:.ignore)
             .accessibilityLabel(game.paused ? L("native.recovering") : game.active ? L("native.yourMove") : L("status.waitingOpponent"))
             .accessibilityValue(Text(min(1,max(0,game.remaining/30)),format:.percent.precision(.fractionLength(0))))
@@ -540,13 +578,17 @@ final class LabSceneHost: UIView {
         super.layoutSubviews()
         // Layout callbacks can arrive after removal. Never create a renderer
         // here: only adopt() may create one for a host that is in a window.
-        if let renderer=scene.view,renderer.superview === self { renderer.frame=bounds }
+        if let renderer=scene.view,renderer.superview === self {
+            renderer.frame=bounds
+            scene.resizeViewport(bounds.size)
+        }
     }
     private func adopt() {
         guard window != nil else { return }
         let renderer=scene.rendererView()
         if renderer.superview !== self { addSubview(renderer) }
         renderer.frame=bounds
+        scene.resizeViewport(bounds.size)
     }
 }
 
@@ -589,5 +631,32 @@ struct GameButtonStyle: ButtonStyle {
             .overlay { RoundedRectangle(cornerRadius:18).strokeBorder(secondary ? LabTheme.border : LabTheme.amberInk.opacity(0.20),lineWidth:1) }
             .scaleEffect(configuration.isPressed ? 0.98 : 1)
             .opacity(enabled ? 1 : 0.45)
+    }
+}
+
+private struct PlayerNameField: View {
+    @Binding var name: String
+    @Binding var invalid: Bool
+    @FocusState private var focused: Bool
+
+    var body: some View {
+        TextField(L("name.label"),text:$name)
+            .textContentType(.nickname)
+            .autocorrectionDisabled()
+            .focused($focused)
+            .submitLabel(.done)
+            .onSubmit { focused = false }
+            .onChange(of:name) { _,value in
+                name = String(value.prefix(24))
+                if !value.trimmingCharacters(in:.whitespacesAndNewlines).isEmpty { invalid = false }
+            }
+            .task(id:invalid) {
+                if invalid {
+                    await Task.yield()
+                    guard !Task.isCancelled else { return }
+                    focused = true
+                }
+            }
+            .accessibilityIdentifier("setup.name")
     }
 }

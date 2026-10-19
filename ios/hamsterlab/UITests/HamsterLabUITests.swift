@@ -2,6 +2,59 @@ import XCTest
 import UIKit
 
 final class HamsterLabUITests: XCTestCase {
+    @MainActor func testTrainingControlsAndBoardFitWithoutScrolling() {
+        let app = XCUIApplication()
+        app.launchArguments = ["--uitesting", "--training", "-AppleLanguages", "(ru)", "-AppleLocale", "ru_RU"]
+        XCUIDevice.shared.orientation = .portrait
+        defer { XCUIDevice.shared.orientation = .portrait }
+        app.launch()
+        XCTAssertTrue(app.buttons["game.next"].waitForExistence(timeout:20))
+        for orientation in [UIDeviceOrientation.portrait, .landscapeLeft] {
+            XCUIDevice.shared.orientation = orientation
+            waitUntilReady(app)
+            let next = app.buttons["game.next"]
+            let timer = app.descendants(matching:.any)["game.timer"]
+            XCTAssertTrue(next.isHittable)
+            XCTAssertTrue(app.frame.contains(next.frame), "Next round must fit without scrolling")
+            XCTAssertTrue(app.frame.contains(timer.frame))
+            for index in [0,2,6,8] {
+                let tile = app.descendants(matching:.any)["platform.\(index)"]
+                XCTAssertTrue(tile.isHittable)
+                XCTAssertTrue(app.frame.contains(tile.frame), "Corner platform \(index) must fit")
+                if orientation == .portrait {
+                    XCTAssertGreaterThanOrEqual(tile.frame.minY, timer.frame.maxY)
+                    XCTAssertLessThanOrEqual(tile.frame.maxY, next.frame.minY)
+                }
+            }
+            assertBoardRendered(app)
+            capture(orientation == .portrait ? "training-fit-portrait" : "training-fit-landscape")
+        }
+    }
+    @MainActor func testTrainingMissingNameFocusesVisibleField() {
+        let app = XCUIApplication()
+        app.launchArguments = ["--uitesting", "--empty-name", "-AppleLanguages", "(ru)", "-AppleLocale", "ru_RU"]
+        app.launch()
+        XCTAssertTrue(app.buttons["menu.training"].waitForExistence(timeout:20))
+        app.buttons["menu.training"].tap()
+        let hard = app.buttons["setup.difficulty.hard"]
+        XCTAssertTrue(hard.waitForExistence(timeout:5))
+        hard.tap()
+        let start = app.buttons["setup.start"]
+        if !start.isHittable { app.swipeUp() }
+        start.tap()
+        let field = app.textFields["setup.name"]
+        XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout:5))
+        XCTAssertTrue(field.isHittable)
+        XCTAssertFalse(app.alerts.firstMatch.exists)
+        XCTAssertLessThanOrEqual(field.frame.maxY, app.keyboards.firstMatch.frame.minY)
+        capture("training-empty-name-visible")
+        field.typeText("Mila\n")
+        XCTAssertEqual(field.value as? String, "Mila")
+        XCTAssertFalse(app.staticTexts["setup.name.error"].exists)
+        if !start.isHittable { app.swipeUp() }
+        start.tap()
+        XCTAssertTrue(app.buttons["game.next"].waitForExistence(timeout:20))
+    }
     @MainActor func testMusicLabelInEveryLanguage() {
         let labels=[("en","Music"),("be","Музыка"),("es","Música"),("ru","Музыка"),
                     ("uk","Музика"),("it","Musica"),("pt","Música"),("pl","Muzyka"),

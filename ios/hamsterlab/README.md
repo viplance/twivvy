@@ -2,7 +2,7 @@
 
 A standalone iOS 18+ SwiftUI / RealityKit game: small, expressive hamsters crawl
 through transparent tubes on a miniature laboratory workbench. Russian display
-name: **ХомаЛаб**. Bundle ID: `com.enotix.hamsterlab`; version 1.0.0, build 1.
+name: **ХомаЛаб**. Bundle ID: `com.enotix.hamsterlab`; version 1.0.1, build 2.
 Open `HamsterLab.xcodeproj` and choose the **HamsterLab** scheme.
 
 The interface uses a white canvas, dark slate text, teal/berry accents, sunshine
@@ -32,8 +32,8 @@ Tests run sequentially so multiple rendering simulators do not compete for resou
 Build output is in `ios/hamsterlab/build/` and is excluded from Git. Release
 commands need the owner's Xcode signing account for team `W37L5728Y6`, a registered
 bundle ID and an App Store Connect app record. Upload is separate from App Review.
-Increase `CURRENT_PROJECT_VERSION` before uploading another build. No HamsterLab
-build has been uploaded by the implementation task.
+Increase `CURRENT_PROJECT_VERSION` before uploading another build. Upload records
+are kept in `AppStore/upload-*.json`; upload does not submit the app for review.
 
 ## Gameplay and interoperability
 

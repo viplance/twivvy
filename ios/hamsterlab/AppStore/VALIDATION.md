@@ -149,3 +149,10 @@ Physical-device GPU performance, voice timbre, audio/haptics and poor-network
 behavior remain device checks. No signed device archive, App Store Connect
 upload, App Review submission or website deployment was performed. The updated
 AASA file needs publication before HTTPS invitations can launch HamsterLab.
+
+## Version 1.0.1 (2)
+
+- iPhone SE 2020 / iOS 18.6: missing-name validation focuses the visible field above the keyboard; entering a name starts training.
+- Training timer, corner platforms and next-round action fit without scrolling in portrait and landscape on SE 2020 and iPhone 16 Pro Max.
+- Tube sides and underside use denser blue glass while the upper window stays clear. Platforms and tube outlines have stronger contrast.
+- `/tmp/hamsterlab-readable-tubes.xcresult`: glass-elbow render test and both SE UI regressions passed (3 tests, no failures); render attachments inspected.

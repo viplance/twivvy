@@ -107,6 +107,17 @@ import simd
         anchor.isEnabled=false; view.isHidden=true
         view.removeFromSuperview()
     }
+    func resizeViewport(_ size: CGSize) {
+        guard !showcase, size.width > 0, size.height > 0 else { return }
+        // Preserve the board's horizontal framing as its canvas becomes shorter.
+        // A minimum vertical angle keeps both homes visible in wide layouts.
+        let aspect = Float(size.width / size.height)
+        let halfHorizontal = tan(Float.pi * 46 / 360) * (720.0 / 828.0)
+        let fieldOfView = max(38, 2 * atan(halfHorizontal / aspect) * 180 / .pi)
+        if abs(camera.camera.fieldOfViewInDegrees - fieldOfView) > 0.01 {
+            camera.camera.fieldOfViewInDegrees = fieldOfView
+        }
+    }
     private func configureCamera() {
         camera.camera.fieldOfViewInDegrees = showcase ? 38 : 46
         camera.position = showcase ? [0,3.25,5.4] : [0,8.8,7.0]
@@ -197,8 +208,8 @@ import simd
             if p==4 { rebuiltCenter=true }
             let tile=Entity(); tile.name="platform-\(p)"; tile.position=TubePath.tileCenter(p)
             let tint=palette[(p+p/3)%3]
-            tile.addChild(LabGeometry.box([2.06,0.10,2.06],at:[0,0.02,0],color:UIColor(lab:0x94B5D6),radius:0.14))
-            let base=LabGeometry.box([1.99,0.08,1.99],at:[0,0.10,0],color:UIColor(lab:0xEDF5FF),radius:0.13)
+            tile.addChild(LabGeometry.box([2.06,0.10,2.06],at:[0,0.02,0],color:UIColor(lab:0x6B9BC6),radius:0.14))
+            let base=LabGeometry.box([1.99,0.08,1.99],at:[0,0.10,0],color:UIColor(lab:0xC4DEF4),radius:0.13)
             base.name="base"; tile.addChild(base); tileBases[p]=base
             // Drag/tap selection uses boardPoint's ray/plane intersection;
             // invisible physics/collision meshes are unnecessary.
@@ -365,7 +376,7 @@ import simd
             let hot=state.cooldown.contains(p)
             let style=hot ? 2 : selected ? 1 : 0
             if tileStyles[p] != style {
-                tileBases[p]?.model?.materials=[LabGeometry.material(hot ? UIColor(lab:0xEAB2BD) : selected ? UIColor(lab:0xFFD973) : UIColor(lab:0xEDF5FF))]
+                tileBases[p]?.model?.materials=[LabGeometry.material(hot ? UIColor(lab:0xEAB2BD) : selected ? UIColor(lab:0xFFD973) : UIColor(lab:0xC4DEF4))]
                 tileStyles[p]=style
             }
             guard drag?.platform != p else { continue }

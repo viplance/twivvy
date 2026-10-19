@@ -89,9 +89,17 @@ struct TubePath {
     }
     static func glow(_ color: UIColor) -> UnlitMaterial { UnlitMaterial(color:color) }
     static func glass(_ color: UIColor = UIColor(lab:0xADD3FF)) -> PhysicallyBasedMaterial {
-        var m = material(color, metallic:0.12, roughness:0.08)
-        m.blending = .transparent(opacity:.init(floatLiteral:0.26))
+        // Inner and outer walls both blend over the residents. Keep each layer
+        // clear so the blue glass does not wash out their fur and expressions.
+        var m = material(color, metallic:0, roughness:0.08)
+        m.specular = .init(floatLiteral:0.20)
+        m.blending = .transparent(opacity:.init(floatLiteral:0.12))
         m.faceCulling = .back // Inner and outer walls already have opposite winding.
+        return m
+    }
+    private static func tubeWall() -> PhysicallyBasedMaterial {
+        var m = glass(UIColor(lab:0x72B9EB))
+        m.blending = .transparent(opacity:.init(floatLiteral:0.42))
         return m
     }
     static func box(_ size: SIMD3<Float>, at position: SIMD3<Float>, color: UIColor, radius: Float = 0.06) -> ModelEntity {
@@ -120,6 +128,7 @@ struct TubePath {
     /// A swept, hollow mesh with inner walls and open ends, not a solid cylinder.
     static func tube(points: [SIMD3<Float>], radius: Float = TubePath.radius, thickness: Float = TubePath.wall) throws -> MeshResource {
         var vertices: [SIMD3<Float>] = [], normals: [SIMD3<Float>] = [], indices: [UInt32] = []
+        var wallMaterials: [UInt32] = []
         let sides = 24, count = points.count
         guard count >= 2 else { throw GeometryError.emptyPath }
         for shell in 0..<2 {
@@ -140,15 +149,21 @@ struct TubePath {
             let a = UInt32(shell*count*sides+i*sides+j), b = UInt32(shell*count*sides+i*sides+(j+1)%sides)
             let c = a+UInt32(sides), d = b+UInt32(sides)
             indices += shell == 0 ? [a,c,b,b,c,d] : [a,b,c,b,d,c]
+            // A clear upper window preserves the residents' colors. The sides
+            // and underside carry the denser blue tint that defines the tube.
+            let lowerWall: UInt32 = sin((Float(j)+0.5)/Float(sides)*2 * .pi) < 0.25 ? 1 : 0
+            wallMaterials += [lowerWall,lowerWall]
         } } }
         // Lip rings join the inner and outer wall; the bore stays open.
         for i in [0,count-1] { for j in 0..<sides {
             let a=UInt32(i*sides+j), b=UInt32(i*sides+(j+1)%sides)
             let c=a+UInt32(count*sides), d=b+UInt32(count*sides)
             indices += i == 0 ? [a,c,b,b,c,d] : [a,b,c,b,d,c]
+            wallMaterials += [1,1]
         } }
         var descriptor = MeshDescriptor(name:"HamsterLab-hollow-tube")
         descriptor.positions = .init(vertices); descriptor.normals = .init(normals); descriptor.primitives = .triangles(indices)
+        descriptor.materials = .perFace(wallMaterials)
         return try MeshResource.generate(from:[descriptor])
     }
     static func collar(at position: SIMD3<Float>, tangent: SIMD3<Float>, color: UIColor, radius: Float = TubePath.radius + 0.01) -> Entity {
@@ -197,18 +212,18 @@ struct TubePath {
     }
     static func tubeAssembly(points: [SIMD3<Float>], tint: UIColor, collars: Bool = true, radius: Float = TubePath.radius) -> Entity {
         let root = Entity()
-        do { root.addChild(ModelEntity(mesh:try tube(points:points,radius:radius),materials:[glass()])) }
+        do { root.addChild(ModelEntity(mesh:try tube(points:points,radius:radius),materials:[glass(),tubeWall()])) }
         catch { assertionFailure("Tube mesh: \(error)") }
         // Thin highlights make transparent glass readable against the laboratory.
-        let highlights: [[SIMD3<Float>]] = [-Float(0.13),0.13].map { offset in
+        let highlights: [[SIMD3<Float>]] = [-radius*0.94,radius*0.94].map { offset in
             points.indices.map { i -> SIMD3<Float> in
                 let tangent=simd_normalize(points[min(points.count-1,i+1)]-points[max(0,i-1)])
                 let reference: SIMD3<Float> = abs(tangent.y)>0.95 ? [1,0,0] : [0,1,0]
                 let side=simd_normalize(simd_cross(tangent,reference))
-                return points[i] + side*offset + [0,radius*0.72,0]
+                return points[i] + side*offset + [0,radius*0.34,0]
             }
         }
-        do { root.addChild(ModelEntity(mesh:try strokes(highlights,radius:0.007),materials:[glow(UIColor(lab:0xD6E9FF))])) }
+        do { root.addChild(ModelEntity(mesh:try strokes(highlights,radius:0.009),materials:[glow(UIColor(lab:0x72B4E3))])) }
         catch { assertionFailure("Highlight mesh: \(error)") }
         if collars, points.count > 1 {
             root.addChild(collar(at:points[0],tangent:points[1]-points[0],color:tint,radius:radius+0.01))
