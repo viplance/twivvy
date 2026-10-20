@@ -46,7 +46,7 @@ enum HamsterSound: String, CaseIterable {
 /// At most one interjection in a selected thinking round. Repeated online
 /// timer/active messages and app resumes must not schedule it a second time.
 struct ThinkingSoundSchedule {
-    private(set) var nextRound=Int.random(in:7...15)
+    private(set) var nextRound=Int.random(in:3...8)
     private(set) var round: Int?
     private(set) var remainingAtCue: Double?
 
@@ -55,7 +55,7 @@ struct ThinkingSoundSchedule {
         self.round=round; remainingAtCue=nil
         guard round >= nextRound, remaining > 6 else { return }
         remainingAtCue=Double.random(in:3...min(25,remaining-2))
-        nextRound=round+Int.random(in:7...15)
+        nextRound=round+Int.random(in:3...8)
     }
 
     mutating func takeCue(remaining: Double) -> Bool {

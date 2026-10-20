@@ -130,27 +130,27 @@ final class AudioTests: XCTestCase {
         XCTAssertEqual(HamsterSound.result(own:3,opponent:7),.loss)
         XCTAssertNil(HamsterSound.result(own:3,opponent:3))
     }
-    func testThinkingCueOccursOnlyOnceEverySevenToFifteenRounds() throws {
+    func testThinkingCueOccursOnlyOnceEveryThreeToEightRounds() throws {
         var schedule=ThinkingSoundSchedule(), previous=0, cues=0
         for round in 1...150 {
             let expected=round == schedule.nextRound
             schedule.begin(round:round,remaining:30)
             if expected {
-                XCTAssertTrue((7...15).contains(round-previous))
+                XCTAssertTrue((3...8).contains(round-previous))
                 let threshold=try XCTUnwrap(schedule.remainingAtCue)
                 XCTAssertTrue((3...25).contains(threshold))
                 XCTAssertFalse(schedule.takeCue(remaining:threshold+0.1))
                 XCTAssertTrue(schedule.takeCue(remaining:threshold))
                 schedule.begin(round:round,remaining:20)
                 XCTAssertFalse(schedule.takeCue(remaining:1),"Repeated timer/restore messages cannot repeat the cue")
-                XCTAssertTrue((7...15).contains(schedule.nextRound-round))
+                XCTAssertTrue((3...8).contains(schedule.nextRound-round))
                 previous=round; cues += 1
             } else {
                 XCTAssertNil(schedule.remainingAtCue)
                 XCTAssertFalse(schedule.takeCue(remaining:1))
             }
         }
-        XCTAssertGreaterThan(cues,8)
+        XCTAssertGreaterThan(cues,17)
     }
     func testThinkingCueNeverFiresAfterTheTimerExpires() {
         var schedule=ThinkingSoundSchedule()

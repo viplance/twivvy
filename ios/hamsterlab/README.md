@@ -137,7 +137,7 @@ is needed. `Game/GameSounds.swift` discovers numbered variants by event prefix:
 | `plus_point_` | Hamsters reach the player's receiver |
 | `minus_point_` | Hamsters reach the opponent's receiver |
 | `return_` | Reversal in a tube, on a half-turning platform or before sitting at home |
-| `oops_` | A random thinking-time reaction once every 7–15 rounds |
+| `oops_` | A random thinking-time reaction once every 3–8 rounds |
 
 Each event chooses a random variant without immediately repeating the previous
 one. Simultaneous receiver events play in sequence; the result cue takes priority.
