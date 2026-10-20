@@ -49,6 +49,7 @@ import simd
         var elapsed = 0.0
     }
     private var smoke: Smoke?
+    static let oopsSmokeDuration = 2.7
     private static let smokeMesh = MeshResource.generateSphere(radius:1)
     var hasTubeHamster: Bool {
         !showcase && !isAnimating && state.balls.contains { hamsters[$0.id] != nil }
@@ -74,8 +75,8 @@ import simd
     private func updateOopsSmoke(delta: Double) {
         guard var smoke else { return }
         smoke.elapsed += delta
-        guard smoke.elapsed < 1.35 else { clearOopsSmoke(); return }
-        let t=Float(smoke.elapsed/1.35)
+        guard smoke.elapsed < Self.oopsSmokeDuration else { clearOopsSmoke(); return }
+        let t=Float(smoke.elapsed/Self.oopsSmokeDuration)
         let offset=smoke.root.parent?.position ?? .zero
         for (i,child) in smoke.root.children.enumerated() {
             guard let puff=child as? ModelEntity else { continue }

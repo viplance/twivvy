@@ -2,7 +2,7 @@
   "status": "draft",
   "bundleId": "com.enotix.hamsterlab",
   "version": "1.0.1",
-  "build": "4",
+  "build": "5",
   "localizations": {
     "en-US": {
       "name": "HamsterLab",

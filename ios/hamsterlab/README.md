@@ -2,7 +2,7 @@
 
 A standalone iOS 18+ SwiftUI / RealityKit game: small, expressive hamsters crawl
 through transparent tubes on a miniature laboratory workbench. Russian display
-name: **ХомаЛаб**. Bundle ID: `com.enotix.hamsterlab`; version 1.0.1, build 4.
+name: **ХомаЛаб**. Bundle ID: `com.enotix.hamsterlab`; version 1.0.1, build 5.
 Open `HamsterLab.xcodeproj` and choose the **HamsterLab** scheme.
 
 The interface uses a white canvas, dark slate text, teal/berry accents, sunshine
@@ -142,7 +142,11 @@ is needed. `Game/GameSounds.swift` discovers numbered variants by event prefix:
 Each event chooses a random variant without immediately repeating the previous
 one. Simultaneous receiver events play in sequence; the result cue takes priority.
 Thinking cues occur at a random time with 3–25 seconds remaining and are cancelled
-when thinking ends. Pause, backgrounding and leaving stop pending playback.
+when thinking ends. Oops requires a hamster still in a tube, checked both before
+queueing and immediately before playback; seated home residents do not qualify.
+Actual oops playback starts green smoke behind a tube resident, fading over
+2.7 seconds within the bore. Other samples do not start smoke.
+Pause, backgrounding and leaving stop pending playback.
 The Hamster voices switch controls all MP3 event samples and WAV effects; muting
 music does not mute these sounds. Samples respect Silent Mode and yield to VoiceOver.
 The existing generated PCM effects remain for rotation, crawling, selection,

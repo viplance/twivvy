@@ -3,6 +3,42 @@ import XCTest
 @testable import HamsterLab
 
 final class AudioTests: XCTestCase {
+    @MainActor func testOopsPlaybackStartsSmokeButOtherSamplesDoNot() async throws {
+        let previousGate=AudioEngine.shared.canPlayOops
+        let previousStarted=AudioEngine.shared.onSampleStarted
+        defer {
+            AudioEngine.shared.canPlayOops=previousGate
+            AudioEngine.shared.onSampleStarted=previousStarted
+        }
+        let game=GameModel()
+        game.screen = .game; game.active=true
+        game.board.cells[2][2]=3
+        game.board.balls=[Ball(id:1,row:2,col:2,exit:0)]
+        game.boardScene.render(game.board,side:game.side)
+        let tile=try XCTUnwrap(game.boardScene.tiles[4])
+        let suite="HamsterLab.OopsSmoke." + UUID().uuidString
+        let preferences=try XCTUnwrap(UserDefaults(suiteName:suite))
+        defer { preferences.removePersistentDomain(forName:suite) }
+        let audio=AudioEngine(preferences:preferences)
+        defer { audio.stop() }
+        // Exercise the production model callbacks with isolated preferences.
+        audio.canPlayOops=AudioEngine.shared.canPlayOops
+        audio.onSampleStarted=AudioEngine.shared.onSampleStarted
+        audio.playSample(.turnaround)
+        try await Task.sleep(for:.milliseconds(30))
+        XCTAssertTrue(try XCTUnwrap(audio.currentSample).isPlaying)
+        XCTAssertNil(tile.findEntity(named:"oops-smoke"))
+        audio.stop()
+        audio.playSample(.oops)
+        XCTAssertNil(tile.findEntity(named:"oops-smoke"),"Enqueueing alone must not start smoke")
+        try await Task.sleep(for:.milliseconds(30))
+        XCTAssertTrue(try XCTUnwrap(audio.currentSample).isPlaying)
+        let smoke=try XCTUnwrap(tile.findEntity(named:"oops-smoke"))
+        game.boardScene.update(delta:1.4)
+        XCTAssertNotNil(smoke.parent)
+        game.boardScene.update(delta:1.31)
+        XCTAssertNil(smoke.parent)
+    }
     @MainActor func testOopsRequiresAnActiveHamsterInATubeNotAtHome() {
         let previousGate=AudioEngine.shared.canPlayOops
         let previousStarted=AudioEngine.shared.onSampleStarted

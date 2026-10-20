@@ -182,3 +182,15 @@ AASA file needs publication before HTTPS invitations can launch HamsterLab.
   empty/home/tube residents and queued playback revalidation. Positive playback
   with a tube resident remains enabled. Result: `/tmp/hamsterlab-oops-resident-guard.xcresult`.
 - All 16 localizations (116 keys each) passed generation-time validation.
+
+## Version 1.0.1 (5)
+
+- Doubled smoke lifetime from 1.35 to 2.7 seconds using one duration constant.
+  Expansion, drift and fade use normalized progress over that entire lifetime.
+- Smoke starts on actual oops sample playback, rather than timer scheduling or
+  queue insertion. Other event samples do not trigger the effect.
+- Two focused tests passed on iPhone SE 2020 / iOS 18.6: actual playback-to-smoke
+  integration (including no effect for turnaround samples) and full-lifetime
+  containment, expiry and transition cleanup across all tube masks/directions.
+  Result: `/tmp/hamsterlab-oops-long-smoke.xcresult`.
+- All 16 localizations (116 keys each) passed generation-time validation.

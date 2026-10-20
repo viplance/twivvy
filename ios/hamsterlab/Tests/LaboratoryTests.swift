@@ -42,8 +42,10 @@ final class LaboratoryTests: XCTestCase {
                 let smoke=try XCTUnwrap(tile.findEntity(named:"oops-smoke"))
                 XCTAssertEqual(smoke.children.count,7)
                 let distance=boreDistance(path)
-                for _ in 0..<75 {
+                XCTAssertEqual(BoardScene.oopsSmokeDuration,2.7)
+                for _ in 0..<150 {
                     scene.update(delta:1/60.0)
+                    XCTAssertNotNil(smoke.parent,"Smoke remains visible beyond the former 1.35 seconds")
                     for puff in smoke.children {
                         let center=puff.position(relativeTo:scene.world)
                         let radius=puff.scale.x
@@ -55,7 +57,7 @@ final class LaboratoryTests: XCTestCase {
                         }
                     }
                 }
-                scene.update(delta:0.2)
+                scene.update(delta:0.25)
                 XCTAssertNil(smoke.parent)
                 scene.showOopsSmoke()
                 let nextSmoke=try XCTUnwrap(tile.findEntity(named:"oops-smoke"))

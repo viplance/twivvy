@@ -55,6 +55,7 @@ import SwiftUI
                 && !self.board.balls.isEmpty && self.boardScene.hasTubeHamster
         }
         AudioEngine.shared.onSampleStarted = { [weak self] sound in
+            // Couple smoke to actual oops playback, not to its timer/queue.
             guard let self, sound == .oops, self.screen == .game,
                   self.active, !self.paused, !self.audioSuspended else { return }
             self.boardScene.showOopsSmoke()
