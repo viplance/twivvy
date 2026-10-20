@@ -1,0 +1,24 @@
+{
+  "appStoreConnectId": "6824583582",
+  "bundleId": "com.enotix.hamsterlab",
+  "version": "1.0.1",
+  "build": "5",
+  "uploadedAt": "2026-10-20T18:59:45Z",
+  "buildUploadId": "6ae5506a-c144-4616-8ae7-8bd32ee2ed93",
+  "uploadStatus": "succeeded",
+  "lastObservedPackageStatus": "processing",
+  "submittedForAppReview": false,
+  "sourceCommit": "29d2710",
+  "archive": "ios/hamsterlab/build/HamsterLab.xcarchive",
+  "exportedIpa": "ios/hamsterlab/build/AppStore/HamsterLab.ipa",
+  "confirmation": [
+    "Upload succeeded.",
+    "Uploaded HamsterLab",
+    "EXPORT SUCCEEDED"
+  ],
+  "validation": {
+    "localizations": "16 complete localizations, 116 keys each",
+    "regressionTests": "2 focused tests passed on iPhone SE 2020 / iOS 18.6",
+    "oopsSmoke": "2.7-second smoke starts with actual oops playback; other samples do not trigger smoke; smoke remains inside all tube masks/directions"
+  }
+}
