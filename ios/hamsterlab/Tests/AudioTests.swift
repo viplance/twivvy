@@ -3,6 +3,56 @@ import XCTest
 @testable import HamsterLab
 
 final class AudioTests: XCTestCase {
+    @MainActor func testOopsRequiresAnActiveHamsterInATubeNotAtHome() {
+        let previousGate=AudioEngine.shared.canPlayOops
+        let previousStarted=AudioEngine.shared.onSampleStarted
+        defer {
+            AudioEngine.shared.canPlayOops=previousGate
+            AudioEngine.shared.onSampleStarted=previousStarted
+        }
+        let game=GameModel()
+        game.screen = .game; game.active=true
+        XCTAssertFalse(AudioEngine.shared.canPlayOops?() ?? true,"Empty field must be silent")
+        game.board.score.top=2; game.board.score.bottom=3
+        game.boardScene.render(game.board,side:game.side)
+        XCTAssertEqual(game.boardScene.homeHamsters.count,5)
+        XCTAssertFalse(AudioEngine.shared.canPlayOops?() ?? true,"Seated hamsters cannot trigger oops")
+        game.board.cells[2][2]=3
+        game.board.balls=[Ball(id:1,row:2,col:2,exit:0)]
+        game.boardScene.render(game.board,side:game.side)
+        XCTAssertTrue(AudioEngine.shared.canPlayOops?() ?? false)
+        game.paused=true
+        XCTAssertFalse(AudioEngine.shared.canPlayOops?() ?? true)
+        game.paused=false; game.active=false
+        XCTAssertFalse(AudioEngine.shared.canPlayOops?() ?? true)
+        game.active=true; game.board.balls=[]
+        XCTAssertFalse(AudioEngine.shared.canPlayOops?() ?? true,"Check live rules even before the renderer refreshes")
+    }
+    @MainActor func testOopsIsRecheckedBeforeQueuedPlayback() async throws {
+        let suite="HamsterLab.OopsGate." + UUID().uuidString
+        let preferences=try XCTUnwrap(UserDefaults(suiteName:suite))
+        defer { preferences.removePersistentDomain(forName:suite) }
+        let audio=AudioEngine(preferences:preferences)
+        defer { audio.stop() }
+        var available=false, starts=0
+        audio.canPlayOops={ available }
+        audio.onSampleStarted={ if $0 == .oops { starts += 1 } }
+        audio.playSample(.oops)
+        try await Task.sleep(for:.milliseconds(30))
+        XCTAssertNil(audio.currentSample)
+        XCTAssertEqual(starts,0)
+        available=true
+        audio.playSample(.oops)
+        available=false // The last hamster leaves before the queue starts.
+        try await Task.sleep(for:.milliseconds(30))
+        XCTAssertNil(audio.currentSample)
+        XCTAssertEqual(starts,0)
+        available=true
+        audio.playSample(.oops)
+        try await Task.sleep(for:.milliseconds(30))
+        XCTAssertTrue(try XCTUnwrap(audio.currentSample).isPlaying)
+        XCTAssertEqual(starts,1,"A tube resident still plays its sample normally")
+    }
     @MainActor func testFirstLaunchEnablesMusicAndVoicesAndPreservesSavedChoices() throws {
         let suite="HamsterLab.FirstLaunch." + UUID().uuidString
         let preferences=try XCTUnwrap(UserDefaults(suiteName:suite))

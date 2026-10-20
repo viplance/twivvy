@@ -49,6 +49,11 @@ import SwiftUI
     var showsRoomInvitation: Bool { isHostingPrivateRoom && !roomCode.isEmpty }
 
     init() {
+        AudioEngine.shared.canPlayOops = { [weak self] in
+            guard let self else { return false }
+            return self.screen == .game && self.active && !self.paused && !self.audioSuspended
+                && !self.board.balls.isEmpty && self.boardScene.hasTubeHamster
+        }
         AudioEngine.shared.onSampleStarted = { [weak self] sound in
             guard let self, sound == .oops, self.screen == .game,
                   self.active, !self.paused, !self.audioSuspended else { return }
@@ -311,7 +316,7 @@ import SwiftUI
         }
     }
     private func playThinkingCue() {
-        guard screen == .game,active,!paused,!audioSuspended else { return }
+        guard screen == .game,active,!paused,!audioSuspended,!board.balls.isEmpty else { return }
         thinkingSound.begin(round:displayRound,remaining:remaining)
         if thinkingSound.takeCue(remaining:remaining) { AudioEngine.shared.playSample(.oops) }
     }

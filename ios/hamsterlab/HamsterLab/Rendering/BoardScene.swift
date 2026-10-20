@@ -50,6 +50,9 @@ import simd
     }
     private var smoke: Smoke?
     private static let smokeMesh = MeshResource.generateSphere(radius:1)
+    var hasTubeHamster: Bool {
+        !showcase && !isAnimating && state.balls.contains { hamsters[$0.id] != nil }
+    }
     /// A small fixed pool, attached to the tube's tile so dragging/rotation
     /// cannot separate the puff from its glass enclosure.
     func showOopsSmoke() {

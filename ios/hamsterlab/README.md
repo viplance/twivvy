@@ -2,7 +2,7 @@
 
 A standalone iOS 18+ SwiftUI / RealityKit game: small, expressive hamsters crawl
 through transparent tubes on a miniature laboratory workbench. Russian display
-name: **ХомаЛаб**. Bundle ID: `com.enotix.hamsterlab`; version 1.0.1, build 3.
+name: **ХомаЛаб**. Bundle ID: `com.enotix.hamsterlab`; version 1.0.1, build 4.
 Open `HamsterLab.xcodeproj` and choose the **HamsterLab** scheme.
 
 The interface uses a white canvas, dark slate text, teal/berry accents, sunshine

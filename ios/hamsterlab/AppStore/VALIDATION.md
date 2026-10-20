@@ -171,3 +171,14 @@ AASA file needs publication before HTTPS invitations can launch HamsterLab.
 - Smoke containment tests cover all six tube masks and both directions, checking
   bore clearance, open-end clearance, expiry and removal on round transitions.
   Inspected a native render of the effect inside a glass elbow.
+
+## Version 1.0.1 (4)
+
+- Oops reactions require an active, unpaused game and at least one hamster still
+  in a tube. Empty fields and hamsters already seated in either home stay silent.
+- Eligibility is checked both when enqueueing and immediately before playback,
+  so the last hamster leaving also invalidates a pending oops sample.
+- Two focused tests passed on iPhone SE 2020 / iOS 18.6: game eligibility with
+  empty/home/tube residents and queued playback revalidation. Positive playback
+  with a tube resident remains enabled. Result: `/tmp/hamsterlab-oops-resident-guard.xcresult`.
+- All 16 localizations (116 keys each) passed generation-time validation.

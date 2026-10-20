@@ -29,6 +29,7 @@ import UIKit
     private(set) var currentSample: AVAudioPlayer?
     private var currentSound: HamsterSound?
     var onSampleStarted: ((HamsterSound) -> Void)?
+    var canPlayOops: (() -> Bool)?
     let music=GameMusic()
     private var musicRequested=false
     init(preferences: UserDefaults = .standard) {
@@ -62,6 +63,7 @@ import UIKit
     /// Serialize voice samples so simultaneous captures remain intelligible.
     /// Results take priority over any queued capture or thinking reactions.
     func playSample(_ sound: HamsterSound) {
+        guard sound != .oops || canPlayOops?() == true else { return }
         if sound.isResult { endGameMusic() }
         if haptics,!ProcessInfo.processInfo.arguments.contains("--uitesting"),sound == .win {
             UINotificationFeedbackGenerator().notificationOccurred(.success)
@@ -81,6 +83,8 @@ import UIKit
         sampleTask=Task { [weak self] in
             while let self, !Task.isCancelled, !self.sampleQueue.isEmpty {
                 let event=self.sampleQueue.removeFirst()
+                // A queued reaction may outlive the last hamster on the field.
+                guard event != .oops || self.canPlayOops?() == true else { continue }
                 if event.isResult {
                     await self.music.fadeOut()?.value
                     guard !Task.isCancelled else { return }
