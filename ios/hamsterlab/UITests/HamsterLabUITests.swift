@@ -55,10 +55,70 @@ final class HamsterLabUITests: XCTestCase {
         start.tap()
         XCTAssertTrue(app.buttons["game.next"].waitForExistence(timeout:20))
     }
+    @MainActor func testArabicPersianLayoutAndSettings() {
+        let cases = [
+            ("ar", "ساعد الهامسترات في العثور على طريق العودة إلى البيت!", "الجولة التالية", "الموسيقى", "أصوات الهامستر"),
+            ("fa", "به همسترها کمک کن راه خانه را پیدا کنند!", "دور بعدی", "موسیقی", "صدای همسترها")
+        ]
+        for (language, slogan, next, music, voices) in cases {
+            let app=XCUIApplication()
+            app.launchArguments=["--uitesting","-AppleLanguages","(\(language))"]
+            app.launch()
+            XCTAssertTrue(app.buttons["menu.training"].waitForExistence(timeout:20),language)
+            XCTAssertTrue(app.staticTexts[slogan].isHittable,language)
+            capture("rtl-menu-\(language)")
+            app.terminate()
+            app.launchArguments.insert("--training",at:1)
+            app.launch()
+            let button=app.buttons["game.next"]
+            XCTAssertTrue(button.waitForExistence(timeout:20),language)
+            XCTAssertTrue(button.isHittable,language)
+            XCTAssertEqual(button.label,next,language)
+            for p in [0,2,6,8] {
+                let platform=app.descendants(matching:.any)["platform.\(p)"]
+                XCTAssertTrue(platform.isHittable,language)
+                XCTAssertTrue(app.frame.contains(platform.frame),language)
+            }
+            capture("rtl-training-\(language)")
+            app.buttons["menu.settings"].tap()
+            let toggle=app.switches["settings.sound"]
+            XCTAssertTrue(toggle.waitForExistence(timeout:5),language)
+            XCTAssertEqual(toggle.label,music,language)
+            XCTAssertEqual(app.switches["settings.voices"].label,voices,language)
+            capture("rtl-settings-\(language)")
+            app.terminate()
+        }
+    }
+    @MainActor func testChineseJapaneseHindiTrainingAndSettings() {
+        let cases = [
+            ("zh-Hans", "下一回合", "音乐", "仓鼠叫声"),
+            ("ja", "次のラウンド", "音楽", "ハムスターの声"),
+            ("hi", "अगला दौर", "संगीत", "हैम्स्टर की आवाज़ें")
+        ]
+        for (language, next, music, voices) in cases {
+            let app=XCUIApplication()
+            app.launchArguments=["--uitesting","--training","-AppleLanguages","(\(language))"]
+            app.launch()
+            let button=app.buttons["game.next"]
+            XCTAssertTrue(button.waitForExistence(timeout:20),language)
+            XCTAssertTrue(button.isHittable,language)
+            XCTAssertEqual(button.label,next,language)
+            capture("training-\(language)")
+            app.buttons["menu.settings"].tap()
+            let toggle=app.switches["settings.sound"]
+            XCTAssertTrue(toggle.waitForExistence(timeout:5),language)
+            XCTAssertEqual(toggle.label,music,language)
+            XCTAssertEqual(app.switches["settings.voices"].label,voices,language)
+            capture("settings-\(language)")
+            app.terminate()
+        }
+    }
     @MainActor func testMusicLabelInEveryLanguage() {
         let labels=[("en","Music"),("be","Музыка"),("es","Música"),("ru","Музыка"),
                     ("uk","Музика"),("it","Musica"),("pt","Música"),("pl","Muzyka"),
-                    ("fr","Musique"),("de","Musik"),("tr","Müzik")]
+                    ("fr","Musique"),("de","Musik"),("tr","Müzik"),
+                    ("zh-Hans","音乐"),("ja","音楽"),("hi","संगीत"),
+                    ("ar","الموسيقى"),("fa","موسیقی")]
         for (language,label) in labels {
             let app=XCUIApplication()
             app.launchArguments=["--uitesting","-AppleLanguages","(\(language))"]
@@ -131,7 +191,12 @@ final class HamsterLabUITests: XCTestCase {
             ("pl", "Pomóż chomikom znaleźć drogę do domu!"),
             ("fr", "Aide les hamsters à retrouver le chemin de leur maison !"),
             ("de", "Hilf den Hamstern, den Weg nach Hause zu finden!"),
-            ("tr", "Hamsterların evlerinin yolunu bulmasına yardım et!")
+            ("tr", "Hamsterların evlerinin yolunu bulmasına yardım et!"),
+            ("zh-Hans", "帮仓鼠找到回家的路！"),
+            ("ja", "ハムスターがおうちに帰るのを手伝おう！"),
+            ("hi", "हैम्स्टर को घर का रास्ता खोजने में मदद करो!"),
+            ("ar", "ساعد الهامسترات في العثور على طريق العودة إلى البيت!"),
+            ("fa", "به همسترها کمک کن راه خانه را پیدا کنند!")
         ]
         for (language, slogan) in slogans {
             let app = XCUIApplication()

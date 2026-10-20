@@ -28,6 +28,7 @@ import UIKit
     private var sampleTask: Task<Void,Never>?
     private(set) var currentSample: AVAudioPlayer?
     private var currentSound: HamsterSound?
+    var onSampleStarted: ((HamsterSound) -> Void)?
     let music=GameMusic()
     private var musicRequested=false
     init(preferences: UserDefaults = .standard) {
@@ -91,7 +92,7 @@ import UIKit
                 let player=variants[index]
                 self.currentSample=player; self.currentSound=event; player.currentTime=0
                 try? AVAudioSession.sharedInstance().setActive(true)
-                player.play()
+                if player.play() { self.onSampleStarted?(event) }
                 do { try await Task.sleep(for:.seconds(player.duration+0.08)) }
                 catch { return }
             }

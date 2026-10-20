@@ -4,7 +4,7 @@ import XCTest
 final class LocalizationTests: XCTestCase {
     func testEveryLanguageHasCompleteBundledText() throws {
         let english = try strings("en")
-        for language in ["en","be","es","ru","uk","it","pt","pl","fr","de","tr"] {
+        for language in ["en","be","es","ru","uk","it","pt","pl","fr","de","tr","zh-Hans","ja","hi","ar","fa"] {
             let localized = try strings(language)
             XCTAssertEqual(Set(localized.keys), Set(english.keys), language)
             for (key, value) in localized {

@@ -33,7 +33,7 @@ for(let index=0;index<45;index++) {
  fixtures.push({map:index%3,turns});
 }
 fs.writeFileSync(path.join(root,'ios/hamsterlab/Tests/web-fixtures.json'),JSON.stringify(fixtures));
-console.log(`Synced protocol, 11 locales, ${fixtures.reduce((n,f)=>n+f.turns.length,0)} parity rounds.`);
+console.log(`Synced protocol, 11 shared web locales, ${fixtures.reduce((n,f)=>n+f.turns.length,0)} parity rounds.`);
 
 await import("./native-locales.mjs");
 

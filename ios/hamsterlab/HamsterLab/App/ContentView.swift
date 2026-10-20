@@ -9,6 +9,7 @@ struct ContentView: View {
     @ScaledMetric(relativeTo:.largeTitle) private var titleSize = 58.0
     @GestureState private var boardTouchActive = false
     @Bindable var game: GameModel
+    @Environment(\.layoutDirection) private var layoutDirection
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var sheet: Panel?
@@ -141,7 +142,7 @@ struct ContentView: View {
     private var topBar: some View {
         HStack {
             if game.screen != .menu {
-                Button { confirmLeave = true } label: { Image(systemName:"chevron.left").frame(width:44,height:44) }
+                Button { confirmLeave = true } label: { Image(systemName:"chevron.backward").frame(width:44,height:44) }
                     .accessibilityLabel(L("native.leave")).accessibilityIdentifier("game.leave")
             } else {
                 Text(L("meta.title"))
@@ -188,7 +189,7 @@ struct ContentView: View {
     private var menuActions: some View {
         VStack(spacing:12) {
             Button { sheet = .setup("online") } label: {
-                HStack { Image(systemName:"globe.europe.africa.fill"); Text(L("menu.online")); Spacer(); Image(systemName:"arrow.right") }
+                HStack { Image(systemName:"globe.europe.africa.fill"); Text(L("menu.online")); Spacer(); Image(systemName:"arrow.forward") }
             }.buttonStyle(GameButtonStyle()).accessibilityIdentifier("menu.online")
             HStack(spacing:12) {
                 Button { sheet = .setup("host") } label: {
@@ -301,7 +302,7 @@ struct ContentView: View {
                 playerScore(name:game.name,score:game.ownScore,color:mint,icon:"person.fill")
                 Spacer()
                 VStack(spacing:5) {
-                    Text(game.training ? L("menu.training") : L("native.duel")).font(.caption2.weight(.heavy)).tracking(2).foregroundStyle(muted)
+                    Text(game.training ? L("menu.training") : L("native.duel")).font(.caption2.weight(.heavy)).tracking(layoutDirection == .rightToLeft ? 0 : 2).foregroundStyle(muted)
                     Text("\(game.displayRound) / 30").font(.headline.monospacedDigit())
                 }
                 Spacer()
@@ -476,7 +477,7 @@ struct ContentView: View {
                         else { game.startOnline(mode) }
                         sheet = nil
                     } label: {
-                        Label(L(mode == "training" ? "dialog.trainingSubmit" : mode == "host" ? "dialog.createSubmit" : mode == "join" ? "dialog.joinSubmit" : "dialog.onlineSubmit"),systemImage:mode == "training" ? "play.fill" : "arrow.right")
+                        Label(L(mode == "training" ? "dialog.trainingSubmit" : mode == "host" ? "dialog.createSubmit" : mode == "join" ? "dialog.joinSubmit" : "dialog.onlineSubmit"),systemImage:mode == "training" ? "play.fill" : "arrow.forward")
                             .frame(maxWidth:.infinity)
                     }
                     .buttonStyle(GameButtonStyle())

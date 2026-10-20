@@ -156,3 +156,18 @@ AASA file needs publication before HTTPS invitations can launch HamsterLab.
 - Training timer, corner platforms and next-round action fit without scrolling in portrait and landscape on SE 2020 and iPhone 16 Pro Max.
 - Tube sides and underside use denser blue glass while the upper window stays clear. Platforms and tube outlines have stronger contrast.
 - `/tmp/hamsterlab-readable-tubes.xcresult`: glass-elbow render test and both SE UI regressions passed (3 tests, no failures); render attachments inspected.
+
+## Version 1.0.1 (3)
+
+- Added complete Simplified Chinese, Japanese, Hindi, Arabic and Persian catalogs:
+  16 supported languages, 116 keys each. Generator and bundled-text checks pass.
+- Native UI tests passed on iPhone SE 2020 / iOS 18.6 for Chinese, Japanese and
+  Hindi training/settings, and Arabic/Persian menu, training and settings.
+- RTL navigation arrows follow reading direction; Arabic/Persian headings retain
+  connected letter shaping without added tracking. Inspected native screenshots.
+- Oops samples trigger a short green smoke effect behind a random tube resident
+  when playback starts. Seven lightweight puffs follow the tube's actual curve,
+  fade over 1.35 seconds, and clear before traversal or when the renderer hides.
+- Smoke containment tests cover all six tube masks and both directions, checking
+  bore clearance, open-end clearance, expiry and removal on round transitions.
+  Inspected a native render of the effect inside a glass elbow.

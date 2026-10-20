@@ -81,8 +81,10 @@
 		05C15C3A30820B4E4E01F5E1 /* LabTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabTheme.swift; sourceTree = "<group>"; };
 		05E4DD0F6E0DDB7A46CBA753 /* HamsterLabUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = HamsterLabUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		0A86E186BB11EDF4DB9027BB /* HamsterCharacterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HamsterCharacterTests.swift; sourceTree = "<group>"; };
+		0DCB10F1E0CC242BF69EF288 /* ar */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ar; path = ar.lproj/Localizable.strings; sourceTree = "<group>"; };
 		0ECF5E258A612C92ED11E974 /* pl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pl; path = pl.lproj/Localizable.strings; sourceTree = "<group>"; };
 		0F5869E2EFB8C2D98BC8925E /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		13DC7F682911A66BF585966B /* hi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = hi; path = hi.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		147FDFE73D253942AEE42F64 /* countdown.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = countdown.wav; sourceTree = "<group>"; };
 		161879581B6B55DA6613F660 /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = it.lproj/Localizable.strings; sourceTree = "<group>"; };
 		181AB47416A2B5C12A8C368D /* BridgeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BridgeTests.swift; sourceTree = "<group>"; };
@@ -97,8 +99,11 @@
 		2AC4A2CBF7509B66A73044EA /* be */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = be; path = be.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		2B3E24D245C645B8547E6253 /* AudioEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioEngine.swift; sourceTree = "<group>"; };
 		2C8BF665E6F9A166F72A15EF /* hamster-torso-0.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "hamster-torso-0.png"; sourceTree = "<group>"; };
+		2D029898ACCFD8D62974475C /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
+		2D32E65E440FE711FBA07E37 /* hi */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = hi; path = hi.lproj/Localizable.strings; sourceTree = "<group>"; };
 		2EF0CEE5800B0DFF5FB68E4B /* delivery.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = delivery.wav; sourceTree = "<group>"; };
 		2FBA62BC2FDF532F89345548 /* pt */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pt; path = pt.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		310FB215ABC68F45BA50DBD5 /* fa */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fa; path = fa.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		321A75BEA874131BEA395A02 /* BoardScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardScene.swift; sourceTree = "<group>"; };
 		3477A588899330CA9FFD212D /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		34C7EB8B7E7DDE4EFD53F6EB /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
@@ -110,6 +115,7 @@
 		5B6CF7EF66158E3DF9DAD992 /* hamster-head-4.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "hamster-head-4.png"; sourceTree = "<group>"; };
 		5C536D1A45BBA9C2683CCD44 /* hamster-head-0.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "hamster-head-0.png"; sourceTree = "<group>"; };
 		5CBD27E1211885E8E62FE9AC /* LabGeometry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabGeometry.swift; sourceTree = "<group>"; };
+		5E95F55C76F8C0B087A60345 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
 		652493E3AE30FE07B1AD0627 /* hamster-cheek-0.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "hamster-cheek-0.png"; sourceTree = "<group>"; };
 		6CC032D2C4CFBD5ED35E582B /* HamsterSculpt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HamsterSculpt.swift; sourceTree = "<group>"; };
 		6CED551FE12670AB21A1B659 /* hamster-torso-2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "hamster-torso-2.png"; sourceTree = "<group>"; };
@@ -127,6 +133,7 @@
 		9265FBB309050F7BCC730DD7 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/Localizable.strings; sourceTree = "<group>"; };
 		9555358DC351A69FC8FE9BB4 /* HamsterLabTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = HamsterLabTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		9709B1BB32BC8992D9CB8F5F /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		9B75A12DD34ECCD830ABDD25 /* ar */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ar; path = ar.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		9C1F80BEC9071E4D6A5E5B96 /* LocalizationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalizationTests.swift; sourceTree = "<group>"; };
 		9CA4AB0EEDF27C3CA7647972 /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/Localizable.strings; sourceTree = "<group>"; };
 		9DAC81275D11BAD09818C41D /* Bot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bot.swift; sourceTree = "<group>"; };
@@ -139,6 +146,7 @@
 		AC75BE9A4993651A754C88C0 /* pl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pl; path = pl.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		AD55E68566473485906C305E /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		AF105EA64731D8A9907AD19A /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Localizable.strings; sourceTree = "<group>"; };
+		B63E6166E36293F173FADEB6 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		B6F29DF655E5124C90F9B401 /* select.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = select.wav; sourceTree = "<group>"; };
 		BC6D879F77520368FADC6721 /* HamsterRig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HamsterRig.swift; sourceTree = "<group>"; };
 		C095BF3059E97EC9ABE20282 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/InfoPlist.strings; sourceTree = "<group>"; };
@@ -150,8 +158,10 @@
 		DEAAC2F24CEE09DB48FFA69F /* pt */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pt; path = pt.lproj/Localizable.strings; sourceTree = "<group>"; };
 		E16B18C4A3507270F87EA54E /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		E4EAFD268035AF8E9FBDA248 /* hamster-head-1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "hamster-head-1.png"; sourceTree = "<group>"; };
+		ED8E2A49F067E4C8DE2AD381 /* fa */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fa; path = fa.lproj/Localizable.strings; sourceTree = "<group>"; };
 		EE7B0376FD43A4CD086E3E90 /* Rules.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Rules.swift; sourceTree = "<group>"; };
 		F4C60F8FF4B0B9CF7F8F48D3 /* hamster-torso-1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "hamster-torso-1.png"; sourceTree = "<group>"; };
+		F5B39EC2E21A20C03ABDE33D /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/Localizable.strings; sourceTree = "<group>"; };
 		FB2F6C046568C5F59A5F242D /* happy.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = happy.wav; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -433,17 +443,22 @@
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				Base,
+				ar,
 				be,
 				de,
 				en,
 				es,
+				fa,
 				fr,
+				hi,
 				it,
+				ja,
 				pl,
 				pt,
 				ru,
 				tr,
 				uk,
+				"zh-Hans",
 			);
 			mainGroup = 4A91BA9C79ABC7F8C38B31D1;
 			minimizedProjectReferenceProxies = 1;
@@ -568,17 +583,22 @@
 		37F510A23A2C41B99A23BCC5 /* InfoPlist.strings */ = {
 			isa = PBXVariantGroup;
 			children = (
+				9B75A12DD34ECCD830ABDD25 /* ar */,
 				2AC4A2CBF7509B66A73044EA /* be */,
 				C095BF3059E97EC9ABE20282 /* de */,
 				34C7EB8B7E7DDE4EFD53F6EB /* en */,
 				0F5869E2EFB8C2D98BC8925E /* es */,
+				310FB215ABC68F45BA50DBD5 /* fa */,
 				9709B1BB32BC8992D9CB8F5F /* fr */,
+				13DC7F682911A66BF585966B /* hi */,
 				DA84D38C79A496CEEA7944D2 /* it */,
+				B63E6166E36293F173FADEB6 /* ja */,
 				AC75BE9A4993651A754C88C0 /* pl */,
 				2FBA62BC2FDF532F89345548 /* pt */,
 				3477A588899330CA9FFD212D /* ru */,
 				527A8D807D00C4F31C000C5B /* tr */,
 				8A93F5EB63EA54FA02D6ABAA /* uk */,
+				5E95F55C76F8C0B087A60345 /* zh-Hans */,
 			);
 			name = InfoPlist.strings;
 			sourceTree = "<group>";
@@ -586,17 +606,22 @@
 		A73CEBD6E1732E422684A3BF /* Localizable.strings */ = {
 			isa = PBXVariantGroup;
 			children = (
+				0DCB10F1E0CC242BF69EF288 /* ar */,
 				2180FFF4F6B9BC2AE454BF7D /* be */,
 				AF105EA64731D8A9907AD19A /* de */,
 				AD55E68566473485906C305E /* en */,
 				A305A2DE05483EA85E8D745E /* es */,
+				ED8E2A49F067E4C8DE2AD381 /* fa */,
 				9CA4AB0EEDF27C3CA7647972 /* fr */,
+				2D32E65E440FE711FBA07E37 /* hi */,
 				161879581B6B55DA6613F660 /* it */,
+				F5B39EC2E21A20C03ABDE33D /* ja */,
 				0ECF5E258A612C92ED11E974 /* pl */,
 				DEAAC2F24CEE09DB48FFA69F /* pt */,
 				9265FBB309050F7BCC730DD7 /* ru */,
 				9E6C5332E5791C9B4DE0546A /* tr */,
 				4F48F4297234159E7647C9A8 /* uk */,
+				2D029898ACCFD8D62974475C /* zh-Hans */,
 			);
 			name = Localizable.strings;
 			sourceTree = "<group>";
@@ -694,7 +719,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = W37L5728Y6;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -780,7 +805,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = W37L5728Y6;
 				ENABLE_NS_ASSERTIONS = NO;

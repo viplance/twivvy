@@ -42,6 +42,54 @@ import simd
     private var drag: Drag?
     private var transition: Transition?
     private var clock = 0.0
+    private struct Smoke {
+        let root: Entity
+        let path: TubePath
+        let exit: Int
+        var elapsed = 0.0
+    }
+    private var smoke: Smoke?
+    private static let smokeMesh = MeshResource.generateSphere(radius:1)
+    /// A small fixed pool, attached to the tube's tile so dragging/rotation
+    /// cannot separate the puff from its glass enclosure.
+    func showOopsSmoke() {
+        guard !showcase, !isAnimating,
+              let ball=state.balls.filter({ hamsters[$0.id] != nil }).randomElement(),
+              let tile=tiles[Rules.platform(ball.row,ball.col)] else { return }
+        clearOopsSmoke()
+        let root=Entity(); root.name="oops-smoke"
+        tile.addChild(root)
+        for _ in 0..<7 {
+            root.addChild(ModelEntity(mesh:Self.smokeMesh,materials:[UnlitMaterial(color:.green)]))
+        }
+        smoke=Smoke(root:root,path:TubePath(row:ball.row,col:ball.col,state:state),exit:ball.exit)
+        updateOopsSmoke(delta:0)
+    }
+    private func clearOopsSmoke() {
+        smoke?.root.removeFromParent(); smoke=nil
+    }
+    private func updateOopsSmoke(delta: Double) {
+        guard var smoke else { return }
+        smoke.elapsed += delta
+        guard smoke.elapsed < 1.35 else { clearOopsSmoke(); return }
+        let t=Float(smoke.elapsed/1.35)
+        let offset=smoke.root.parent?.position ?? .zero
+        for (i,child) in smoke.root.children.enumerated() {
+            guard let puff=child as? ModelEntity else { continue }
+            let phase=Float(i)*2.4
+            let radius: Float=0.035+0.045*min(1,t*3)+Float(i%3)*0.008
+            // Every sphere stays within the bore and before the open end.
+            // Its centre follows the actual elbow, never a straight tangent.
+            let distance=min(0.235+t*0.12+Float(i)*0.008,smoke.path.length/2-radius-0.045)
+            let radial=SIMD3<Float>(cos(phase)*0.025,sin(phase)*0.025+t*0.035,0)
+            puff.position=smoke.path.fromMidpoint(toward:smoke.exit,distance:-distance)-offset+radial
+            puff.scale = .init(repeating:radius)
+            var material=UnlitMaterial(color:UIColor(lab:i%2 == 0 ? 0x88C94E : 0xACDA69))
+            material.blending = .transparent(opacity:.init(floatLiteral:0.46*(1-t)*min(1,0.2+t*12)))
+            puff.model?.materials=[material]
+        }
+        self.smoke=smoke
+    }
     weak var view: ARView?
     private var storedView: ARView?
     func rendererView() -> ARView {
@@ -103,6 +151,7 @@ import simd
     /// A hidden scene has no updates, enabled entities or visible render target.
     func pauseRenderer(from host: UIView) {
         guard let view, view.superview === host else { return }
+        clearOopsSmoke()
         updateSubscription?.cancel(); updateSubscription=nil
         anchor.isEnabled=false; view.isHidden=true
         view.removeFromSuperview()
@@ -182,6 +231,7 @@ import simd
             return
         }
         self.transition=nil; isAnimating=false; drag=nil
+        clearOopsSmoke()
         self.state=state; self.side=side
         world.orientation=simd_quatf(angle:side == .top ? .pi : 0,axis:[0,1,0])
         let remaining=Set(state.balls.map(\.id))
@@ -392,6 +442,7 @@ import simd
         }
     }
     func animate(before: BoardState, after: BoardState, turn: Turn, side: Side) {
+        clearOopsSmoke()
         let visible=tiles.mapValues { $0.transform }
         selection=nil; enabled=false; transition=nil; drag=nil
         if self.state != before || self.side != side { render(before,side:side) }
@@ -432,6 +483,7 @@ import simd
         AudioEngine.shared.play(turn.spawned.isEmpty ? "crawl" : "chirp")
     }
     func update(delta: Double) {
+        updateOopsSmoke(delta:delta)
         // One scaled character clock keeps running, sitting, breathing and
         // facial movements at the same pace without changing the game timer.
         clock += delta * HamsterMotion.speed

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { supportedLocales, readTranslations } from './translation-catalog.mjs';
+import { supportedLocales, standaloneLocales, readTranslations } from './translation-catalog.mjs';
 
 const resources = new URL('../HamsterLab/Resources/', import.meta.url);
 const placeholders = value => [...value.matchAll(/\{[a-zA-Z]+\}/g)].map(match => match[0]).sort();
@@ -21,7 +21,8 @@ const overrides = readTranslations('en');
 for (const locale of supportedLocales) {
  const generated = strings(locale), translated = readTranslations(locale);
  assert.deepEqual(Object.keys(generated).sort(), Object.keys(english).sort(), `${locale}: missing UI keys`);
- assert.deepEqual(Object.keys(translated).sort(), Object.keys(overrides).sort(), `${locale}: missing overrides`);
+ const expected=standaloneLocales.includes(locale) ? english : overrides;
+ assert.deepEqual(Object.keys(translated).sort(), Object.keys(expected).sort(), `${locale}: missing translations`);
  for (const [key, value] of Object.entries(generated)) {
   assert.ok(typeof value === 'string' && value.trim(), `${locale}: empty ${key}`);
   assert.deepEqual(placeholders(value), placeholders(english[key]), `${locale}: ${key} placeholders`);

@@ -2,13 +2,13 @@
 
 A standalone iOS 18+ SwiftUI / RealityKit game: small, expressive hamsters crawl
 through transparent tubes on a miniature laboratory workbench. Russian display
-name: **ХомаЛаб**. Bundle ID: `com.enotix.hamsterlab`; version 1.0.1, build 2.
+name: **ХомаЛаб**. Bundle ID: `com.enotix.hamsterlab`; version 1.0.1, build 3.
 Open `HamsterLab.xcodeproj` and choose the **HamsterLab** scheme.
 
 The interface uses a white canvas, dark slate text, teal/berry accents, sunshine
 buttons and mint/peach secondary buttons. `App/LabTheme.swift` defines the palette;
 active text/background pairs have at least 5.6:1 contrast. Rounded system type
-supports all eleven languages and Dynamic Type. Sheets also use the light theme.
+supports all sixteen languages and Dynamic Type. Sheets also use the light theme.
 The menu displays a bundled static watercolor illustration of three hamsters in
 laboratory tubes, without an active 3D renderer. See [scripts/MENU-ART.md](scripts/MENU-ART.md)
 for the asset path and generation prompt.
@@ -159,14 +159,17 @@ Returning to an active game or re-enabling Music resumes music. The Music switch
 controls only the three HamsterLab_ tracks; disabling Hamster voices leaves music
 playing. The former Sound preference is retained as the Music preference.
 
-All eleven Twivvy languages have translated HamsterLab interface copy, rules
+All sixteen languages have translated HamsterLab interface copy, rules
 and privacy text: English, Belarusian, Spanish, Russian, Ukrainian, Italian,
-Portuguese, Polish, French, German and Turkish. There is no speech synthesis or
+Portuguese, Polish, French, German, Turkish, Simplified Chinese (`zh-Hans`),
+Japanese (`ja`), Hindi (`hi`), Arabic (`ar`) and Persian (`fa`). There is no speech synthesis or
 pre-generated spoken narration. Character voices use only the supplied MP3
 samples; no microphone access is required.
 
 `scripts/locales/*.json` contains the HamsterLab-specific translations.
 `scripts/hamster-locales.mjs` applies them after syncing shared controls.
+Chinese, Japanese, Hindi, Arabic and Persian have complete native catalogs in these JSON files
+and do not depend on translations from the web version.
 Every sync validates complete key sets, nonempty strings, placeholders and display
 names.
 

@@ -5,6 +5,67 @@ import simd
 @testable import HamsterLab
 
 final class LaboratoryTests: XCTestCase {
+    @MainActor func testRenderedOopsSmoke() async throws {
+        let scene=BoardScene()
+        var state=BoardState(); state.cells[2][2]=3
+        state.balls=[Ball(id:1,row:2,col:2,exit:0)]
+        scene.render(state,side:.bottom)
+        let center=TubePath(row:2,col:2,state:state).midpoint
+        scene.camera.look(at:center,from:center+[0.8,1.2,1.1],relativeTo:nil)
+        let renderer=ARView(frame:CGRect(x:0,y:0,width:700,height:700),cameraMode:.nonAR,automaticallyConfigureSession:false)
+        renderer.environment.background = .color(.white)
+        renderer.scene.addAnchor(scene.anchor)
+        let controller=UIViewController(), window=UIWindow(frame:renderer.bounds)
+        window.rootViewController=controller
+        controller.view.addSubview(renderer); window.makeKeyAndVisible()
+        defer { renderer.removeFromSuperview(); window.isHidden=true }
+        scene.showOopsSmoke()
+        scene.update(delta:0.35)
+        try await Task.sleep(for:.seconds(2))
+        let snapshot: UIImage? = await withCheckedContinuation { continuation in
+            renderer.snapshot(saveToHDR:false) { continuation.resume(returning:$0) }
+        }
+        let attachment=XCTAttachment(image:try XCTUnwrap(snapshot))
+        attachment.name="oops-smoke-elbow"; attachment.lifetime = .keepAlways; add(attachment)
+    }
+    @MainActor func testOopsSmokeStaysInsideEveryTubeAndExpires() throws {
+        let scene=BoardScene()
+        for mask in [3,5,6,9,10,12] {
+            var state=BoardState()
+            state.cells[2][2]=mask
+            let path=TubePath(row:2,col:2,state:state)
+            for exit in path.ports {
+                state.balls=[Ball(id:1,row:2,col:2,exit:exit)]
+                scene.render(state,side:.bottom)
+                scene.showOopsSmoke()
+                let tile=try XCTUnwrap(scene.tiles[4])
+                let smoke=try XCTUnwrap(tile.findEntity(named:"oops-smoke"))
+                XCTAssertEqual(smoke.children.count,7)
+                let distance=boreDistance(path)
+                for _ in 0..<75 {
+                    scene.update(delta:1/60.0)
+                    for puff in smoke.children {
+                        let center=puff.position(relativeTo:scene.world)
+                        let radius=puff.scale.x
+                        XCTAssertLessThan(distance(center)+radius,TubePath.radius-TubePath.wall)
+                        // All vertices also remain between the two mouth planes.
+                        for port in path.ports {
+                            let outward=simd_normalize(path.endpoint(port)-path.fromMidpoint(toward:port,distance:path.length/2-0.01))
+                            XCTAssertLessThanOrEqual(simd_dot(center-path.endpoint(port),outward)+radius,0.001)
+                        }
+                    }
+                }
+                scene.update(delta:0.2)
+                XCTAssertNil(smoke.parent)
+                scene.showOopsSmoke()
+                let nextSmoke=try XCTUnwrap(tile.findEntity(named:"oops-smoke"))
+                var after=state
+                let turn=Rules.resolve(&after,top:nil,bottom:nil)
+                scene.animate(before:state,after:after,turn:turn,side:.bottom)
+                XCTAssertNil(nextSmoke.parent)
+            }
+        }
+    }
     @MainActor func testBlockedHamsterTurnsContinuouslyBeforeSettling() throws {
         var before=BoardState(); before.tick=2
         before.cells[2][2]=10; before.cells[2][3]=5

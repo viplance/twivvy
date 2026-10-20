@@ -49,6 +49,11 @@ import SwiftUI
     var showsRoomInvitation: Bool { isHostingPrivateRoom && !roomCode.isEmpty }
 
     init() {
+        AudioEngine.shared.onSampleStarted = { [weak self] sound in
+            guard let self, sound == .oops, self.screen == .game,
+                  self.active, !self.paused, !self.audioSuspended else { return }
+            self.boardScene.showOopsSmoke()
+        }
         boardScene.onTurnaround = { [weak self] in
             guard let self, self.screen == .game, !self.paused, !self.audioSuspended else { return }
             AudioEngine.shared.playSample(.turnaround)
