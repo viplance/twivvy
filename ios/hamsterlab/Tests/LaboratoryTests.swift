@@ -5,6 +5,54 @@ import simd
 @testable import HamsterLab
 
 final class LaboratoryTests: XCTestCase {
+    @MainActor func testWindowResizePreservesBoardAndCancelsAnUnfinishedTurn() async throws {
+        let scene=BoardScene()
+        var board=BoardState()
+        board.balls=[Ball(id:1,row:2,col:2,exit:0)]
+        scene.render(board,side:.bottom)
+        scene.setSelection(nil,highlighted:nil,enabled:true)
+        let window=UIWindow(frame:CGRect(x:0,y:0,width:466,height:678))
+        let controller=UIViewController()
+        window.rootViewController=controller
+        let host=LabSceneHost(scene:scene)
+        host.frame=window.bounds
+        controller.view.addSubview(host); window.makeKeyAndVisible()
+        host.setNeedsLayout(); host.layoutIfNeeded()
+        defer { host.removeFromSuperview(); window.isHidden=true }
+        try await Task.sleep(for:.seconds(1))
+        let renderer=try XCTUnwrap(scene.view)
+        let tile=try XCTUnwrap(scene.tiles[4])
+        let hamster=try XCTUnwrap(scene.hamsters[1])
+        var starts=0, commits=0
+        scene.onDragStart={ starts += 1 }
+        scene.onSelect={ _,_ in commits += 1 }
+        let start=try XCTUnwrap(renderer.project(scene.world.convert(position:[0.7,0,0],to:nil)))
+        let end=try XCTUnwrap(renderer.project(scene.world.convert(position:[0,0,0.7],to:nil)))
+        scene.dragChanged(start:start,location:end)
+        XCTAssertEqual(starts,1)
+        // Resize the existing host, without a device rotation or a new scene.
+        for size in [CGSize(width:890,height:626), CGSize(width:626,height:890), CGSize(width:466,height:678)] {
+            host.frame=CGRect(origin:.zero,size:size)
+            host.setNeedsLayout(); host.layoutIfNeeded()
+            XCTAssertTrue(scene.view === renderer)
+            XCTAssertEqual(renderer.bounds.size,size)
+            XCTAssertTrue(scene.tiles[4] === tile)
+            XCTAssertTrue(scene.hamsters[1] === hamster)
+            XCTAssertTrue(scene.anchor.isEnabled)
+            XCTAssertTrue(scene.camera.camera.fieldOfViewInDegrees.isFinite)
+            for index in [0,2,6,8] {
+                let frame=scene.accessibilityFrame(platform:index,size:size)
+                XCTAssertTrue(CGRect(origin:.zero,size:size).contains(frame),"Corner \(index) must remain in the resized viewport")
+            }
+        }
+        scene.dragChanged(start:start,location:end)
+        scene.dragEnded(at:end)
+        XCTAssertEqual(starts,1,"The pre-resize gesture must stay cancelled until release")
+        XCTAssertEqual(commits,0,"Resizing must not commit a turn")
+        scene.dragChanged(start:start,location:start)
+        scene.dragEnded(at:start)
+        XCTAssertEqual(commits,1,"A new gesture must work after resizing")
+    }
     @MainActor func testRenderedOopsSmoke() async throws {
         let scene=BoardScene()
         var state=BoardState(); state.cells[2][2]=3

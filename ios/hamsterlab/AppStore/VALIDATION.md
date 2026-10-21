@@ -194,3 +194,49 @@ AASA file needs publication before HTTPS invitations can launch HamsterLab.
   containment, expiry and transition cleanup across all tube masks/directions.
   Result: `/tmp/hamsterlab-oops-long-smoke.xcresult`.
 - All 16 localizations (116 keys each) passed generation-time validation.
+
+## iPhone Duo compatibility — 21 October 2026
+
+- Unsigned Release device build passed with Xcode 27.1 / `iphoneos27.1`.
+  The built application's `MinimumOSVersion` remains `18.0`. Artifact:
+  `build/DuoRelease/Build/Products/Release-iphoneos/HamsterLab.app`.
+- Release tooling requires SDK 27.1 or later. Shell validation and mocked SDK
+  checks passed: 26.5/27.0 rejected; 27.1/27.2/28.0 accepted.
+- Resizing cancels an unfinished board drag and ignores its remaining updates
+  until release, so a changed projection cannot accidentally commit a turn.
+- The native resize regression passed on iPhone Duo / iOS 27.1 and iPhone 16 Pro
+  Max / iOS 18.6. It resizes the same host without a rotation, preserves renderer,
+  tiles and hamster identity, checks projected corner hit areas and verifies
+  cancellation plus subsequent input.
+- Seven UI scenarios passed on iPhone Duo / iOS 27.1: menu/settings, training
+  field/control fit in portrait and landscape, platform drag/reveal/rotation,
+  join-code validation, a complete match/result/rematch, name validation with
+  the keyboard visible, and settings rotation/background/resume with the round
+  preserved and play continuing.
+- Two additional UI checks passed with Dynamic Type set to XXXL: training field
+  and controls in both orientations, and missing-name validation with a visible
+  keyboard. Result: `build/DuoDerivedData/Logs/Test/Test-HamsterLab-2026.10.21_14-53-06-+0300.xcresult`.
+- Results: `build/DuoDerivedData/Logs/Test/Test-HamsterLab-2026.10.21_14-47-05-+0300.xcresult`
+  and `build/DuoDerivedData/Logs/Test/Test-HamsterLab-2026.10.21_14-49-42-+0300.xcresult`.
+  The first cold-start UI attempt timed out; the subsequent runs above passed.
+  Post-test diagnostic collection stalled and was stopped separately after the
+  tests completed; both xcodebuild runs exited successfully.
+- Runtime warnings remain: synchronous audio-session work on the main thread,
+  and one transient invalid-frame warning during the result/rematch test.
+  That test's result visibility and rematch assertions passed; the warning's
+  cause has not been isolated by this compatibility pass.
+- Physical fold/unfold transitions between Duo displays remain unverified.
+  Device Hub UI automation is unavailable because macOS denied assistive access;
+  the native window resize regression does not replace that device check.
+- No archive was signed or uploaded. The existing App Store build is unchanged.
+
+## Version 1.0.2 (6) — 21 October 2026
+
+- Updated marketing version and build number in the XcodeGen specification,
+  generated Xcode project and local App Store metadata.
+- Release regression passed on iPhone 16 Pro Max / iOS 18.6: native window
+  resizing/gesture cancellation and UI settings/rotation/background/resume.
+  Result: `build/DuoDerivedData/Logs/Test/Test-HamsterLab-2026.10.21_15-29-43-+0300.xcresult`.
+- Protocol generation and all 16 localizations (116 keys each) validated.
+- Prepared local App Store media for iPhone, iPhone Duo and iPad; generated
+  screenshots, previews and ZIP bundles are excluded from Git.

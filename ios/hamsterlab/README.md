@@ -15,7 +15,9 @@ for the asset path and generation prompt.
 
 ## Build and run
 
-Requires Xcode 26+, XcodeGen, Node.js and pnpm. From the repository root:
+Requires Xcode 27.1+ (iOS SDK 27.1+ for full iPhone Duo display support),
+XcodeGen, Node.js and pnpm. The minimum supported OS remains iOS 18.0.
+From the repository root:
 
 ```sh
 pnpm hamsterlab:generate # sync protocol, fixtures, locales; generate Xcode project
@@ -28,6 +30,17 @@ pnpm hamsterlab:upload   # archive, export, then upload to App Store Connect
 Set `HAMSTERLAB_DESTINATION` to test another installed simulator, for example
 `HAMSTERLAB_DESTINATION='platform=iOS Simulator,name=iPad Pro 13-inch (M4),OS=18.6' pnpm hamsterlab:test`.
 Tests run sequentially so multiple rendering simulators do not compete for resources.
+
+For iPhone Duo, run
+`HAMSTERLAB_DESTINATION='platform=iOS Simulator,name=iPhone Duo,OS=27.1' pnpm hamsterlab:test`.
+Also check folding and unfolding during a round, an unfinished board drag, setup
+with the keyboard visible, settings, and the result screen. Repeat in both
+orientations and with larger text. A fold must preserve the current game and
+selection; an unfinished drag is cancelled because its projection has changed.
+The native resize regression exercises the same renderer at several window sizes
+without a rotation, checks projected corner hit areas, and verifies that a resize
+cannot commit a turn. Physical fold transitions still need the Duo simulator or
+a device. The release script rejects SDKs older than 27.1.
 
 Build output is in `ios/hamsterlab/build/` and is excluded from Git. Release
 commands need the owner's Xcode signing account for team `W37L5728Y6`, a registered

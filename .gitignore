@@ -24,3 +24,11 @@ xcuserdata/
 *.xcarchive/
 *.ipa
 *.xcresult/
+
+# Local App Store artwork and export bundles.
+/ios/hamsterlab/AppStore/*.zip
+/ios/hamsterlab/AppStore/*.png
+/ios/hamsterlab/AppStore/Media-en-US-iPhone-6.3/
+/ios/hamsterlab/AppStore/Media-en-US-iPhone-Duo/
+/ios/hamsterlab/AppStore/Media-en-US-iPad-13/
+/ios/hamsterlab/AppStore/HamsterLab-iPhone-6.3-AppStore-Assets/

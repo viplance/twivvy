@@ -2,6 +2,35 @@ import XCTest
 import UIKit
 
 final class HamsterLabUITests: XCTestCase {
+    @MainActor func testTrainingSurvivesSettingsResizeAndBackground() {
+        let app=XCUIApplication()
+        app.launchArguments=["--uitesting","--training","-AppleLanguages","(en)","-AppleLocale","en_US"]
+        XCUIDevice.shared.orientation = .portrait
+        defer { XCUIDevice.shared.orientation = .portrait }
+        app.launch()
+        XCTAssertTrue(app.buttons["game.next"].waitForExistence(timeout:20))
+        waitUntilReady(app)
+        app.buttons["game.next"].tap()
+        XCTAssertTrue(app.staticTexts["2 / 30"].waitForExistence(timeout:5))
+        waitUntilReady(app)
+        app.buttons["menu.settings"].tap()
+        XCTAssertTrue(app.switches["settings.sound"].waitForExistence(timeout:5))
+        XCUIDevice.shared.orientation = .landscapeLeft
+        XCTAssertTrue(app.switches["settings.sound"].isHittable)
+        app.buttons["sheet.done"].tap()
+        XCUIDevice.shared.press(.home)
+        app.activate()
+        XCTAssertTrue(app.buttons["game.next"].waitForExistence(timeout:10))
+        waitUntilReady(app)
+        XCTAssertTrue(app.staticTexts["2 / 30"].exists,"Resizing and backgrounding must preserve the round")
+        assertBoardRendered(app)
+        XCUIDevice.shared.orientation = .portrait
+        waitUntilReady(app)
+        XCTAssertTrue(app.staticTexts["2 / 30"].exists)
+        app.buttons["game.next"].tap()
+        XCTAssertTrue(app.staticTexts["3 / 30"].waitForExistence(timeout:5))
+        capture("training-resize-and-background")
+    }
     @MainActor func testTrainingControlsAndBoardFitWithoutScrolling() {
         let app = XCUIApplication()
         app.launchArguments = ["--uitesting", "--training", "-AppleLanguages", "(ru)", "-AppleLocale", "ru_RU"]

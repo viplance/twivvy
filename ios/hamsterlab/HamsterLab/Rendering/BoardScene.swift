@@ -40,6 +40,7 @@ import simd
     private var enabled = false
     private var selection: Command?
     private var drag: Drag?
+    private var dragCancelledByResize = false
     private var transition: Transition?
     private var clock = 0.0
     private struct Smoke {
@@ -96,6 +97,7 @@ import simd
     }
     weak var view: ARView?
     private var storedView: ARView?
+    private var viewportSize: CGSize = .zero
     func rendererView() -> ARView {
         if let storedView { attach(to:storedView); return storedView }
         let created=ARView(frame:.zero,cameraMode:.nonAR,automaticallyConfigureSession:false)
@@ -162,6 +164,15 @@ import simd
     }
     func resizeViewport(_ size: CGSize) {
         guard !showcase, size.width > 0, size.height > 0 else { return }
+        if size != viewportSize {
+            // A fold or window resize changes the projection under the finger.
+            // Restore the selected turn rather than committing the old gesture.
+            if drag != nil {
+                finishDrag(cancelled:true)
+                dragCancelledByResize=true
+            }
+            viewportSize=size
+        }
         // Preserve the board's horizontal framing as its canvas becomes shorter.
         // A minimum vertical angle keeps both homes visible in wide layouts.
         let aspect = Float(size.width / size.height)
@@ -601,7 +612,7 @@ import simd
         return abs(local.x)<=1.04 && abs(local.z)<=1.04 ? p : nil
     }
     func dragChanged(start: CGPoint, location: CGPoint) {
-        guard enabled,!isAnimating,let point=boardPoint(location) else { return }
+        guard !dragCancelledByResize,enabled,!isAnimating,let point=boardPoint(location) else { return }
         if drag == nil {
             guard let initial=boardPoint(start),let p=platform(at:initial),!state.cooldown.contains(p) else { return }
             onDragStart?(); tiles[p]?.stopAllAnimations(recursive:false)
@@ -620,6 +631,7 @@ import simd
     }
     func dragEnded(at point: CGPoint) { finishDrag() }
     func finishDrag(cancelled: Bool = false) {
+        dragCancelledByResize=false
         guard let drag else { return }
         self.drag=nil
         guard !cancelled else { setSelection(selection,highlighted:selection?.platform,enabled:enabled); return }
