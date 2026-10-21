@@ -240,3 +240,7 @@ AASA file needs publication before HTTPS invitations can launch HamsterLab.
 - Protocol generation and all 16 localizations (116 keys each) validated.
 - Prepared local App Store media for iPhone, iPhone Duo and iPad; generated
   screenshots, previews and ZIP bundles are excluded from Git.
+- Signed archive, IPA export and App Store Connect upload succeeded on
+  21 October 2026 at 12:40:49 UTC. Apple confirmed the package is processing.
+  Upload record: `upload-1.0.2-6.json`. Source commit: `418a750`.
+  The build was not submitted for App Review.
